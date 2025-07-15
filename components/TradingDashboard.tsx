@@ -23,7 +23,10 @@ export default function TradingDashboard() {
           
           {/* Live Signals */}
           <div className="lg:col-span-1">
-            <LiveSignals />
+            <LiveSignals 
+              symbol="EURUSD" 
+              interval="5" 
+            />
           </div>
         </div>
       </div>

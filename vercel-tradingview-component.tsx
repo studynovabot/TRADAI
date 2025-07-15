@@ -115,10 +115,7 @@ export default function TradingViewChart({
 // 🎯 SIGNAL DISPLAY COMPONENT
 // components/dashboard/LiveSignals.tsx
 
-import React from 'react';
-import { useRealTime } from './hooks/useRealTime';
-
-export default function LiveSignals() {
+export function LiveSignals() {
   const { signals, connected } = useRealTime();
   
   return (
