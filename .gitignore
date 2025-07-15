@@ -54,6 +54,11 @@ dist/
 build/
 out/
 
+# Next.js specific
+.next/
+next-env.d.ts
+.vercel
+
 # Coverage directory used by tools like istanbul
 coverage/
 

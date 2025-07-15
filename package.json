@@ -6,6 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
+    "build": "echo 'Build complete - Node.js app'",
+    "vercel-build": "npm run setup",
     "test": "jest",
     "test:watch": "jest --watch",
     "paper-trade": "node src/index.js --paper-trading",
