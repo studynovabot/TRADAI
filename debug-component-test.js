@@ -6,9 +6,9 @@
 
 console.log('🔍 Debug Component Test - Testing Individual Components...\n');
 
-// Set environment variables
-process.env.GROQ_API_KEY = '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';
-process.env.TOGETHER_API_KEY = 'ef4e211e6928ea6a284a38d0a34421b02f4eab6151471d244689a572ebd2f1da';
+// Set environment variables (load from .env file in production)
+process.env.GROQ_API_KEY = process.env.GROQ_API_KEY || 'your-groq-api-key';
+process.env.TOGETHER_API_KEY = process.env.TOGETHER_API_KEY || 'your-together-api-key';
 
 // Create a comprehensive mock logger
 const mockLogger = {
