@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRADAI - Trade History</title>
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 0;
+            margin-bottom: 20px;
+        }
+        
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .filter-group label {
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: var(--secondary-color);
+        }
+        
+        select, input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #3a5bd9;
+        }
+        
+        .export-btn {
+            background-color: var(--success-color);
+        }
+        
+        .export-btn:hover {
+            background-color: #218838;
+        }
+        
+        .clear-btn {
+            background-color: var(--danger-color);
+        }
+        
+        .clear-btn:hover {
+            background-color: #c82333;
+        }
+        
+        .stats {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .stat-card {
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            color: var(--secondary-color);
+        }
+        
+        .stat-card p {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .win-rate {
+            border-left-color: var(--success-color);
+        }
+        
+        .loss-rate {
+            border-left-color: var(--danger-color);
+        }
+        
+        .profit {
+            border-left-color: var(--info-color);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        th {
+            background-color: #f1f3f5;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .result-win {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+        
+        .result-loss {
+            color: var(--danger-color);
+            font-weight: bold;
+        }
+        
+        .result-pending {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+        
+        .confidence {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            background-color: #e9ecef;
+        }
+        
+        .high-confidence {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .medium-confidence {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
+        .low-confidence {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+        
+        .pagination button {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+        }
+        
+        .pagination button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--secondary-color);
+        }
+        
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .filters {
+                flex-wrap: wrap;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>TRADAI - Trade History</h1>
+            <div>
+                <button id="refreshBtn">Refresh</button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="controls">
+            <div class="filters">
+                <div class="filter-group">
+                    <label for="dateFilter">Date Range</label>
+                    <select id="dateFilter">
+                        <option value="all">All Time</option>
+                        <option value="today" selected>Today</option>
+                        <option value="yesterday">Yesterday</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="resultFilter">Result</label>
+                    <select id="resultFilter">
+                        <option value="all" selected>All Results</option>
+                        <option value="win">Wins</option>
+                        <option value="loss">Losses</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="directionFilter">Direction</label>
+                    <select id="directionFilter">
+                        <option value="all" selected>All Directions</option>
+                        <option value="UP">UP/CALL</option>
+                        <option value="DOWN">DOWN/PUT</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="timeframeFilter">Timeframe</label>
+                    <select id="timeframeFilter">
+                        <option value="all" selected>All Timeframes</option>
+                        <option value="1M">1 Minute</option>
+                        <option value="5M">5 Minutes</option>
+                        <option value="15M">15 Minutes</option>
+                        <option value="30M">30 Minutes</option>
+                        <option value="1H">1 Hour</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div>
+                <button id="exportBtn" class="export-btn">Export CSV</button>
+                <button id="clearBtn" class="clear-btn">Clear History</button>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <h2>Trade Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Total Trades</h3>
+                    <p id="totalTrades">0</p>
+                </div>
+                
+                <div class="stat-card win-rate">
+                    <h3>Win Rate</h3>
+                    <p id="winRate">0%</p>
+                </div>
+                
+                <div class="stat-card loss-rate">
+                    <h3>Loss Rate</h3>
+                    <p id="lossRate">0%</p>
+                </div>
+                
+                <div class="stat-card profit">
+                    <h3>Net Profit</h3>
+                    <p id="netProfit">$0.00</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Avg. Confidence</h3>
+                    <p id="avgConfidence">0%</p>
+                </div>
+                
+                <div class="stat-card">
+                    <h3>Best Timeframe</h3>
+                    <p id="bestTimeframe">-</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="tradeTableContainer">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Direction</th>
+                        <th>Timeframe</th>
+                        <th>Confidence</th>
+                        <th>Amount</th>
+                        <th>Result</th>
+                        <th>Profit/Loss</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody id="tradeTableBody">
+                    <!-- Trade rows will be inserted here -->
+                </tbody>
+            </table>
+            
+            <div class="pagination" id="pagination">
+                <!-- Pagination buttons will be inserted here -->
+            </div>
+        </div>
+        
+        <div id="emptyState" class="empty-state" style="display: none;">
+            <p>No trade history found.</p>
+            <p>Start trading to see your history here.</p>
+        </div>
+    </div>
+    
+    <script src="trade-history.js"></script>
+</body>
+</html>

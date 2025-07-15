@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "AI Candle Sniper - Binary Options Predictor",
+  "version": "1.0.0",
+  "description": "AI-powered multi-timeframe binary options candle prediction with professional trading logic",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "background"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI Candle Sniper",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "32": "assets/icon32.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.quotex.io/*",
+        "*://*.olymptrade.com/*",
+        "*://*.iqoption.com/*",
+        "*://*.binomo.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/*", 
+        "assets/models/*",
+        "utils/*",
+        "utils/quotex-extractor.js",
+        "utils/real-time-analyzer.js",
+        "utils/indicators.js",
+        "utils/patterns.js",
+        "utils/tensorflow-ai-model.js",
+        "utils/ai-signal-engine.js",
+        "utils/auto-trade-engine.js",
+        "ai-integration.js",
+        "popup-sniper.html",
+        "popup-sniper.css",
+        "popup-sniper.js"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  }
+}

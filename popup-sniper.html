@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Trading Sniper - Professional Assistant</title>
+    <link rel="stylesheet" href="popup-sniper.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Live Status -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">🧠</div>
+                <div class="logo-text">
+                    <h1>AI Trading Sniper</h1>
+                    <div class="tagline">Disciplined • Precise • Profitable</div>
+                </div>
+            </div>
+            <div class="status-display">
+                <div class="connection-status" id="connectionStatus">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Live</span>
+                </div>
+                <div class="scan-timer" id="scanTimer">Next: 15s</div>
+            </div>
+        </div>
+
+        <!-- Enhanced Configuration Panel -->
+        <div class="section config-section">
+            <div class="config-header">
+                <h3>🎯 TRADAI Configuration</h3>
+                <div class="websocket-status" id="websocketStatus">
+                    <span class="ws-dot"></span>
+                    <span class="ws-text">Connecting...</span>
+                </div>
+            </div>
+
+            <div class="config-controls">
+                <div class="control-group">
+                    <label for="currencyPairSelect">Currency Pair:</label>
+                    <select id="currencyPairSelect" class="config-select">
+                        <option value="USD/EUR">USD/EUR</option>
+                        <option value="USD/GBP">USD/GBP</option>
+                        <option value="USD/JPY">USD/JPY</option>
+                        <option value="USD/CHF">USD/CHF</option>
+                        <option value="USD/CAD">USD/CAD</option>
+                        <option value="USD/AUD">USD/AUD</option>
+                        <option value="USD/NZD">USD/NZD</option>
+                        <option value="EUR/GBP">EUR/GBP</option>
+                        <option value="EUR/JPY">EUR/JPY</option>
+                        <option value="GBP/JPY">GBP/JPY</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="timeframeSelect">Timeframe:</label>
+                    <select id="timeframeSelect" class="config-select">
+                        <option value="2min">2-Minute Candles</option>
+                        <option value="5min" selected>5-Minute Candles</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="aiConsensusMode">AI Consensus Mode:</label>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="aiConsensusMode" checked>
+                        <span class="toggle-slider"></span>
+                    </div>
+                    <span class="toggle-label">Both AI models must agree</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Market Detection & Analysis -->
+        <div class="section market-section">
+            <div class="market-header">
+                <div class="pair-info">
+                    <div class="pair-name" id="pairName">USD/EUR</div>
+                    <div class="pair-platform" id="pairPlatform">TRADAI Signal Mode</div>
+                </div>
+                <div class="market-health">
+                    <div class="trend-indicator" id="trendIndicator">
+                        <span class="trend-label">Trend:</span>
+                        <span class="trend-value" id="trendValue">Analyzing...</span>
+                    </div>
+                    <div class="volatility-indicator" id="volatilityIndicator">
+                        <span class="vol-label">Vol:</span>
+                        <span class="vol-value" id="volValue">--</span>
+                    </div>
+                </div>
+            </div>
+            <div class="last-analysis">
+                <span class="analysis-time" id="analysisTime">Last Analysis: --</span>
+                <span class="data-quality" id="dataQuality">Quality: --</span>
+                <span class="ai-consensus" id="aiConsensus">AI Consensus: --</span>
+            </div>
+        </div>
+
+        <!-- Enhanced AI Signal Display -->
+        <div class="section signal-section" id="signalSection" style="display: none;">
+            <div class="signal-card">
+                <div class="signal-header">
+                    <div class="signal-direction" id="signalDirection">BUY</div>
+                    <div class="signal-confidence">
+                        <div class="confidence-value" id="confidenceValue">87%</div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidenceFill" style="width: 87%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dual AI Analysis Display -->
+                <div class="ai-analysis-panel">
+                    <div class="ai-model-result">
+                        <div class="ai-model-header">
+                            <span class="ai-model-name">🧠 Groq AI</span>
+                            <span class="ai-model-decision" id="groqDecision">BUY (85%)</span>
+                        </div>
+                    </div>
+                    <div class="ai-model-result">
+                        <div class="ai-model-header">
+                            <span class="ai-model-name">🤖 Together AI</span>
+                            <span class="ai-model-decision" id="togetherDecision">BUY (89%)</span>
+                        </div>
+                    </div>
+                    <div class="consensus-indicator" id="consensusIndicator">
+                        <span class="consensus-status">✅ AI CONSENSUS REACHED</span>
+                    </div>
+                </div>
+
+                <div class="signal-details">
+                    <div class="signal-timeframe" id="signalTimeframe">Next 5M Candle</div>
+                    <div class="position-sizing">
+                        <div class="position-info">
+                            <span class="position-label">Recommended Position:</span>
+                            <span class="position-amount" id="positionAmount">$12.50</span>
+                            <span class="position-method">(Kelly Criterion)</span>
+                        </div>
+                    </div>
+                    <div class="signal-reasons" id="signalReasons">
+                        <div class="reason-category">
+                            <strong>Technical Indicators:</strong>
+                            <div class="reason-item">• RSI oversold bounce (32 → 45)</div>
+                            <div class="reason-item">• MACD bullish crossover confirmed</div>
+                            <div class="reason-item">• Bollinger Bands squeeze breakout</div>
+                        </div>
+                        <div class="reason-category">
+                            <strong>Market Conditions:</strong>
+                            <div class="reason-item">• Strong support at 1.0850 level</div>
+                            <div class="reason-item">• Volume spike indicates momentum</div>
+                            <div class="reason-item">• Low volatility environment favorable</div>
+                        </div>
+                        <div class="reason-category">
+                            <strong>Risk Assessment:</strong>
+                            <div class="reason-item">• Risk/Reward ratio: 1:2.3</div>
+                            <div class="reason-item">• Market sentiment: Neutral to Bullish</div>
+                            <div class="reason-item">• No major news events scheduled</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="signal-actions">
+                    <button class="btn btn-take-trade" id="takeTradeBtn">
+                        <span class="btn-icon">📈</span>
+                        Execute Trade
+                        <span class="btn-amount">$12.50</span>
+                    </button>
+                    <button class="btn btn-skip-signal" id="skipSignalBtn">
+                        <span class="btn-icon">⏭️</span>
+                        Skip Signal
+                    </button>
+                </div>
+
+                <div class="signal-timer">
+                    <div class="timer-label">Entry Window:</div>
+                    <div class="timer-countdown" id="timerCountdown">4:32</div>
+                    <div class="timer-progress">
+                        <div class="timer-progress-bar" id="timerProgressBar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhanced Performance Analytics -->
+        <div class="section performance-section">
+            <div class="section-header">
+                <h3>📈 AI Performance Analytics</h3>
+                <div class="performance-period">
+                    <select id="performancePeriod" class="period-select">
+                        <option value="today">Today</option>
+                        <option value="week" selected>This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="performance-grid">
+                <div class="perf-card">
+                    <div class="perf-label">Win Rate</div>
+                    <div class="perf-value win-rate" id="winRate">73.2%</div>
+                    <div class="perf-detail" id="winRateDetail">41W / 15L</div>
+                </div>
+                <div class="perf-card">
+                    <div class="perf-label">AI Consensus</div>
+                    <div class="perf-value consensus-rate" id="consensusRate">89.5%</div>
+                    <div class="perf-detail" id="consensusDetail">Both AI agree</div>
+                </div>
+                <div class="perf-card">
+                    <div class="perf-label">Avg Confidence</div>
+                    <div class="perf-value confidence-avg" id="avgConfidence">82.4%</div>
+                    <div class="perf-detail" id="confidenceDetail">High quality signals</div>
+                </div>
+                <div class="perf-card">
+                    <div class="perf-label">Profit Factor</div>
+                    <div class="perf-value profit-factor" id="profitFactor">2.31</div>
+                    <div class="perf-detail" id="profitDetail">Excellent ratio</div>
+                </div>
+            </div>
+
+            <div class="ai-model-comparison">
+                <div class="comparison-header">AI Model Performance</div>
+                <div class="model-stats">
+                    <div class="model-stat">
+                        <span class="model-name">🧠 Groq AI</span>
+                        <span class="model-accuracy" id="groqAccuracy">71.8%</span>
+                        <div class="accuracy-bar">
+                            <div class="accuracy-fill groq-fill" style="width: 71.8%"></div>
+                        </div>
+                    </div>
+                    <div class="model-stat">
+                        <span class="model-name">🤖 Together AI</span>
+                        <span class="model-accuracy" id="togetherAccuracy">74.6%</span>
+                        <div class="accuracy-bar">
+                            <div class="accuracy-fill together-fill" style="width: 74.6%"></div>
+                        </div>
+                    </div>
+                    <div class="model-stat consensus-stat">
+                        <span class="model-name">🎯 Consensus Signals</span>
+                        <span class="model-accuracy" id="consensusAccuracy">87.3%</span>
+                        <div class="accuracy-bar">
+                            <div class="accuracy-fill consensus-fill" style="width: 87.3%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discipline & Risk Control Panel -->
+        <div class="section discipline-section">
+            <div class="section-header">
+                <h3>🔐 Discipline Control</h3>
+                <div class="discipline-status" id="disciplineStatus">Active</div>
+            </div>
+
+            <div class="discipline-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Session Trades</div>
+                    <div class="stat-value" id="sessionTrades">2/5</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Current Streak</div>
+                    <div class="stat-value streak" id="currentStreak">+2</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Kelly Position</div>
+                    <div class="stat-value" id="kellyPosition">$12.50</div>
+                </div>
+            </div>
+
+            <div class="psychology-coaching" id="psychologyCoaching">
+                <div class="coaching-message" id="coachingMessage">
+                    🧠 AI consensus reached - High probability setup detected
+                </div>
+            </div>
+        </div>
+
+        <!-- Trade Size & Risk Calculator -->
+        <div class="section risk-section">
+            <div class="section-header">
+                <h3>💰 Smart Risk Management</h3>
+            </div>
+            
+            <div class="risk-calculator">
+                <div class="capital-input">
+                    <label for="capitalAmount">Account Balance:</label>
+                    <input type="number" id="capitalAmount" placeholder="100" min="10" max="100000">
+                </div>
+                
+                <div class="risk-suggestion">
+                    <div class="suggested-trade">
+                        <div class="trade-label">Suggested Trade Size:</div>
+                        <div class="trade-amount" id="suggestedAmount">$2.00</div>
+                        <div class="trade-risk" id="tradeRisk">(2% Risk)</div>
+                    </div>
+                    
+                    <div class="risk-adjustment" id="riskAdjustment">
+                        <div class="adjustment-reason">After last win - staying conservative</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Timeframe Analysis -->
+        <div class="section analysis-section">
+            <div class="section-header">
+                <h3>📊 Multi-Timeframe Confluence</h3>
+                <button class="btn btn-outline btn-xs" id="refreshAnalysis">🔄 Refresh</button>
+            </div>
+            
+            <div class="timeframes-grid">
+                <div class="timeframe-card" data-tf="1H">
+                    <div class="tf-header">
+                        <div class="tf-label">1H</div>
+                        <div class="tf-strength" id="strength-1H">--</div>
+                    </div>
+                    <div class="tf-trend" id="trend-1H">Analyzing...</div>
+                    <div class="tf-signals" id="signals-1H">--</div>
+                </div>
+                
+                <div class="timeframe-card" data-tf="30M">
+                    <div class="tf-header">
+                        <div class="tf-label">30M</div>
+                        <div class="tf-strength" id="strength-30M">--</div>
+                    </div>
+                    <div class="tf-trend" id="trend-30M">Analyzing...</div>
+                    <div class="tf-signals" id="signals-30M">--</div>
+                </div>
+                
+                <div class="timeframe-card" data-tf="15M">
+                    <div class="tf-header">
+                        <div class="tf-label">15M</div>
+                        <div class="tf-strength" id="strength-15M">--</div>
+                    </div>
+                    <div class="tf-trend" id="trend-15M">Analyzing...</div>
+                    <div class="tf-signals" id="signals-15M">--</div>
+                </div>
+                
+                <div class="timeframe-card" data-tf="5M">
+                    <div class="tf-header">
+                        <div class="tf-label">5M</div>
+                        <div class="tf-strength" id="strength-5M">--</div>
+                    </div>
+                    <div class="tf-trend" id="trend-5M">Analyzing...</div>
+                    <div class="tf-signals" id="signals-5M">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Analysis Tabs -->
+        <div class="section">
+            <div class="tab-nav">
+                <div class="tab-item active" data-tab="indicators">📈 Indicators</div>
+                <div class="tab-item" data-tab="patterns">🕯️ Patterns</div>
+                <div class="tab-item" data-tab="journal">📝 Journal</div>
+            </div>
+            
+            <div class="tab-content">
+                <!-- Technical Indicators -->
+                <div class="tab-pane active" id="indicators">
+                    <div class="indicators-list">
+                        <div class="indicator-row">
+                            <div class="indicator-name">RSI (14)</div>
+                            <div class="indicator-value" id="rsiValue">52.3</div>
+                            <div class="indicator-status neutral" id="rsiStatus">Neutral</div>
+                        </div>
+                        
+                        <div class="indicator-row">
+                            <div class="indicator-name">MACD</div>
+                            <div class="indicator-value" id="macdValue">0.0012</div>
+                            <div class="indicator-status bullish" id="macdStatus">Bullish Cross</div>
+                        </div>
+                        
+                        <div class="indicator-row">
+                            <div class="indicator-name">EMA 9/21</div>
+                            <div class="indicator-value" id="emaValue">Above</div>
+                            <div class="indicator-status bullish" id="emaStatus">Bullish</div>
+                        </div>
+                        
+                        <div class="indicator-row">
+                            <div class="indicator-name">BB Position</div>
+                            <div class="indicator-value" id="bbValue">Mid</div>
+                            <div class="indicator-status neutral" id="bbStatus">Normal</div>
+                        </div>
+                        
+                        <div class="indicator-row">
+                            <div class="indicator-name">ATR</div>
+                            <div class="indicator-value" id="atrValue">0.0018</div>
+                            <div class="indicator-status normal" id="atrStatus">Normal Vol</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Candlestick Patterns -->
+                <div class="tab-pane" id="patterns">
+                    <div class="patterns-list" id="patternsList">
+                        <div class="pattern-item bullish">
+                            <div class="pattern-name">Bullish Engulfing</div>
+                            <div class="pattern-timeframe">5M</div>
+                            <div class="pattern-strength">Strong</div>
+                        </div>
+                        <div class="pattern-item neutral">
+                            <div class="pattern-name">Doji</div>
+                            <div class="pattern-timeframe">15M</div>
+                            <div class="pattern-strength">Medium</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trading Journal -->
+                <div class="tab-pane" id="journal">
+                    <div class="journal-stats">
+                        <div class="journal-stat">
+                            <div class="stat-label">Today's Win Rate</div>
+                            <div class="stat-value win-rate" id="todayWinRate">66.7%</div>
+                        </div>
+                        <div class="journal-stat">
+                            <div class="stat-label">Best Pair</div>
+                            <div class="stat-value" id="bestPair">EUR/USD</div>
+                        </div>
+                        <div class="journal-stat">
+                            <div class="stat-label">Avg Confidence</div>
+                            <div class="stat-value" id="avgConfidence">78%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="journal-entries" id="journalEntries">
+                        <div class="journal-entry win">
+                            <div class="entry-time">14:23</div>
+                            <div class="entry-pair">EUR/USD</div>
+                            <div class="entry-direction">UP</div>
+                            <div class="entry-result">WIN</div>
+                        </div>
+                        <div class="journal-entry loss">
+                            <div class="entry-time">14:15</div>
+                            <div class="entry-pair">GBP/USD</div>
+                            <div class="entry-direction">DOWN</div>
+                            <div class="entry-result">LOSS</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="section control-section">
+            <div class="control-buttons">
+                <button class="btn btn-primary" id="startSniperBtn">
+                    <span class="btn-icon">🎯</span>
+                    Start Sniper Mode
+                </button>
+                <button class="btn btn-secondary" id="pauseSniperBtn" style="display: none;">
+                    <span class="btn-icon">⏸️</span>
+                    Pause Analysis
+                </button>
+            </div>
+            
+            <div class="control-settings">
+                <div class="setting-row">
+                    <label class="setting-label">
+                        <input type="checkbox" id="autoRiskControl" checked>
+                        <span class="checkmark"></span>
+                        Auto Risk Control
+                    </label>
+                    <label class="setting-label">
+                        <input type="checkbox" id="disciplineMode" checked>
+                        <span class="checkmark"></span>
+                        Discipline Mode
+                    </label>
+                </div>
+                
+                <div class="setting-row">
+                    <label class="setting-label">
+                        Min Confidence:
+                        <select id="minConfidence">
+                            <option value="70">70%</option>
+                            <option value="75" selected>75%</option>
+                            <option value="80">80%</option>
+                            <option value="85">85%</option>
+                        </select>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-left">
+                <div class="version">v2.0.0 Sniper</div>
+                <div class="ai-status" id="aiConnectionStatus">🧠 AI Ready</div>
+            </div>
+            <div class="footer-right">
+                <div class="system-health" id="systemHealth">System: Optimal</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Discipline Alert Modal -->
+    <div class="modal-overlay" id="disciplineModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔐 Discipline Alert</h3>
+            </div>
+            <div class="modal-body">
+                <div class="alert-message" id="disciplineAlertMessage">
+                    Trade limit reached for this session. Take a break and return tomorrow.
+                </div>
+                <div class="alert-coaching">
+                    Discipline is your edge. Quality over quantity always wins.
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="acceptDisciplineBtn">Understood</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading States -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">Analyzing market data...</div>
+    </div>
+
+    <script src="popup-sniper.js"></script>
+</body>
+</html>

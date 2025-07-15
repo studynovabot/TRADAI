@@ -1,0 +1,123 @@
+{
+  "currencyPair": "USD/INR",
+  "tradeAmount": 10,
+  "minConfidence": 75,
+  "paperTrading": true,
+  "aiProvider": "groq",
+  "maxDailyTrades": 50,
+  "maxConsecutiveLosses": 3,
+  "stopLossEnabled": true,
+  
+  "tradingHours": {
+    "start": "09:00",
+    "end": "17:00",
+    "timezone": "UTC",
+    "enabled": false
+  },
+  
+  "indicators": {
+    "rsi": {
+      "period": 14,
+      "overbought": 70,
+      "oversold": 30
+    },
+    "macd": {
+      "fastPeriod": 12,
+      "slowPeriod": 26,
+      "signalPeriod": 9
+    },
+    "volatility": {
+      "period": 5,
+      "highThreshold": 2.0,
+      "lowThreshold": 0.5
+    },
+    "bollingerBands": {
+      "period": 20,
+      "stdDev": 2
+    },
+    "stochastic": {
+      "period": 14,
+      "signalPeriod": 3,
+      "overbought": 80,
+      "oversold": 20
+    }
+  },
+  
+  "riskManagement": {
+    "maxRiskPerTrade": 2,
+    "maxDailyRisk": 10,
+    "stopAfterConsecutiveLosses": 3,
+    "cooldownAfterLoss": 300000,
+    "emergencyStop": {
+      "enabled": true,
+      "maxDailyLoss": 100,
+      "maxDrawdown": 20
+    }
+  },
+  
+  "aiSettings": {
+    "temperature": 0.1,
+    "maxTokens": 500,
+    "timeout": 30000,
+    "retryAttempts": 3,
+    "fallbackToNoTrade": true
+  },
+  
+  "selenium": {
+    "headless": true,
+    "timeout": 30000,
+    "screenshotOnError": true,
+    "screenshotPath": "./logs/screenshots",
+    "pageLoadTimeout": 60000,
+    "implicitWait": 10000
+  },
+  
+  "database": {
+    "type": "sqlite",
+    "path": "./data/trading.db",
+    "backupEnabled": true,
+    "backupInterval": 86400000,
+    "retentionDays": 90
+  },
+  
+  "logging": {
+    "level": "info",
+    "file": "./logs/trading.log",
+    "maxFiles": 10,
+    "maxSize": "10m",
+    "enableConsole": true,
+    "enableFile": true
+  },
+  
+  "notifications": {
+    "enabled": false,
+    "telegram": {
+      "botToken": "",
+      "chatId": "",
+      "enabled": false
+    },
+    "discord": {
+      "webhookUrl": "",
+      "enabled": false
+    },
+    "email": {
+      "smtp": {
+        "host": "",
+        "port": 587,
+        "secure": false,
+        "user": "",
+        "pass": ""
+      },
+      "to": "",
+      "enabled": false
+    }
+  },
+  
+  "monitoring": {
+    "healthCheckInterval": 60000,
+    "performanceTracking": true,
+    "alertOnErrors": true,
+    "alertOnLowWinRate": true,
+    "minWinRateThreshold": 60
+  }
+}

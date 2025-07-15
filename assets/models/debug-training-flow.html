@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐛 Debug Training Flow</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #000;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #00ff00;
+        }
+        button {
+            background: #333;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+        #log {
+            background: #111;
+            padding: 10px;
+            border-radius: 5px;
+            height: 500px;
+            overflow-y: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .pass { color: #00ff00; }
+        .fail { color: #ff0000; }
+        .warning { color: #ffff00; }
+        .info { color: #00bfff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐛 Debug Training Flow - "No training features available" Error</h1>
+        <p>This test debugs the exact data flow to identify where features are lost.</p>
+        
+        <button onclick="testDataCollection()">1. Test Data Collection</button>
+        <button onclick="testFeatureEngineering()">2. Test Feature Engineering</button>
+        <button onclick="testDataPreparation()">3. Test Data Preparation</button>
+        <button onclick="testFullFlow()">4. Test Full Flow</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <div id="log"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
+    <script>
+        // Simulate the same state structure as the main interface
+        let trainingState = {
+            realData: null,
+            processedFeatures: null,
+            stats: {
+                samplesCollected: 0,
+                featuresExtracted: 0,
+                qualitySamples: 0
+            }
+        };
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'pass' ? '#00ff00' : type === 'fail' ? '#ff0000' : type === 'warning' ? '#ffff00' : type === 'info' ? '#00bfff' : '#ffffff';
+            logDiv.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Test 1: Data Collection
+        function testDataCollection() {
+            log("🧪 Testing data collection...", 'info');
+            
+            try {
+                // Generate realistic test data (same as main interface)
+                const data = [];
+                let price = 50000;
+                
+                for (let i = 0; i < 100; i++) {
+                    const change = (Math.random() - 0.5) * 0.02;
+                    price = price * (1 + change);
+                    
+                    const open = price;
+                    const close = price * (1 + (Math.random() - 0.5) * 0.01);
+                    const high = Math.max(open, close) * (1 + Math.random() * 0.005);
+                    const low = Math.min(open, close) * (1 - Math.random() * 0.005);
+                    const volume = 100 + Math.random() * 1000;
+                    
+                    data.push({
+                        timestamp: new Date(Date.now() - (100 - i) * 60000).toISOString(),
+                        open: parseFloat(open.toFixed(2)),
+                        high: parseFloat(high.toFixed(2)),
+                        low: parseFloat(low.toFixed(2)),
+                        close: parseFloat(close.toFixed(2)),
+                        volume: parseFloat(volume.toFixed(2))
+                    });
+                }
+                
+                // Validate data structure
+                const firstCandle = data[0];
+                const requiredFields = ['timestamp', 'open', 'high', 'low', 'close', 'volume'];
+                const missingFields = requiredFields.filter(field => !(field in firstCandle));
+                
+                if (missingFields.length > 0) {
+                    log(`💥 ERROR: Missing required fields: ${missingFields.join(', ')}`, 'fail');
+                    return false;
+                }
+                
+                trainingState.realData = data;
+                trainingState.stats.samplesCollected = data.length;
+                
+                log(`✅ Data collection successful: ${data.length} candles`, 'pass');
+                log(`📊 Sample candle: O:${firstCandle.open} H:${firstCandle.high} L:${firstCandle.low} C:${firstCandle.close}`, 'info');
+                log(`🔍 trainingState.realData exists: ${!!trainingState.realData}`, 'info');
+                log(`🔍 trainingState.realData.length: ${trainingState.realData.length}`, 'info');
+                
+                return true;
+                
+            } catch (error) {
+                log(`💥 Data collection failed: ${error.message}`, 'fail');
+                return false;
+            }
+        }
+
+        // Test 2: Feature Engineering
+        function testFeatureEngineering() {
+            log("🧪 Testing feature engineering...", 'info');
+            
+            if (!trainingState.realData) {
+                log("💥 ERROR: No real data available. Run data collection first.", 'fail');
+                return false;
+            }
+            
+            try {
+                const data = trainingState.realData;
+                const features = [];
+                
+                log(`🔧 Processing candles from index 20 to ${data.length - 1} (${data.length - 21} samples expected)`, 'info');
+                
+                if (data.length < 22) {
+                    log(`💥 ERROR: Not enough data for feature engineering (need at least 22 candles, got ${data.length})`, 'fail');
+                    return false;
+                }
+                
+                for (let i = 20; i < data.length - 1; i++) {
+                    const candle = data[i];
+                    const nextCandle = data[i + 1];
+                    
+                    // Validate candle data
+                    if (!candle || !nextCandle) {
+                        log(`⚠️ Skipping invalid candle at index ${i}`, 'warning');
+                        continue;
+                    }
+                    
+                    // Calculate simple indicators (simplified for testing)
+                    const closes = data.slice(i - 20, i + 1).map(d => d.close);
+                    const rsi = 50 + (Math.random() - 0.5) * 40; // Simplified RSI
+                    const ema9 = closes.reduce((a, b) => a + b) / closes.length;
+                    
+                    // Create feature vector (simplified but realistic)
+                    const featureVector = [
+                        (candle.close - candle.open) / candle.open, // Body size
+                        (candle.high - Math.max(candle.open, candle.close)) / candle.open, // Upper wick
+                        (Math.min(candle.open, candle.close) - candle.low) / candle.open, // Lower wick
+                        candle.close > candle.open ? 1 : 0, // Is bullish
+                        (candle.high - candle.low) / candle.open, // Total range
+                        candle.open / 50000, // Normalized open
+                        candle.high / 50000, // Normalized high
+                        candle.low / 50000, // Normalized low
+                        candle.close / 50000, // Normalized close
+                        Math.log(candle.volume + 1) / 10, // Log volume
+                        rsi / 100, // RSI
+                        ema9 / candle.close // EMA ratio
+                    ];
+                    
+                    // Validate features
+                    for (let j = 0; j < featureVector.length; j++) {
+                        if (isNaN(featureVector[j]) || !isFinite(featureVector[j])) {
+                            featureVector[j] = 0;
+                        }
+                    }
+                    
+                    const label = nextCandle.close > candle.close ? 1 : 0;
+                    
+                    features.push({
+                        features: featureVector,
+                        label: label,
+                        timestamp: candle.timestamp,
+                        confidence: Math.abs(nextCandle.close - candle.close) / candle.close > 0.005 ? 0.8 : 0.6
+                    });
+                    
+                    // Debug first few samples
+                    if (features.length <= 3) {
+                        log(`🔍 Sample ${features.length}: ${featureVector.length} features, label=${label}`, 'info');
+                    }
+                }
+                
+                if (features.length === 0) {
+                    log("💥 ERROR: No features were generated!", 'fail');
+                    return false;
+                }
+                
+                trainingState.processedFeatures = features;
+                trainingState.stats.featuresExtracted = features[0].features.length;
+                trainingState.stats.qualitySamples = features.length;
+                
+                log(`✅ Feature engineering successful: ${features.length} samples with ${features[0].features.length} features each`, 'pass');
+                log(`🔍 trainingState.processedFeatures exists: ${!!trainingState.processedFeatures}`, 'info');
+                log(`🔍 trainingState.processedFeatures.length: ${trainingState.processedFeatures.length}`, 'info');
+                
+                return true;
+                
+            } catch (error) {
+                log(`💥 Feature engineering failed: ${error.message}`, 'fail');
+                console.error(error);
+                return false;
+            }
+        }
+
+        // Test 3: Data Preparation
+        function testDataPreparation() {
+            log("🧪 Testing data preparation...", 'info');
+            
+            // Debug state
+            log(`🔍 trainingState.processedFeatures exists: ${!!trainingState.processedFeatures}`, 'info');
+            log(`🔍 processedFeatures length: ${trainingState.processedFeatures ? trainingState.processedFeatures.length : 'N/A'}`, 'info');
+            
+            if (!trainingState.processedFeatures) {
+                log("💥 ERROR: processedFeatures is null/undefined", 'fail');
+                log("💡 This means feature engineering step failed or didn't complete", 'warning');
+                return false;
+            }
+            
+            if (trainingState.processedFeatures.length === 0) {
+                log("💥 ERROR: processedFeatures array is empty", 'fail');
+                log("💡 Feature engineering completed but generated no samples", 'warning');
+                return false;
+            }
+            
+            try {
+                const features = trainingState.processedFeatures;
+                
+                // Filter high-quality samples
+                const qualityFeatures = features.filter(sample => sample.confidence > 0.6);
+                log(`🔍 Filtered to ${qualityFeatures.length} high-quality samples`, 'info');
+                
+                if (qualityFeatures.length === 0) {
+                    log("💥 ERROR: No high-quality samples after filtering", 'fail');
+                    return false;
+                }
+                
+                // Split data
+                const shuffled = qualityFeatures.sort(() => Math.random() - 0.5);
+                const splitIndex = Math.floor(shuffled.length * 0.8);
+                
+                const trainData = shuffled.slice(0, splitIndex);
+                const valData = shuffled.slice(splitIndex);
+                
+                const trainFeatures = trainData.map(sample => sample.features);
+                const trainLabels = trainData.map(sample => sample.label);
+                
+                if (trainFeatures.length === 0) {
+                    log("💥 ERROR: No training features available after split", 'fail');
+                    return false;
+                }
+                
+                log(`✅ Data preparation successful: ${trainFeatures.length} training samples, ${valData.length} validation samples`, 'pass');
+                log(`📊 Features per sample: ${trainFeatures[0].length}`, 'info');
+                
+                // Test tensor creation
+                const numSamples = trainFeatures.length;
+                const numFeatures = trainFeatures[0].length;
+                
+                const featureTensor = tf.tensor2d(trainFeatures, [numSamples, numFeatures]);
+                const labelTensor = tf.tensor1d(trainLabels, 'int32');
+                
+                log(`✅ Tensor creation successful: features[${featureTensor.shape.join(', ')}], labels[${labelTensor.shape.join(', ')}]`, 'pass');
+                
+                featureTensor.dispose();
+                labelTensor.dispose();
+                
+                return true;
+                
+            } catch (error) {
+                log(`💥 Data preparation failed: ${error.message}`, 'fail');
+                console.error(error);
+                return false;
+            }
+        }
+
+        // Test 4: Full Flow
+        function testFullFlow() {
+            log("🧪 Testing full flow...", 'info');
+            
+            // Reset state
+            trainingState = {
+                realData: null,
+                processedFeatures: null,
+                stats: { samplesCollected: 0, featuresExtracted: 0, qualitySamples: 0 }
+            };
+            
+            log("🔄 Step 1: Data Collection", 'info');
+            if (!testDataCollection()) {
+                log("💥 Full flow failed at data collection", 'fail');
+                return;
+            }
+            
+            log("🔄 Step 2: Feature Engineering", 'info');
+            if (!testFeatureEngineering()) {
+                log("💥 Full flow failed at feature engineering", 'fail');
+                return;
+            }
+            
+            log("🔄 Step 3: Data Preparation", 'info');
+            if (!testDataPreparation()) {
+                log("💥 Full flow failed at data preparation", 'fail');
+                return;
+            }
+            
+            log("🎉 Full flow completed successfully!", 'pass');
+            log("💡 The training interface should work with these same steps", 'info');
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            log("🐛 Debug Training Flow Ready", 'info');
+            log("Click buttons to test each step individually or run full flow", 'info');
+        });
+    </script>
+</body>
+</html>

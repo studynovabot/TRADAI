@@ -1,0 +1,66 @@
+{
+  "name": "ai-binary-trading-bot",
+  "version": "1.0.0",
+  "description": "AI-powered binary options trading bot using Node.js with Groq/Together AI integration",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "paper-trade": "node src/index.js --paper-trading",
+    "signal-only": "node src/index.js --signal-only",
+    "signals": "node src/index.js --signal-only",
+    "setup": "node scripts/setup.js",
+    "test-system": "node scripts/test-system.js",
+    "install-bot": "node install.js",
+    "verify": "node scripts/verify-setup.js",
+    "test-apis": "node scripts/test-api-connections.js",
+    "three-brain": "node start-three-brain-system.js",
+    "train-models": "node scripts/train-models.js",
+    "three-brain-dev": "nodemon start-three-brain-system.js",
+    "test-three-brain": "node test-three-brain-system.js",
+    "log-trade": "node log-trade-result.js",
+    "view-stats": "node view-statistics.js"
+  },
+  "keywords": [
+    "trading",
+    "binary-options",
+    "ai",
+    "forex",
+    "automation",
+    "groq",
+    "together-ai"
+  ],
+  "author": "TRADAI",
+  "license": "MIT",
+  "dependencies": {
+    "@huggingface/inference": "^4.5.1",
+    "@tensorflow/tfjs-node": "^4.22.0",
+    "axios": "^1.10.0",
+    "dotenv": "^16.3.1",
+    "fs-extra": "^11.3.0",
+    "groq-sdk": "^0.3.3",
+    "lodash": "^4.17.21",
+    "ml-regression": "^6.3.0",
+    "moment": "^2.29.4",
+    "node-cron": "^3.0.3",
+    "openai": "^5.9.0",
+    "selenium-webdriver": "^4.34.0",
+    "simple-statistics": "^7.8.8",
+    "sqlite3": "^5.1.7",
+    "technicalindicators": "^3.1.0",
+    "together-ai": "^0.5.0",
+    "winston": "^3.17.0",
+    "ws": "^8.18.3",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

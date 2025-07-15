@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional AI Trading Model Trainer</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .status {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .progress {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            height: 20px;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d2ff;
+        }
+        .metric-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Professional AI Trading Model Trainer</h1>
+            <p>Training with High-Quality Pattern-Based Candlestick Data</p>
+        </div>
+
+        <div class="controls">
+            <button id="loadDataBtn" onclick="showFileLoader()">📊 Load Training Data</button>
+            <button id="trainModelBtn" onclick="startTraining()" disabled>🚀 Start Training</button>
+            <button id="exportModelBtn" onclick="exportModel()" disabled>📦 Export Model</button>
+            <button id="testModelBtn" onclick="testModel()" disabled>🧪 Test Model</button>
+            <button onclick="showServerInstructions()">🌐 Local Server Setup</button>
+        </div>
+
+        <!-- File Upload Section -->
+        <div id="fileUploadSection" style="display: none; margin: 20px 0;">
+            <div style="background: rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 20px;">
+                <h3>📁 Upload Training Data Files</h3>
+                <p>Select your CSV training files from the assets/training folder:</p>
+
+                <div style="margin: 15px 0;">
+                    <input type="file" id="fileInput" multiple accept=".csv"
+                           style="background: rgba(255, 255, 255, 0.2); color: white; padding: 10px; border-radius: 5px; border: none; width: 100%;">
+                </div>
+
+                <div style="margin: 15px 0;">
+                    <button onclick="loadSelectedFiles()" style="background: linear-gradient(45deg, #28a745, #20c997);">
+                        📤 Load Selected Files
+                    </button>
+                    <button onclick="loadSampleData()" style="background: linear-gradient(45deg, #17a2b8, #6f42c1);">
+                        🎲 Use Sample Data
+                    </button>
+                </div>
+
+                <div id="fileList" style="margin-top: 15px; font-size: 0.9em;"></div>
+            </div>
+        </div>
+
+        <!-- Drag and Drop Zone -->
+        <div id="dropZone" style="display: none; margin: 20px 0;">
+            <div style="background: rgba(255, 255, 255, 0.1); border: 2px dashed rgba(255, 255, 255, 0.3);
+                        border-radius: 10px; padding: 40px; text-align: center;">
+                <h3>🎯 Drag & Drop CSV Files Here</h3>
+                <p>Or click to select files from your computer</p>
+                <p style="font-size: 0.9em; opacity: 0.8;">Supported: .csv files from assets/training folder</p>
+            </div>
+        </div>
+
+        <div class="progress" id="progressContainer" style="display: none;">
+            <div class="progress-bar" id="progressBar" style="width: 0%;">0%</div>
+        </div>
+
+        <div class="metrics" id="metricsContainer" style="display: none;">
+            <div class="metric-card">
+                <div class="metric-value" id="accuracyValue">0%</div>
+                <div class="metric-label">Accuracy</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="lossValue">0.00</div>
+                <div class="metric-label">Loss</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="samplesValue">0</div>
+                <div class="metric-label">Training Samples</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value" id="epochsValue">0</div>
+                <div class="metric-label">Epochs Completed</div>
+            </div>
+        </div>
+
+        <div class="status" id="statusLog">
+            <div>🚀 Professional AI Trading Model Trainer Ready</div>
+            <div>📁 Training data path: assets/training/</div>
+            <div>🎯 Target: 80,000+ samples from pattern-based datasets</div>
+            <div>⚡ Features: OHLCV + 15 technical indicators per candle</div>
+            <div>🧠 Architecture: LSTM + Dense layers with dropout and batch normalization</div>
+            <div>📊 Click 'Load Training Data' to begin...</div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let trainingData = null;
+        let model = null;
+        let isTraining = false;
+        let trainingHistory = [];
+
+        // Configuration
+        const config = {
+            sequenceLength: 24,
+            featuresPerCandle: 15,
+            batchSize: 32,
+            epochs: 50,
+            learningRate: 0.001,
+            validationSplit: 0.2
+        };
+
+        function log(message) {
+            const statusLog = document.getElementById('statusLog');
+            const timestamp = new Date().toLocaleTimeString();
+            statusLog.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            statusLog.scrollTop = statusLog.scrollHeight;
+        }
+
+        function updateProgress(percent, text = '') {
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            
+            progressContainer.style.display = 'block';
+            progressBar.style.width = `${percent}%`;
+            progressBar.textContent = text || `${percent}%`;
+        }
+
+        function updateMetrics(accuracy, loss, samples, epochs) {
+            document.getElementById('metricsContainer').style.display = 'grid';
+            document.getElementById('accuracyValue').textContent = `${(accuracy * 100).toFixed(2)}%`;
+            document.getElementById('lossValue').textContent = loss.toFixed(4);
+            document.getElementById('samplesValue').textContent = samples.toLocaleString();
+            document.getElementById('epochsValue').textContent = epochs;
+        }
+
+        // Technical indicators calculation
+        function calculateSMA(data, period) {
+            const sma = [];
+            for (let i = 0; i < data.length; i++) {
+                if (i < period - 1) {
+                    sma.push(data[i]);
+                } else {
+                    const sum = data.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0);
+                    sma.push(sum / period);
+                }
+            }
+            return sma;
+        }
+
+        function calculateEMA(data, period) {
+            const ema = [];
+            const multiplier = 2 / (period + 1);
+            ema[0] = data[0];
+            
+            for (let i = 1; i < data.length; i++) {
+                ema[i] = (data[i] * multiplier) + (ema[i - 1] * (1 - multiplier));
+            }
+            return ema;
+        }
+
+        function calculateRSI(data, period = 14) {
+            const rsi = [];
+            const gains = [];
+            const losses = [];
+            
+            for (let i = 1; i < data.length; i++) {
+                const change = data[i] - data[i - 1];
+                gains.push(change > 0 ? change : 0);
+                losses.push(change < 0 ? Math.abs(change) : 0);
+            }
+            
+            for (let i = 0; i < gains.length; i++) {
+                if (i < period - 1) {
+                    rsi.push(50);
+                } else {
+                    const avgGain = gains.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period;
+                    const avgLoss = losses.slice(i - period + 1, i + 1).reduce((a, b) => a + b, 0) / period;
+                    const rs = avgGain / (avgLoss || 0.001);
+                    rsi.push(100 - (100 / (1 + rs)));
+                }
+            }
+            
+            return [50, ...rsi]; // Add initial value
+        }
+
+        function extractFeatures(candles) {
+            log("🔧 Extracting technical features from candles...");
+
+            const features = [];
+            const closes = candles.map(c => c.close);
+            const highs = candles.map(c => c.high);
+            const lows = candles.map(c => c.low);
+            const opens = candles.map(c => c.open);
+            const volumes = candles.map(c => c.volume);
+
+            // Calculate technical indicators
+            const sma20 = calculateSMA(closes, 20);
+            const ema12 = calculateEMA(closes, 12);
+            const ema26 = calculateEMA(closes, 26);
+            const rsi14 = calculateRSI(closes, 14);
+            const rsi7 = calculateRSI(closes, 7);
+
+            for (let i = 0; i < candles.length; i++) {
+                const candle = candles[i];
+
+                // Basic OHLCV features
+                const open = candle.open;
+                const high = candle.high;
+                const low = candle.low;
+                const close = candle.close;
+                const volume = candle.volume;
+
+                // Price action features
+                const bodySize = Math.abs(close - open) / open;
+                const upperShadow = (high - Math.max(open, close)) / Math.max(open, close);
+                const lowerShadow = (Math.min(open, close) - low) / Math.min(open, close);
+                const priceChange = (close - open) / open;
+                const highLowRatio = (high - low) / close;
+
+                // Technical indicators
+                const smaRatio = close / sma20[i];
+                const emaRatio = ema12[i] / ema26[i];
+                const rsiValue = rsi14[i] / 100;
+                const rsiShort = rsi7[i] / 100;
+
+                // Volume features
+                const volumeAvg = i >= 20 ? volumes.slice(i-19, i+1).reduce((a, b) => a + b, 0) / 20 : volume;
+                const volumeRatio = volume / volumeAvg;
+
+                // Momentum features
+                const momentum = i >= 10 ? (close - closes[i-10]) / closes[i-10] : 0;
+                const volatility = i >= 10 ?
+                    Math.sqrt(closes.slice(i-9, i+1).map(c => Math.pow((c - close) / close, 2)).reduce((a, b) => a + b, 0) / 10) : 0;
+
+                features.push([
+                    priceChange,
+                    bodySize,
+                    upperShadow,
+                    lowerShadow,
+                    highLowRatio,
+                    smaRatio - 1,
+                    emaRatio - 1,
+                    rsiValue,
+                    rsiShort,
+                    volumeRatio - 1,
+                    momentum,
+                    volatility,
+                    Math.tanh(priceChange * 10), // Normalized price change
+                    Math.tanh(bodySize * 10), // Normalized body size
+                    Math.tanh(volumeRatio - 1) // Normalized volume ratio
+                ]);
+            }
+
+            log(`✅ Extracted ${features.length} feature vectors with ${features[0].length} features each`);
+            return features;
+        }
+
+        // File handling variables
+        let uploadedFiles = new Map();
+        let isStandaloneMode = true;
+
+        async function loadCSVData(filename, fileContent = null) {
+            try {
+                let text;
+
+                if (fileContent) {
+                    // Use provided file content (from file upload)
+                    text = fileContent;
+                } else {
+                    // Try to fetch from server (if running on local server)
+                    try {
+                        const response = await fetch(`../../assets/training/${filename}`);
+                        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                        text = await response.text();
+                    } catch (fetchError) {
+                        log(`⚠️ Cannot fetch ${filename} via HTTP: ${fetchError.message}`);
+                        log(`💡 Please use file upload or run on local server`);
+                        return [];
+                    }
+                }
+
+                const lines = text.trim().split('\n');
+                const headers = lines[0].split(',');
+
+                const data = [];
+                for (let i = 1; i < lines.length; i++) {
+                    const values = lines[i].split(',');
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        const value = values[index];
+                        if (header === 'timestamp') {
+                            row[header] = new Date(value);
+                        } else {
+                            row[header] = parseFloat(value) || 0;
+                        }
+                    });
+                    data.push(row);
+                }
+
+                return data;
+            } catch (error) {
+                log(`❌ Error processing ${filename}: ${error.message}`);
+                return [];
+            }
+        }
+
+        function showFileLoader() {
+            const fileSection = document.getElementById('fileUploadSection');
+            const dropZone = document.getElementById('dropZone');
+
+            if (fileSection.style.display === 'none') {
+                fileSection.style.display = 'block';
+                dropZone.style.display = 'block';
+                setupDragAndDrop();
+                log("📁 File upload interface opened");
+                log("💡 Select CSV files from your assets/training folder");
+            } else {
+                fileSection.style.display = 'none';
+                dropZone.style.display = 'none';
+            }
+        }
+
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+
+            // Make drop zone clickable
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            // Drag and drop handlers
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.style.background = 'rgba(255, 255, 255, 0.2)';
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                dropZone.style.background = 'rgba(255, 255, 255, 0.1)';
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.style.background = 'rgba(255, 255, 255, 0.1)';
+
+                const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.csv'));
+                if (files.length > 0) {
+                    processUploadedFiles(files);
+                } else {
+                    log("❌ Please drop CSV files only");
+                }
+            });
+
+            // File input change handler
+            fileInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files).filter(f => f.name.endsWith('.csv'));
+                if (files.length > 0) {
+                    processUploadedFiles(files);
+                }
+            });
+        }
+
+        async function processUploadedFiles(files) {
+            log(`📁 Processing ${files.length} uploaded files...`);
+            uploadedFiles.clear();
+
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '<h4>📋 Uploaded Files:</h4>';
+
+            for (const file of files) {
+                try {
+                    const content = await readFileContent(file);
+                    uploadedFiles.set(file.name, content);
+
+                    fileList.innerHTML += `<div>✅ ${file.name} (${(file.size / 1024).toFixed(1)} KB)</div>`;
+                    log(`✅ Loaded ${file.name}`);
+                } catch (error) {
+                    fileList.innerHTML += `<div>❌ ${file.name} - Error: ${error.message}</div>`;
+                    log(`❌ Failed to load ${file.name}: ${error.message}`);
+                }
+            }
+
+            if (uploadedFiles.size > 0) {
+                document.getElementById('trainModelBtn').disabled = false;
+                log(`🎯 Ready to train with ${uploadedFiles.size} files`);
+            }
+        }
+
+        function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+        }
+
+        async function loadSelectedFiles() {
+            if (uploadedFiles.size === 0) {
+                log("❌ No files uploaded. Please select CSV files first.");
+                return;
+            }
+
+            await loadTrainingDataFromFiles();
+        }
+
+        async function loadTrainingDataFromFiles() {
+            log("📊 Loading training datasets from uploaded files...");
+            updateProgress(0, "Processing uploaded files...");
+
+            const patternLabels = {
+                'pattern_bullish_engulfing.csv': 1,
+                'pattern_hammer.csv': 1,
+                'pattern_morning_star.csv': 1,
+                'pattern_inverted_hammer.csv': 1,
+                'pattern_bearish_engulfing.csv': 0,
+                'pattern_bearish_marubozu.csv': 0,
+                'pattern_evening_star.csv': 0,
+                'pattern_shooting_star.csv': 0,
+                'pattern_doji.csv': 0
+            };
+
+            let allData = [];
+            let processedFiles = 0;
+            const totalFiles = uploadedFiles.size;
+
+            for (const [filename, content] of uploadedFiles) {
+                log(`📥 Processing ${filename}...`);
+                const data = await loadCSVData(filename, content);
+
+                if (data.length > 0) {
+                    // Determine label from filename
+                    let label = 0.5; // Default neutral
+                    for (const [pattern, patternLabel] of Object.entries(patternLabels)) {
+                        if (filename.includes(pattern.replace('.csv', ''))) {
+                            label = patternLabel;
+                            break;
+                        }
+                    }
+
+                    // Add pattern labels
+                    data.forEach(row => {
+                        row.label = label;
+                        row.pattern = filename.replace('.csv', '');
+                    });
+
+                    // Sample data to balance dataset
+                    const sampleSize = Math.min(data.length, 8000);
+                    const sampledData = data.sort(() => 0.5 - Math.random()).slice(0, sampleSize);
+
+                    allData = allData.concat(sampledData);
+                    log(`✅ Processed ${sampledData.length} samples from ${filename}`);
+                } else {
+                    log(`⚠️ No data extracted from ${filename}`);
+                }
+
+                processedFiles++;
+                updateProgress((processedFiles / totalFiles) * 50, `Processing ${filename}...`);
+            }
+
+            if (allData.length === 0) {
+                log("❌ No training data available. Please check your CSV files.");
+                return;
+            }
+
+            // Shuffle combined data
+            allData = allData.sort(() => 0.5 - Math.random());
+
+            log(`🎯 Total dataset: ${allData.length} samples`);
+            log("🔧 Processing features and creating sequences...");
+
+            // Extract features
+            const features = extractFeatures(allData);
+
+            // Create sequences
+            const sequences = [];
+            const labels = [];
+
+            for (let i = config.sequenceLength; i < features.length; i++) {
+                const sequence = features.slice(i - config.sequenceLength, i);
+                const label = allData[i].label;
+
+                sequences.push(sequence);
+                labels.push(label);
+            }
+
+            trainingData = {
+                sequences: sequences,
+                labels: labels,
+                totalSamples: sequences.length
+            };
+
+            updateProgress(100, "Data processed successfully!");
+            log(`✅ Created ${sequences.length} training sequences`);
+            log(`📊 Label distribution: UP=${labels.filter(l => l === 1).length}, DOWN=${labels.filter(l => l === 0).length}`);
+
+            // Enable training button
+            document.getElementById('trainModelBtn').disabled = false;
+
+            setTimeout(() => {
+                document.getElementById('progressContainer').style.display = 'none';
+            }, 2000);
+        }
+
+        function createModel() {
+            log("🏗️ Building advanced neural network architecture...");
+
+            const model = tf.sequential({
+                layers: [
+                    // Input layer - LSTM for sequence processing
+                    tf.layers.lstm({
+                        units: 128,
+                        returnSequences: true,
+                        inputShape: [config.sequenceLength, config.featuresPerCandle],
+                        dropout: 0.2,
+                        recurrentDropout: 0.2,
+                        name: 'lstm_1'
+                    }),
+
+                    // Batch normalization
+                    tf.layers.batchNormalization({ name: 'batch_norm_1' }),
+
+                    // Second LSTM layer
+                    tf.layers.lstm({
+                        units: 64,
+                        returnSequences: true,
+                        dropout: 0.2,
+                        recurrentDropout: 0.2,
+                        name: 'lstm_2'
+                    }),
+
+                    // Batch normalization
+                    tf.layers.batchNormalization({ name: 'batch_norm_2' }),
+
+                    // Third LSTM layer
+                    tf.layers.lstm({
+                        units: 32,
+                        returnSequences: false,
+                        dropout: 0.2,
+                        recurrentDropout: 0.2,
+                        name: 'lstm_3'
+                    }),
+
+                    // Batch normalization
+                    tf.layers.batchNormalization({ name: 'batch_norm_3' }),
+
+                    // Dense layers
+                    tf.layers.dense({
+                        units: 64,
+                        activation: 'relu',
+                        name: 'dense_1'
+                    }),
+
+                    tf.layers.dropout({ rate: 0.3, name: 'dropout_1' }),
+
+                    tf.layers.dense({
+                        units: 32,
+                        activation: 'relu',
+                        name: 'dense_2'
+                    }),
+
+                    tf.layers.dropout({ rate: 0.2, name: 'dropout_2' }),
+
+                    // Output layer - binary classification
+                    tf.layers.dense({
+                        units: 2,
+                        activation: 'softmax',
+                        name: 'predictions'
+                    })
+                ]
+            });
+
+            // Compile model
+            model.compile({
+                optimizer: tf.train.adam(config.learningRate),
+                loss: 'sparseCategoricalCrossentropy',
+                metrics: ['accuracy']
+            });
+
+            log(`✅ Model created with ${model.countParams()} parameters`);
+            return model;
+        }
+
+        async function startTraining() {
+            if (!trainingData || isTraining) return;
+
+            isTraining = true;
+            document.getElementById('trainModelBtn').disabled = true;
+
+            log("🚀 Starting professional model training...");
+
+            try {
+                // Create model
+                model = createModel();
+
+                // Prepare data
+                const sequences = tf.tensor3d(trainingData.sequences);
+                const labels = tf.tensor1d(trainingData.labels, 'int32');
+
+                log(`📊 Training data shape: ${sequences.shape}`);
+                log(`🎯 Labels shape: ${labels.shape}`);
+
+                // Training configuration
+                const trainConfig = {
+                    epochs: config.epochs,
+                    batchSize: config.batchSize,
+                    validationSplit: config.validationSplit,
+                    shuffle: true,
+                    callbacks: {
+                        onEpochEnd: (epoch, logs) => {
+                            const progress = ((epoch + 1) / config.epochs) * 100;
+                            updateProgress(progress, `Epoch ${epoch + 1}/${config.epochs}`);
+                            updateMetrics(logs.val_acc || logs.acc, logs.val_loss || logs.loss, trainingData.totalSamples, epoch + 1);
+
+                            log(`📈 Epoch ${epoch + 1}/${config.epochs} - Loss: ${logs.loss.toFixed(4)}, Accuracy: ${(logs.acc * 100).toFixed(2)}%`);
+
+                            if (logs.val_loss && logs.val_acc) {
+                                log(`📊 Validation - Loss: ${logs.val_loss.toFixed(4)}, Accuracy: ${(logs.val_acc * 100).toFixed(2)}%`);
+                            }
+
+                            trainingHistory.push({
+                                epoch: epoch + 1,
+                                loss: logs.loss,
+                                accuracy: logs.acc,
+                                val_loss: logs.val_loss,
+                                val_accuracy: logs.val_acc
+                            });
+                        }
+                    }
+                };
+
+                // Train model
+                log("🎯 Training in progress...");
+                const history = await model.fit(sequences, labels, trainConfig);
+
+                // Training completed
+                log("🎉 Training completed successfully!");
+
+                const finalAccuracy = history.history.acc[history.history.acc.length - 1];
+                const finalLoss = history.history.loss[history.history.loss.length - 1];
+
+                log(`📊 Final Training Accuracy: ${(finalAccuracy * 100).toFixed(2)}%`);
+                log(`📊 Final Training Loss: ${finalLoss.toFixed(4)}`);
+
+                if (history.history.val_acc) {
+                    const finalValAccuracy = history.history.val_acc[history.history.val_acc.length - 1];
+                    log(`📊 Final Validation Accuracy: ${(finalValAccuracy * 100).toFixed(2)}%`);
+                }
+
+                // Enable export and test buttons
+                document.getElementById('exportModelBtn').disabled = false;
+                document.getElementById('testModelBtn').disabled = false;
+
+                // Clean up tensors
+                sequences.dispose();
+                labels.dispose();
+
+            } catch (error) {
+                log(`❌ Training failed: ${error.message}`);
+                console.error(error);
+            } finally {
+                isTraining = false;
+                document.getElementById('trainModelBtn').disabled = false;
+                updateProgress(100, "Training completed!");
+
+                setTimeout(() => {
+                    document.getElementById('progressContainer').style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        async function exportModel() {
+            if (!model) {
+                log("❌ No trained model to export");
+                return;
+            }
+
+            log("📦 Exporting model to TensorFlow.js format...");
+
+            try {
+                // Save model
+                await model.save('downloads://trading-model');
+
+                // Create scaling parameters (simplified for demo)
+                const scalingParams = {
+                    type: 'standard',
+                    features: config.featuresPerCandle,
+                    sequenceLength: config.sequenceLength,
+                    timestamp: new Date().toISOString(),
+                    trainingAccuracy: trainingHistory.length > 0 ?
+                        trainingHistory[trainingHistory.length - 1].accuracy : 0,
+                    trainingHistory: trainingHistory
+                };
+
+                // Download scaling parameters
+                const blob = new Blob([JSON.stringify(scalingParams, null, 2)],
+                    { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'scaler_params.json';
+                a.click();
+                URL.revokeObjectURL(url);
+
+                log("✅ Model exported successfully!");
+                log("📁 Files saved: trading-model.json, trading-model.weights.bin, scaler_params.json");
+                log("🔧 Copy these files to assets/models/ directory for production use");
+
+            } catch (error) {
+                log(`❌ Export failed: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        async function testModel() {
+            if (!model || !trainingData) {
+                log("❌ No trained model or data available for testing");
+                return;
+            }
+
+            log("🧪 Testing model with sample data...");
+
+            try {
+                // Get a few test samples
+                const testSamples = trainingData.sequences.slice(0, 10);
+                const testLabels = trainingData.labels.slice(0, 10);
+
+                let correct = 0;
+
+                for (let i = 0; i < testSamples.length; i++) {
+                    const sample = tf.tensor3d([testSamples[i]]);
+                    const prediction = await model.predict(sample);
+                    const predictionData = await prediction.data();
+
+                    const predictedClass = predictionData[0] > predictionData[1] ? 0 : 1;
+                    const confidence = Math.max(predictionData[0], predictionData[1]) * 100;
+                    const actualClass = testLabels[i];
+
+                    const isCorrect = predictedClass === actualClass;
+                    if (isCorrect) correct++;
+
+                    const direction = predictedClass === 1 ? "UP 📈" : "DOWN 📉";
+                    const actualDirection = actualClass === 1 ? "UP 📈" : "DOWN 📉";
+                    const status = isCorrect ? "✅" : "❌";
+
+                    log(`${status} Sample ${i + 1}: Predicted ${direction} (${confidence.toFixed(1)}%) | Actual: ${actualDirection}`);
+
+                    sample.dispose();
+                    prediction.dispose();
+                }
+
+                const accuracy = (correct / testSamples.length) * 100;
+                log(`🎯 Test Accuracy: ${accuracy.toFixed(1)}% (${correct}/${testSamples.length})`);
+
+                if (accuracy >= 70) {
+                    log("🎉 Model performance looks good! Ready for production use.");
+                } else if (accuracy >= 60) {
+                    log("⚠️ Model performance is moderate. Consider more training data or tuning.");
+                } else {
+                    log("❌ Model performance is low. Recommend retraining with more data.");
+                }
+
+            } catch (error) {
+                log(`❌ Testing failed: ${error.message}`);
+                console.error(error);
+            }
+        }
+
+        function loadSampleData() {
+            log("🎲 Generating sample training data for demonstration...");
+
+            // Generate synthetic pattern data for testing
+            const sampleData = [];
+            const patterns = [
+                { name: 'bullish_engulfing', label: 1, count: 1000 },
+                { name: 'hammer', label: 1, count: 1000 },
+                { name: 'bearish_engulfing', label: 0, count: 1000 },
+                { name: 'shooting_star', label: 0, count: 1000 },
+                { name: 'doji', label: 0, count: 1000 }
+            ];
+
+            patterns.forEach(pattern => {
+                for (let i = 0; i < pattern.count; i++) {
+                    const basePrice = 50000 + Math.random() * 10000;
+                    const volatility = 0.02;
+
+                    const candle = {
+                        timestamp: new Date(Date.now() - Math.random() * 86400000 * 30),
+                        open: basePrice * (1 + (Math.random() - 0.5) * volatility),
+                        high: basePrice * (1 + Math.random() * volatility),
+                        low: basePrice * (1 - Math.random() * volatility),
+                        close: basePrice * (1 + (Math.random() - 0.5) * volatility),
+                        volume: 100 + Math.random() * 200,
+                        label: pattern.label,
+                        pattern: pattern.name
+                    };
+
+                    // Adjust candle based on pattern type
+                    if (pattern.label === 1) { // Bullish patterns
+                        candle.close = Math.max(candle.open, candle.close);
+                    } else if (pattern.label === 0) { // Bearish patterns
+                        candle.close = Math.min(candle.open, candle.close);
+                    }
+
+                    sampleData.push(candle);
+                }
+            });
+
+            // Shuffle data
+            const shuffledData = sampleData.sort(() => 0.5 - Math.random());
+
+            log(`✅ Generated ${shuffledData.length} sample candles`);
+
+            // Process sample data
+            processSampleData(shuffledData);
+        }
+
+        async function processSampleData(allData) {
+            log("🔧 Processing sample data features and creating sequences...");
+            updateProgress(0, "Processing sample data...");
+
+            // Extract features
+            const features = extractFeatures(allData);
+
+            // Create sequences
+            const sequences = [];
+            const labels = [];
+
+            for (let i = config.sequenceLength; i < features.length; i++) {
+                const sequence = features.slice(i - config.sequenceLength, i);
+                const label = allData[i].label;
+
+                sequences.push(sequence);
+                labels.push(label);
+            }
+
+            trainingData = {
+                sequences: sequences,
+                labels: labels,
+                totalSamples: sequences.length
+            };
+
+            updateProgress(100, "Sample data ready!");
+            log(`✅ Created ${sequences.length} training sequences from sample data`);
+            log(`📊 Label distribution: UP=${labels.filter(l => l === 1).length}, DOWN=${labels.filter(l => l === 0).length}`);
+
+            // Enable training button
+            document.getElementById('trainModelBtn').disabled = false;
+
+            setTimeout(() => {
+                document.getElementById('progressContainer').style.display = 'none';
+            }, 2000);
+        }
+
+        function showServerInstructions() {
+            const instructions = `🌐 LOCAL SERVER SETUP INSTRUCTIONS
+
+To avoid CORS issues and load CSV files directly:
+
+📋 OPTION 1: Python HTTP Server
+1. Open Command Prompt in your TRADAI folder
+2. Run: python -m http.server 8000
+3. Open: http://localhost:8000/assets/models/professional-js-trainer.html
+
+📋 OPTION 2: Node.js HTTP Server
+1. Install: npm install -g http-server
+2. Run: http-server -p 8000
+3. Open: http://localhost:8000/assets/models/professional-js-trainer.html
+
+📋 OPTION 3: File Upload (Current)
+1. Click "Load Training Data"
+2. Select CSV files from assets/training folder
+3. Files processed in browser
+
+💡 Local server allows automatic CSV loading!`;
+
+            alert(instructions);
+            log("🌐 Server setup instructions displayed");
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            log("🚀 Professional AI Trading Model Trainer Ready");
+            log("📊 TensorFlow.js version: " + tf.version.tfjs);
+            log("🎯 Configuration:");
+            log(`   - Sequence Length: ${config.sequenceLength} candles`);
+            log(`   - Features per Candle: ${config.featuresPerCandle}`);
+            log(`   - Batch Size: ${config.batchSize}`);
+            log(`   - Epochs: ${config.epochs}`);
+            log(`   - Learning Rate: ${config.learningRate}`);
+            log("📁 Use file upload or local server to load training data");
+            log("💡 Click 'Local Server Setup' for CORS-free loading");
+        });
+    </script>
+</body>
+</html>

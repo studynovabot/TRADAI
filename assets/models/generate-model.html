@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate TensorFlow.js Demo Model</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
+    <script src="create-demo-model.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 20px 0;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .instructions {
+            background-color: #f8f9fa;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        h1 {
+            color: #333;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>TensorFlow.js Demo Model Generator</h1>
+    
+    <div class="instructions">
+        <p><strong>Instructions:</strong></p>
+        <ol>
+            <li>Click the "Generate Demo Model" button below</li>
+            <li>Two files will be downloaded:
+                <ul>
+                    <li><code>trading-model.json</code> - The model architecture</li>
+                    <li><code>scaling-params.json</code> - Scaling parameters for data normalization</li>
+                </ul>
+            </li>
+            <li>Move these files to the <code>assets/models/</code> directory</li>
+            <li>The extension will now use this local model for predictions</li>
+        </ol>
+    </div>
+    
+    <button onclick="generateModel()">Generate Demo Model</button>
+    
+    <div id="status"></div>
+    
+    <script>
+        async function generateModel() {
+            const statusEl = document.getElementById('status');
+            statusEl.className = '';
+            statusEl.textContent = 'Generating model...';
+            
+            try {
+                // Rename the model file during save
+                const model = await createDemoModel();
+                
+                statusEl.className = 'success';
+                statusEl.innerHTML = `
+                    <p>✅ Model generated successfully!</p>
+                    <p>Please move the downloaded files to:</p>
+                    <code>assets/models/trading-model.json</code><br>
+                    <code>assets/models/scaling-params.json</code>
+                `;
+            } catch (error) {
+                statusEl.className = 'error';
+                statusEl.textContent = `Error generating model: ${error.message}`;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
