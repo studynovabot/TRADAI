@@ -27,70 +27,34 @@ export function useRealTime(): UseRealTimeReturn {
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const connect = () => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      return;
-    }
-
-    setConnectionStatus('connecting');
-    setError(null);
-
+  const fetchSignals = async () => {
     try {
-      // Use your WebSocket endpoint here
-      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080';
-      wsRef.current = new WebSocket(wsUrl);
+      setConnectionStatus('connecting');
+      setError(null);
 
-      wsRef.current.onopen = () => {
-        console.log('🔄 WebSocket connected');
+      const response = await fetch('/api/signals');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.signals) {
+        setSignals(data.signals);
         setConnected(true);
         setConnectionStatus('connected');
         setError(null);
-      };
-
-      wsRef.current.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          
-          if (data.type === 'signal') {
-            const newSignal: Signal = {
-              id: data.id || Date.now().toString(),
-              pair: data.pair,
-              direction: data.direction,
-              confidence: data.confidence,
-              timestamp: data.timestamp || Date.now(),
-              timeframe: data.timeframe || '5m'
-            };
-            
-            setSignals(prev => [newSignal, ...prev.slice(0, 49)]); // Keep last 50 signals
-          }
-        } catch (err) {
-          console.error('Error parsing WebSocket message:', err);
-        }
-      };
-
-      wsRef.current.onclose = () => {
-        console.log('🔄 WebSocket disconnected');
-        setConnected(false);
-        setConnectionStatus('disconnected');
-        
-        // Auto-reconnect after 5 seconds
-        reconnectTimeoutRef.current = setTimeout(() => {
-          connect();
-        }, 5000);
-      };
-
-      wsRef.current.onerror = (error) => {
-        console.error('🔄 WebSocket error:', error);
-        setConnected(false);
-        setConnectionStatus('error');
-        setError('WebSocket connection failed');
-      };
-
+      }
     } catch (err) {
-      console.error('🔄 Failed to create WebSocket:', err);
+      console.error('Error fetching signals:', err);
+      setConnected(false);
       setConnectionStatus('error');
-      setError('Failed to create WebSocket connection');
+      setError('Failed to fetch signals');
     }
+  };
+
+  const connect = () => {
+    fetchSignals();
   };
 
   const disconnect = () => {
@@ -109,10 +73,17 @@ export function useRealTime(): UseRealTimeReturn {
   };
 
   useEffect(() => {
-    connect();
-
+    // Initial fetch
+    fetchSignals();
+    
+    // Poll for new signals every 10 seconds
+    const intervalId = setInterval(fetchSignals, 10000);
+    
     return () => {
-      disconnect();
+      clearInterval(intervalId);
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, []);
 
