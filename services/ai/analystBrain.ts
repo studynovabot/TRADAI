@@ -100,19 +100,68 @@ EXPLANATION: [your analysis]
     } catch (error) {
       console.error('❌ Analyst Brain error:', error);
       
-      // Fallback analysis if AI fails
+      // Enhanced fallback analysis if AI fails
       const latest = marketData[marketData.length - 1];
       const previous = marketData[marketData.length - 2];
       const priceChange = ((latest.close - previous.close) / previous.close) * 100;
       
-      const direction = priceChange > 0 ? 'BUY' : 'SELL';
-      const confidence = 0.65;
+      // Use technical indicators for better fallback decision
+      let direction: 'BUY' | 'SELL';
+      let confidence = 0.60;
+      let explanation = 'Fallback technical analysis: ';
+      
+      // Simple multi-indicator fallback logic
+      let bullishSignals = 0;
+      let bearishSignals = 0;
+      
+      // RSI signal
+      if (indicators.rsi < 30) {
+        bullishSignals++;
+        explanation += 'RSI oversold, ';
+      } else if (indicators.rsi > 70) {
+        bearishSignals++;
+        explanation += 'RSI overbought, ';
+      }
+      
+      // MACD signal
+      if (indicators.macd.macd > indicators.macd.signal) {
+        bullishSignals++;
+        explanation += 'MACD bullish, ';
+      } else {
+        bearishSignals++;
+        explanation += 'MACD bearish, ';
+      }
+      
+      // Price vs EMA
+      if (latest.close > indicators.ema.ema20) {
+        bullishSignals++;
+        explanation += 'Price above EMA20, ';
+      } else {
+        bearishSignals++;
+        explanation += 'Price below EMA20, ';
+      }
+      
+      // Final decision
+      if (bullishSignals > bearishSignals) {
+        direction = 'BUY';
+        confidence = Math.min(0.60 + (bullishSignals * 0.05), 0.75);
+      } else if (bearishSignals > bullishSignals) {
+        direction = 'SELL';
+        confidence = Math.min(0.60 + (bearishSignals * 0.05), 0.75);
+      } else {
+        // Tie - use price momentum
+        direction = priceChange > 0 ? 'BUY' : 'SELL';
+        confidence = 0.55;
+        explanation += 'using price momentum as tiebreaker';
+      }
+      
+      explanation = explanation.replace(/, $/, '') + ' (AI service unavailable)';
       
       return {
         direction,
         confidence,
-        explanation: 'Fallback analysis based on price movement due to AI service unavailability',
-        raw_response: 'AI service temporarily unavailable'
+        explanation,
+        raw_response: 'AI service temporarily unavailable - using technical fallback'
       };
     }
   }

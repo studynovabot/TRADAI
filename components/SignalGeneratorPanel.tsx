@@ -66,11 +66,15 @@ export function SignalGeneratorPanel() {
         throw new Error(data.error || 'Failed to generate signal');
       }
 
+      // Our new API always returns a signal
       if (data.signal) {
         setCurrentSignal(data);
         updateCurrentSignal(data); // Update for TradeLogPanel
+      } else if (data.message) {
+        // Handle old format for backward compatibility
+        setError(data.message);
       } else {
-        setError(data.message || 'No signal generated - AI brains disagreed');
+        setError('Unexpected response format from signal generator');
       }
 
     } catch (error) {

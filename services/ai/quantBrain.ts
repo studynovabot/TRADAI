@@ -85,17 +85,29 @@ export class QuantBrain {
       let direction: 'BUY' | 'SELL';
       let confidence: number;
       
+      const totalScore = bullishScore + bearishScore;
+      
       if (bullishScore > bearishScore) {
         direction = 'BUY';
-        confidence = Math.min((bullishScore / (bullishScore + bearishScore)) * 100, 95) / 100;
-      } else {
+        confidence = Math.min((bullishScore / totalScore), 0.95);
+      } else if (bearishScore > bullishScore) {
         direction = 'SELL';
-        confidence = Math.min((bearishScore / (bullishScore + bearishScore)) * 100, 95) / 100;
+        confidence = Math.min((bearishScore / totalScore), 0.95);
+      } else {
+        // Equal scores - use price momentum as tiebreaker
+        direction = priceChange > 0 ? 'BUY' : 'SELL';
+        confidence = 0.55; // Low confidence for tie situations
       }
       
-      // Apply minimum confidence threshold
-      if (confidence < 0.65) {
-        confidence = 0.65;
+      // Ensure confidence is within reasonable bounds
+      confidence = Math.max(Math.min(confidence, 0.95), 0.55);
+      
+      // Boost confidence based on score difference
+      const scoreDifference = Math.abs(bullishScore - bearishScore);
+      if (scoreDifference >= 3) {
+        confidence = Math.min(confidence * 1.1, 0.95);
+      } else if (scoreDifference >= 2) {
+        confidence = Math.min(confidence * 1.05, 0.90);
       }
       
       console.log(`🧮 Quant Brain: ${direction} (${Math.round(confidence * 100)}%) - Bull: ${bullishScore}, Bear: ${bearishScore}`);

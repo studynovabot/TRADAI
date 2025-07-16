@@ -55,10 +55,13 @@ export default async function handler(
     }
 
     console.log(`🔍 Generating signal for ${symbol} on ${timeframe} for ${trade_duration}`);
+    console.log(`📊 API Keys configured: TWELVE_DATA=${!!process.env.TWELVE_DATA_API_KEY}, GROQ=${!!process.env.GROQ_API_KEY}`);
 
     // 1. Fetch market data
     const twelveData = new TwelveDataService();
     const marketData = await twelveData.getOHLCV(symbol, timeframe, 100);
+    
+    console.log(`📈 Market data fetched: ${marketData.length} candles, latest price: ${marketData[marketData.length - 1]?.close}`);
     
     if (!marketData || marketData.length === 0) {
       res.status(400).json({ 
@@ -70,6 +73,8 @@ export default async function handler(
     // 2. Calculate technical indicators
     const technicalAnalyzer = new TechnicalAnalyzer();
     const indicators = await technicalAnalyzer.analyzeMarket(marketData);
+    
+    console.log(`📊 Technical indicators calculated: RSI=${indicators.rsi?.toFixed(1)}, MACD=${indicators.macd?.macd?.toFixed(4)}, EMA20=${indicators.ema?.ema20?.toFixed(4)}`);
 
     // 3. Run through 3-Brain AI System
     console.log('🧮 Running Quant Brain analysis...');
@@ -84,39 +89,69 @@ export default async function handler(
     const reflexBrain = new ReflexBrain();
     const reflexResult = await reflexBrain.analyze(quantResult, analystResult, indicators);
 
-    // 4. Check if all brains agree
-    if (reflexResult.approved && quantResult.direction === analystResult.direction) {
-      const response: GenerateSignalResponse = {
-        signal: quantResult.direction,
-        confidence: Math.round((quantResult.confidence + analystResult.confidence) / 2 * 100) / 100,
-        reason: analystResult.explanation,
-        indicators: {
-          rsi: indicators.rsi,
-          macd: indicators.macd,
-          ema: indicators.ema,
-          bb: indicators.bollinger,
-          volume: indicators.volume,
-          volatility: indicators.volatility,
-          pattern: indicators.pattern
-        },
-        symbol,
-        timeframe,
-        trade_duration,
-        timestamp: new Date().toISOString()
-      };
+    // 4. Enhanced signal generation logic - Always generate a signal with proper confidence
+    let finalSignal: 'BUY' | 'SELL';
+    let finalConfidence: number;
+    let finalReason: string;
+    let signalQuality: string;
 
-      console.log('✅ Signal generated successfully:', response.signal, response.confidence);
-      res.status(200).json(response);
+    // Check if both main brains agree
+    if (quantResult.direction === analystResult.direction) {
+      // Both brains agree - high quality signal
+      finalSignal = quantResult.direction;
+      finalConfidence = Math.round((quantResult.confidence + analystResult.confidence) / 2 * 100) / 100;
+      finalReason = `${analystResult.explanation} | Technical confluence: ${quantResult.bullishScore > quantResult.bearishScore ? 'Bullish' : 'Bearish'} (${quantResult.bullishScore}:${quantResult.bearishScore})`;
+      signalQuality = reflexResult.approved ? 'HIGH' : 'MEDIUM';
+      
+      // Boost confidence if reflex brain also approves
+      if (reflexResult.approved) {
+        finalConfidence = Math.min(finalConfidence * 1.1, 0.95);
+      }
     } else {
-      console.log('❌ No signal - AI brains disagreed');
-      res.status(200).json({
-        message: 'No signal generated due to AI disagreement',
-        symbol,
-        timeframe,
-        trade_duration,
-        timestamp: new Date().toISOString()
-      });
+      // Brains disagree - use the one with higher confidence
+      if (quantResult.confidence > analystResult.confidence) {
+        finalSignal = quantResult.direction;
+        finalConfidence = Math.max(quantResult.confidence * 0.8, 0.60); // Reduce confidence due to disagreement
+        finalReason = `Technical analysis suggests ${quantResult.direction} (Quant: ${Math.round(quantResult.confidence * 100)}% vs Analyst: ${Math.round(analystResult.confidence * 100)}%). ${analystResult.explanation}`;
+      } else {
+        finalSignal = analystResult.direction;
+        finalConfidence = Math.max(analystResult.confidence * 0.8, 0.60); // Reduce confidence due to disagreement
+        finalReason = `Market analysis suggests ${analystResult.direction} (Analyst: ${Math.round(analystResult.confidence * 100)}% vs Quant: ${Math.round(quantResult.confidence * 100)}%). ${analystResult.explanation}`;
+      }
+      signalQuality = 'LOW';
     }
+
+    // Apply minimum confidence floor
+    finalConfidence = Math.max(finalConfidence, 0.55);
+
+    // Generate response with signal
+    const response: GenerateSignalResponse = {
+      signal: finalSignal,
+      confidence: Math.round(finalConfidence * 100) / 100,
+      reason: `[${signalQuality} QUALITY] ${finalReason}`,
+      indicators: {
+        rsi: indicators.rsi,
+        macd: indicators.macd,
+        ema: indicators.ema,
+        bb: indicators.bollinger,
+        volume: indicators.volume,
+        volatility: indicators.volatility,
+        pattern: indicators.pattern,
+        quant_analysis: quantResult.analysis,
+        signal_quality: signalQuality,
+        brain_agreement: quantResult.direction === analystResult.direction,
+        reflex_approved: reflexResult.approved
+      },
+      symbol,
+      timeframe,
+      trade_duration,
+      timestamp: new Date().toISOString()
+    };
+
+    console.log(`✅ Signal generated: ${response.signal} (${Math.round(finalConfidence * 100)}%) - Quality: ${signalQuality}`);
+    console.log(`🧠 Brain Agreement: ${quantResult.direction === analystResult.direction ? 'YES' : 'NO'} | Reflex: ${reflexResult.approved ? 'APPROVED' : 'REJECTED'}`);
+    
+    res.status(200).json(response);
 
   } catch (error) {
     console.error('❌ Error generating signal:', error);

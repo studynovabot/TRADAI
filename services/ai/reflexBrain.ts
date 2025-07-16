@@ -71,9 +71,9 @@ Reason: [brief explanation]
       const reasonMatch = response.match(/Reason:\s*(.+)/i);
       const reason = reasonMatch ? reasonMatch[1].trim() : 'No specific reason provided';
 
-      // Additional safety checks
+      // Additional safety checks - More lenient thresholds
       const avgConfidence = (quantResult.confidence + analystResult.confidence) / 2;
-      const safetyApproved = approved && avgConfidence >= 0.70;
+      const safetyApproved = approved && avgConfidence >= 0.60; // Reduced from 0.70 to 0.60
 
       console.log(`⚡ Reflex Brain: ${safetyApproved ? 'APPROVED' : 'REJECTED'} - ${reason}`);
       console.log(`🎯 Combined confidence: ${Math.round(avgConfidence * 100)}%`);
@@ -89,13 +89,13 @@ Reason: [brief explanation]
     } catch (error) {
       console.error('❌ Reflex Brain error:', error);
       
-      // Fallback: only approve if both brains agree and confidence is high
+      // Fallback: more lenient approval criteria
       const avgConfidence = (quantResult.confidence + analystResult.confidence) / 2;
-      const fallbackApproved = quantResult.direction === analystResult.direction && avgConfidence >= 0.75;
+      const fallbackApproved = quantResult.direction === analystResult.direction && avgConfidence >= 0.65; // Reduced from 0.75 to 0.65
       
       return {
         approved: fallbackApproved,
-        reason: 'Fallback decision due to AI service unavailability',
+        reason: 'Fallback decision due to AI service unavailability - using technical consensus',
         confidence: avgConfidence,
         final_decision: fallbackApproved ? 'APPROVE' : 'REJECT',
         raw_response: 'AI service temporarily unavailable'

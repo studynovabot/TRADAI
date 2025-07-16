@@ -54,21 +54,25 @@ export class TechnicalAnalyzer {
       const pattern = this.detectPattern(marketData.slice(-5));
       
       return {
-        rsi: currentRSI,
-        macd: currentMACD,
+        rsi: currentRSI || 50, // Default to neutral if calculation fails
+        macd: currentMACD || { macd: 0, signal: 0, histogram: 0 },
         ema: {
-          ema20: currentEMA20,
-          ema50: currentEMA50
+          ema20: currentEMA20 || closes[closes.length - 1],
+          ema50: currentEMA50 || closes[closes.length - 1]
         },
-        bollinger: currentBB,
+        bollinger: currentBB || { 
+          upper: closes[closes.length - 1] * 1.02, 
+          middle: closes[closes.length - 1], 
+          lower: closes[closes.length - 1] * 0.98 
+        },
         volume: {
-          current: currentVolume,
-          average: avgVolume,
+          current: currentVolume || 0,
+          average: avgVolume || 0,
           trend: volumeTrend,
-          ratio: currentVolume / avgVolume
+          ratio: currentVolume && avgVolume ? currentVolume / avgVolume : 1
         },
-        volatility,
-        pattern
+        volatility: volatility || 1.0,
+        pattern: pattern || null
       };
       
     } catch (error) {
