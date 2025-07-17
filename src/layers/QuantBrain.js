@@ -2,8 +2,8 @@
  * Quant Brain - Layer 1: ML-Based Prediction Engine
  * 
  * This module implements the first layer of the 3-layer AI trading system.
- * It uses machine learning models (XGBoost, LightGBM, Neural Networks) to predict
- * market direction based on technical indicators and candlestick patterns.
+ * It uses an advanced signal engine with multi-factor confluence, market regime detection,
+ * and adaptive filter weighting to generate high-confidence trading signals.
  */
 
 const { Logger } = require('../utils/Logger');
@@ -19,6 +19,7 @@ const {
 } = require('technicalindicators');
 const { CandlestickPatterns } = require('../utils/CandlestickPatterns');
 const { SimpleRealML } = require('../ml/SimpleRealML');
+const { SignalEngine } = require('../engines/signalEngine');
 const fs = require('fs-extra');
 const path = require('path');
 
@@ -28,7 +29,10 @@ class QuantBrain {
     this.logger = Logger.getInstanceSync();
     this.patterns = new CandlestickPatterns();
     
-    // Initialize real ML models
+    // Initialize advanced signal engine
+    this.signalEngine = new SignalEngine(config);
+    
+    // Initialize real ML models (as fallback)
     this.realMLModels = new SimpleRealML(config, this.logger);
     this.useRealML = true; // Flag to switch between real and simulated ML
     
@@ -74,43 +78,91 @@ class QuantBrain {
         throw new Error('Invalid or insufficient market data');
       }
       
-      // Extract comprehensive features
+      // Use the advanced signal engine to generate a signal
+      const signal = await this.signalEngine.generateSignal(marketData);
+      
+      // Extract comprehensive features (still needed for Analyst Brain)
       const features = await this.extractFeatures(marketData);
       
-      // Get predictions from all models
-      const predictions = await this.getModelPredictions(features);
-      
-      // Ensemble the predictions
-      const finalPrediction = this.ensemblePredictions(predictions);
-      
-      // Calculate confidence and risk metrics
-      const confidence = this.calculateConfidence(predictions, features);
-      const riskScore = this.calculateRiskScore(features);
-      const uncertainty = this.calculateUncertainty(predictions, features);
-      
-      const processingTime = Date.now() - startTime;
-      
-      const result = {
-        direction: finalPrediction > 0.5 ? 'UP' : 'DOWN',
-        confidence: confidence,
-        riskScore: riskScore,
-        uncertainty: uncertainty,
-        rawPrediction: finalPrediction,
-        features: features,
-        modelPredictions: predictions,
-        processingTime: processingTime,
-        timestamp: new Date().toISOString(),
-        currencyPair: marketData.currencyPair || this.config.currencyPair
-      };
-      
-      this.logger.info(`🔮 QuantBrain prediction: ${result.direction} (${(result.confidence * 100).toFixed(1)}% conf, ${(result.riskScore * 100).toFixed(1)}% risk)`);
-      
-      return result;
+      // If signal is valid, use it for prediction
+      if (signal.execute) {
+        const processingTime = Date.now() - startTime;
+        
+        const result = {
+          direction: signal.direction,
+          confidence: signal.confidence,
+          riskScore: this.calculateRiskScoreFromSignal(signal),
+          uncertainty: 1 - signal.confidence,
+          rawPrediction: signal.direction === 'UP' ? 0.75 : 0.25, // For compatibility
+          features: features,
+          signal: signal, // Include the full signal data
+          processingTime: processingTime,
+          timestamp: new Date().toISOString(),
+          currencyPair: marketData.currencyPair || this.config.currencyPair,
+          setupTag: signal.setupTag,
+          regime: signal.regime
+        };
+        
+        this.logger.info(`🔮 QuantBrain prediction: ${result.direction} (${(result.confidence * 100).toFixed(1)}% conf) - ${signal.setupTag} in ${signal.regime} regime`);
+        
+        return result;
+      } 
+      // Fallback to legacy prediction method if signal engine doesn't produce a valid signal
+      else {
+        this.logger.warn('⚠️ Signal engine did not produce a valid signal, falling back to legacy prediction');
+        
+        // Get predictions from all models
+        const predictions = await this.getModelPredictions(features);
+        
+        // Ensemble the predictions
+        const finalPrediction = this.ensemblePredictions(predictions);
+        
+        // Calculate confidence and risk metrics
+        const confidence = this.calculateConfidence(predictions, features);
+        const riskScore = this.calculateRiskScore(features);
+        const uncertainty = this.calculateUncertainty(predictions, features);
+        
+        const processingTime = Date.now() - startTime;
+        
+        const result = {
+          direction: finalPrediction > 0.5 ? 'UP' : 'DOWN',
+          confidence: confidence,
+          riskScore: riskScore,
+          uncertainty: uncertainty,
+          rawPrediction: finalPrediction,
+          features: features,
+          modelPredictions: predictions,
+          processingTime: processingTime,
+          timestamp: new Date().toISOString(),
+          currencyPair: marketData.currencyPair || this.config.currencyPair,
+          fallback: true // Indicate this is a fallback prediction
+        };
+        
+        this.logger.info(`🔮 QuantBrain fallback prediction: ${result.direction} (${(result.confidence * 100).toFixed(1)}% conf, ${(result.riskScore * 100).toFixed(1)}% risk)`);
+        
+        return result;
+      }
       
     } catch (error) {
       this.logger.error('❌ QuantBrain prediction failed:', error);
       throw error;
     }
+  }
+  
+  /**
+   * Calculate risk score from signal data
+   */
+  calculateRiskScoreFromSignal(signal) {
+    // If signal has a risk assessment, use it
+    if (signal.riskAssessment && typeof signal.riskAssessment.riskScore === 'number') {
+      return signal.riskAssessment.riskScore;
+    }
+    
+    // Otherwise calculate based on confidence and contradictions
+    const baseRisk = 1 - signal.confidence;
+    const contradictionFactor = signal.contradictions ? signal.contradictions * 0.1 : 0;
+    
+    return Math.min(0.9, Math.max(0.1, baseRisk + contradictionFactor));
   }
 
   /**

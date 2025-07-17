@@ -1,11 +1,38 @@
 /**
- * CandlestickPatterns - Advanced Pattern Recognition
+ * CandlestickPatterns - Enhanced Pattern Recognition
  * 
  * Detects various candlestick patterns for technical analysis
+ * with strength assessment for high-confidence trading signals
  */
 
 class CandlestickPatterns {
   constructor() {
+    // Pattern detection thresholds
+    this.thresholds = {
+      doji: {
+        bodyToRangeRatio: 0.1, // Max body size as percentage of range
+        minRange: 0.0005 // Minimum range to avoid noise
+      },
+      hammer: {
+        bodyToRangeRatio: 0.3, // Max body size as percentage of range
+        lowerShadowRatio: 2.0, // Lower shadow must be at least 2x body
+        upperShadowRatio: 0.5 // Upper shadow must be at most 0.5x body
+      },
+      shootingStar: {
+        bodyToRangeRatio: 0.3, // Max body size as percentage of range
+        upperShadowRatio: 2.0, // Upper shadow must be at least 2x body
+        lowerShadowRatio: 0.5 // Lower shadow must be at most 0.5x body
+      },
+      engulfing: {
+        minBodySize: 0.0005, // Minimum body size to be significant
+        minEngulfRatio: 1.1 // Current body must engulf previous by at least 110%
+      },
+      marubozu: {
+        bodyToRangeRatio: 0.8, // Body must be at least 80% of range
+        minBodySize: 0.001 // Minimum body size to be significant
+      }
+    };
+    
     this.patterns = {
       // Single candle patterns
       doji: this.isDoji.bind(this),
@@ -25,7 +52,7 @@ class CandlestickPatterns {
   }
   
   /**
-   * Detect all patterns in market data
+   * Detect all patterns in market data with enhanced confidence scoring
    */
   detectPatterns(marketData) {
     if (!marketData || marketData.length < 3) {
@@ -33,80 +60,211 @@ class CandlestickPatterns {
         detected: [],
         bullishCount: 0,
         bearishCount: 0,
-        summary: 'Insufficient data for pattern detection'
+        summary: 'Insufficient data for pattern detection',
+        mainPattern: null
       };
     }
     
     const detected = [];
     let bullishCount = 0;
     let bearishCount = 0;
+    let strongestPattern = null;
+    let highestStrength = 0;
     
     // Check single candle patterns (last candle)
     const lastCandle = marketData[marketData.length - 1];
+    const prevCandle = marketData[marketData.length - 2];
     
+    // Enhanced Doji detection
     if (this.isDoji(lastCandle)) {
-      detected.push({ pattern: 'Doji', type: 'NEUTRAL', strength: 'MODERATE' });
-    }
-    
-    if (this.isHammer(lastCandle)) {
-      detected.push({ pattern: 'Hammer', type: 'BULLISH', strength: 'STRONG' });
-      bullishCount++;
-    }
-
-    if (this.isInvertedHammer(lastCandle)) {
-      detected.push({ pattern: 'Inverted Hammer', type: 'BULLISH', strength: 'MODERATE' });
-      bullishCount++;
-    }
-
-    if (this.isShootingStar(lastCandle)) {
-      detected.push({ pattern: 'Shooting Star', type: 'BEARISH', strength: 'STRONG' });
-      bearishCount++;
-    }
-
-    if (this.isMarubozu(lastCandle)) {
-      const marubozu = this.getMarubozuType(lastCandle);
-      detected.push({
-        pattern: `${marubozu.type} Marubozu`,
-        type: marubozu.signal,
-        strength: 'STRONG'
+      const dojiType = this.getDojiType(lastCandle);
+      const dojiStrength = dojiType.includes('Long-legged') ? 0.7 : 
+                          dojiType.includes('Dragonfly') ? 0.75 : 
+                          dojiType.includes('Gravestone') ? 0.75 : 0.6;
+      
+      const dojiDirection = dojiType.includes('Dragonfly') ? 'BULLISH' : 
+                           dojiType.includes('Gravestone') ? 'BEARISH' : 'NEUTRAL';
+      
+      detected.push({ 
+        pattern: dojiType, 
+        type: dojiDirection, 
+        strength: dojiStrength 
       });
-      if (marubozu.signal === 'BULLISH') bullishCount++;
-      else bearishCount++;
+      
+      if (dojiStrength > highestStrength) {
+        strongestPattern = {
+          type: 'doji',
+          subType: dojiType.toLowerCase().replace(' ', '_'),
+          strength: dojiStrength,
+          direction: dojiDirection.toLowerCase()
+        };
+        highestStrength = dojiStrength;
+      }
     }
     
-    if (this.isInvertedHammer(lastCandle)) {
-      detected.push({ pattern: 'Inverted Hammer', type: 'BULLISH', strength: 'MODERATE' });
+    // Enhanced Hammer detection
+    if (this.isHammer(lastCandle)) {
+      // Check for downtrend context for stronger signal
+      const inDowntrend = prevCandle && prevCandle.close < prevCandle.open;
+      const hammerStrength = inDowntrend ? 0.85 : 0.75;
+      
+      detected.push({ 
+        pattern: 'Hammer', 
+        type: 'BULLISH', 
+        strength: hammerStrength 
+      });
       bullishCount++;
+      
+      if (hammerStrength > highestStrength) {
+        strongestPattern = {
+          type: 'hammer',
+          strength: hammerStrength,
+          direction: 'bullish'
+        };
+        highestStrength = hammerStrength;
+      }
     }
-    
+
+    // Enhanced Inverted Hammer detection
+    if (this.isInvertedHammer(lastCandle)) {
+      // Check for downtrend context for stronger signal
+      const inDowntrend = prevCandle && prevCandle.close < prevCandle.open;
+      const invHammerStrength = inDowntrend ? 0.75 : 0.65;
+      
+      detected.push({ 
+        pattern: 'Inverted Hammer', 
+        type: 'BULLISH', 
+        strength: invHammerStrength 
+      });
+      bullishCount++;
+      
+      if (invHammerStrength > highestStrength) {
+        strongestPattern = {
+          type: 'inverted_hammer',
+          strength: invHammerStrength,
+          direction: 'bullish'
+        };
+        highestStrength = invHammerStrength;
+      }
+    }
+
+    // Enhanced Shooting Star detection
     if (this.isShootingStar(lastCandle)) {
-      detected.push({ pattern: 'Shooting Star', type: 'BEARISH', strength: 'STRONG' });
+      // Check for uptrend context for stronger signal
+      const inUptrend = prevCandle && prevCandle.close > prevCandle.open;
+      const shootingStarStrength = inUptrend ? 0.85 : 0.75;
+      
+      detected.push({ 
+        pattern: 'Shooting Star', 
+        type: 'BEARISH', 
+        strength: shootingStarStrength 
+      });
       bearishCount++;
+      
+      if (shootingStarStrength > highestStrength) {
+        strongestPattern = {
+          type: 'shooting_star',
+          strength: shootingStarStrength,
+          direction: 'bearish'
+        };
+        highestStrength = shootingStarStrength;
+      }
     }
-    
+
+    // Enhanced Marubozu detection
     const marubozuResult = this.isMarubozu(lastCandle);
     if (marubozuResult) {
+      const marubozuStrength = 0.85; // Strong signal
+      
       detected.push({ 
         pattern: `${marubozuResult} Marubozu`, 
         type: marubozuResult === 'Bullish' ? 'BULLISH' : 'BEARISH', 
-        strength: 'STRONG' 
+        strength: marubozuStrength 
       });
+      
       if (marubozuResult === 'Bullish') bullishCount++;
       else bearishCount++;
+      
+      if (marubozuStrength > highestStrength) {
+        strongestPattern = {
+          type: 'marubozu',
+          subType: marubozuResult.toLowerCase(),
+          strength: marubozuStrength,
+          direction: marubozuResult.toLowerCase()
+        };
+        highestStrength = marubozuStrength;
+      }
     }
     
     // Check two candle patterns
     if (marketData.length >= 2) {
-      const prevCandle = marketData[marketData.length - 2];
-      
-      if (this.isBullishEngulfing(prevCandle, lastCandle)) {
-        detected.push({ pattern: 'Bullish Engulfing', type: 'BULLISH', strength: 'VERY_STRONG' });
+      // Enhanced Bullish Engulfing detection
+      if (this.isBullishEngulfing([prevCandle, lastCandle])) {
+        const engulfingStrength = 0.9; // Very strong signal
+        
+        detected.push({ 
+          pattern: 'Bullish Engulfing', 
+          type: 'BULLISH', 
+          strength: engulfingStrength 
+        });
         bullishCount++;
+        
+        if (engulfingStrength > highestStrength) {
+          strongestPattern = {
+            type: 'engulfing',
+            subType: 'bullish',
+            strength: engulfingStrength,
+            direction: 'bullish'
+          };
+          highestStrength = engulfingStrength;
+        }
       }
       
-      if (this.isBearishEngulfing(prevCandle, lastCandle)) {
-        detected.push({ pattern: 'Bearish Engulfing', type: 'BEARISH', strength: 'VERY_STRONG' });
+      // Enhanced Bearish Engulfing detection
+      if (this.isBearishEngulfing([prevCandle, lastCandle])) {
+        const engulfingStrength = 0.9; // Very strong signal
+        
+        detected.push({ 
+          pattern: 'Bearish Engulfing', 
+          type: 'BEARISH', 
+          strength: engulfingStrength 
+        });
         bearishCount++;
+        
+        if (engulfingStrength > highestStrength) {
+          strongestPattern = {
+            type: 'engulfing',
+            subType: 'bearish',
+            strength: engulfingStrength,
+            direction: 'bearish'
+          };
+          highestStrength = engulfingStrength;
+        }
+      }
+      
+      // Check for Harami pattern
+      if (this.isHarami([prevCandle, lastCandle])) {
+        const haramiType = lastCandle.close > lastCandle.open ? 'Bullish' : 'Bearish';
+        const haramiStrength = 0.7;
+        
+        detected.push({ 
+          pattern: `${haramiType} Harami`, 
+          type: haramiType === 'Bullish' ? 'BULLISH' : 'BEARISH', 
+          strength: haramiStrength 
+        });
+        
+        if (haramiType === 'Bullish') bullishCount++;
+        else bearishCount++;
+        
+        if (haramiStrength > highestStrength) {
+          strongestPattern = {
+            type: 'harami',
+            subType: haramiType.toLowerCase(),
+            strength: haramiStrength,
+            direction: haramiType.toLowerCase()
+          };
+          highestStrength = haramiStrength;
+        }
       }
     }
     
@@ -114,14 +272,88 @@ class CandlestickPatterns {
     if (marketData.length >= 3) {
       const threeCandles = marketData.slice(-3);
       
+      // Enhanced Morning Star detection
       if (this.isMorningStar(threeCandles)) {
-        detected.push({ pattern: 'Morning Star', type: 'BULLISH', strength: 'VERY_STRONG' });
+        const morningStarStrength = 0.95; // Extremely strong signal
+        
+        detected.push({ 
+          pattern: 'Morning Star', 
+          type: 'BULLISH', 
+          strength: morningStarStrength 
+        });
         bullishCount++;
+        
+        if (morningStarStrength > highestStrength) {
+          strongestPattern = {
+            type: 'morning_star',
+            strength: morningStarStrength,
+            direction: 'bullish'
+          };
+          highestStrength = morningStarStrength;
+        }
       }
       
+      // Enhanced Evening Star detection
       if (this.isEveningStar(threeCandles)) {
-        detected.push({ pattern: 'Evening Star', type: 'BEARISH', strength: 'VERY_STRONG' });
+        const eveningStarStrength = 0.95; // Extremely strong signal
+        
+        detected.push({ 
+          pattern: 'Evening Star', 
+          type: 'BEARISH', 
+          strength: eveningStarStrength 
+        });
         bearishCount++;
+        
+        if (eveningStarStrength > highestStrength) {
+          strongestPattern = {
+            type: 'evening_star',
+            strength: eveningStarStrength,
+            direction: 'bearish'
+          };
+          highestStrength = eveningStarStrength;
+        }
+      }
+      
+      // Check for Three White Soldiers
+      if (this.isThreeWhiteSoldiers(threeCandles)) {
+        const threeWhiteSoldiersStrength = 0.9;
+        
+        detected.push({ 
+          pattern: 'Three White Soldiers', 
+          type: 'BULLISH', 
+          strength: threeWhiteSoldiersStrength 
+        });
+        bullishCount++;
+        
+        if (threeWhiteSoldiersStrength > highestStrength) {
+          strongestPattern = {
+            type: 'three_white_soldiers',
+            strength: threeWhiteSoldiersStrength,
+            direction: 'bullish'
+          };
+          highestStrength = threeWhiteSoldiersStrength;
+        }
+      }
+      
+      // Check for Three Black Crows
+      if (this.isThreeBlackCrows(threeCandles)) {
+        const threeBlackCrowsStrength = 0.9;
+        
+        detected.push({ 
+          pattern: 'Three Black Crows', 
+          type: 'BEARISH', 
+          strength: threeBlackCrowsStrength 
+        });
+        bearishCount++;
+        
+        if (threeBlackCrowsStrength > highestStrength) {
+          strongestPattern = {
+            type: 'three_black_crows',
+            strength: threeBlackCrowsStrength,
+            direction: 'bearish'
+          };
+          highestStrength = threeBlackCrowsStrength;
+        }
       }
     }
     
@@ -129,7 +361,8 @@ class CandlestickPatterns {
       detected: detected,
       bullishCount: bullishCount,
       bearishCount: bearishCount,
-      summary: this.generateSummary(detected, bullishCount, bearishCount)
+      summary: this.generateSummary(detected, bullishCount, bearishCount),
+      mainPattern: strongestPattern
     };
   }
   
@@ -587,20 +820,132 @@ class CandlestickPatterns {
   }
 
   /**
-   * Generate pattern summary
+   * Get the specific type of Doji
+   */
+  getDojiType(candle) {
+    if (!this.isDoji(candle)) return 'Not a Doji';
+    
+    const bodySize = Math.abs(candle.close - candle.open);
+    const upperShadow = candle.high - Math.max(candle.open, candle.close);
+    const lowerShadow = Math.min(candle.open, candle.close) - candle.low;
+    
+    // Long-legged doji (long upper and lower shadows)
+    if (upperShadow > bodySize * 2 && lowerShadow > bodySize * 2) {
+      return 'Long-legged Doji';
+    }
+    
+    // Dragonfly doji (long lower shadow, minimal upper shadow)
+    if (lowerShadow > bodySize * 3 && upperShadow < bodySize) {
+      return 'Dragonfly Doji';
+    }
+    
+    // Gravestone doji (long upper shadow, minimal lower shadow)
+    if (upperShadow > bodySize * 3 && lowerShadow < bodySize) {
+      return 'Gravestone Doji';
+    }
+    
+    // Regular doji
+    return 'Standard Doji';
+  }
+  
+  /**
+   * Check for Three White Soldiers pattern
+   */
+  isThreeWhiteSoldiers(candles) {
+    if (candles.length !== 3) return false;
+    
+    const [first, second, third] = candles;
+    
+    // All three candles must be bullish
+    const allBullish = first.close > first.open && 
+                      second.close > second.open && 
+                      third.close > third.open;
+    
+    if (!allBullish) return false;
+    
+    // Each candle should open within the previous candle's body
+    const properOpens = second.open > first.open && second.open < first.close &&
+                       third.open > second.open && third.open < second.close;
+    
+    // Each candle should close higher than the previous
+    const higherCloses = second.close > first.close && third.close > second.close;
+    
+    // Each candle should have a decent body size
+    const goodBodySizes = (second.close - second.open) >= (second.high - second.low) * 0.6 &&
+                         (third.close - third.open) >= (third.high - third.low) * 0.6;
+    
+    return allBullish && properOpens && higherCloses && goodBodySizes;
+  }
+  
+  /**
+   * Check for Three Black Crows pattern
+   */
+  isThreeBlackCrows(candles) {
+    if (candles.length !== 3) return false;
+    
+    const [first, second, third] = candles;
+    
+    // All three candles must be bearish
+    const allBearish = first.close < first.open && 
+                      second.close < second.open && 
+                      third.close < third.open;
+    
+    if (!allBearish) return false;
+    
+    // Each candle should open within the previous candle's body
+    const properOpens = second.open < first.open && second.open > first.close &&
+                       third.open < second.open && third.open > second.close;
+    
+    // Each candle should close lower than the previous
+    const lowerCloses = second.close < first.close && third.close < second.close;
+    
+    // Each candle should have a decent body size
+    const goodBodySizes = (second.open - second.close) >= (second.high - second.low) * 0.6 &&
+                         (third.open - third.close) >= (third.high - third.low) * 0.6;
+    
+    return allBearish && properOpens && lowerCloses && goodBodySizes;
+  }
+
+  /**
+   * Generate pattern summary with enhanced details
    */
   generateSummary(detected, bullishCount, bearishCount) {
     if (detected.length === 0) {
-      return 'No significant patterns detected';
+      return 'No significant candlestick patterns detected.';
     }
     
+    let summary = '';
+    
     if (bullishCount > bearishCount) {
-      return `Bullish patterns dominate (${bullishCount} bullish vs ${bearishCount} bearish)`;
+      summary = `Bullish patterns dominate (${bullishCount} bullish vs ${bearishCount} bearish). `;
     } else if (bearishCount > bullishCount) {
-      return `Bearish patterns dominate (${bearishCount} bearish vs ${bearishCount} bullish)`;
+      summary = `Bearish patterns dominate (${bearishCount} bearish vs ${bullishCount} bullish). `;
+    } else if (bullishCount > 0) {
+      summary = `Mixed signals (${bullishCount} bullish, ${bearishCount} bearish). `;
     } else {
-      return `Mixed signals (${bullishCount} bullish, ${bearishCount} bearish)`;
+      summary = 'Neutral patterns detected. ';
     }
+    
+    // Add strongest pattern
+    if (detected.length > 0) {
+      // Sort patterns by strength
+      const sortedPatterns = [...detected].sort((a, b) => {
+        // Convert string strengths to numeric values for comparison
+        const getStrengthValue = (strength) => {
+          if (typeof strength === 'number') return strength;
+          return strength === 'VERY_STRONG' ? 0.9 : 
+                 strength === 'STRONG' ? 0.8 : 
+                 strength === 'MODERATE' ? 0.7 : 0.6;
+        };
+        
+        return getStrengthValue(b.strength) - getStrengthValue(a.strength);
+      });
+      
+      const strongestPattern = sortedPatterns[0];
+      summary += `Strongest pattern: ${strongestPattern.pattern} (${strongestPattern.type}).`;
+    }
+    
+    return summary;
   }
 }
 

@@ -82,19 +82,19 @@ export default function Home() {
             }}
             transition={{ duration: 8, repeat: Infinity }}
           >
-            🧠 TRADAI
+            🧠 TRADAI PRO
           </motion.h1>
           <motion.p 
             className="text-3xl text-gray-300 mb-2 font-light"
             variants={itemVariants}
           >
-            Next-Gen AI Signal Generator
+            High-Confidence AI Signal Generator
           </motion.p>
           <motion.p 
             className="text-lg text-gray-400 mb-4"
             variants={itemVariants}
           >
-            3-Brain Layered AI System | Manual Decision Support
+            Multi-Timeframe Analysis | Deep Market Confluence
           </motion.p>
           <motion.div 
             className="text-sm text-gray-500 flex items-center justify-center gap-4"
@@ -125,7 +125,7 @@ export default function Home() {
         >
           <h2 className="text-xl font-semibold mb-6 text-white flex items-center">
             <Activity className="mr-3 text-cyan-400" size={24} />
-            AI Brain Status
+            Multi-Timeframe Analysis System
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <motion.div 
@@ -136,7 +136,7 @@ export default function Home() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-blue-400 font-semibold flex items-center">
                   <Brain className="mr-2" size={16} />
-                  Quant Brain
+                  Technical Analysis
                 </span>
                 <motion.div 
                   className="w-3 h-3 bg-green-500 rounded-full"
@@ -144,8 +144,8 @@ export default function Home() {
                   transition={{ duration: 2, repeat: Infinity }}
                 />
               </div>
-              <p className="text-sm text-gray-400">Technical Analysis</p>
-              <p className="text-xs text-gray-500">XGBoost • TabNet • Indicators</p>
+              <p className="text-sm text-gray-400">Indicator Confluence</p>
+              <p className="text-xs text-gray-500">RSI • MACD • EMA • Bollinger • Volume</p>
             </motion.div>
             
             <motion.div 
@@ -156,7 +156,7 @@ export default function Home() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-purple-400 font-semibold flex items-center">
                   <Target className="mr-2" size={16} />
-                  Analyst Brain
+                  Pattern Recognition
                 </span>
                 <motion.div 
                   className="w-3 h-3 bg-green-500 rounded-full"
@@ -164,8 +164,8 @@ export default function Home() {
                   transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
                 />
               </div>
-              <p className="text-sm text-gray-400">LLM Analysis</p>
-              <p className="text-xs text-gray-500">GPT-4 • Claude • Groq</p>
+              <p className="text-sm text-gray-400">Candlestick Patterns</p>
+              <p className="text-xs text-gray-500">Engulfing • Doji • Hammer • Morning Star</p>
             </motion.div>
             
             <motion.div 
@@ -176,7 +176,7 @@ export default function Home() {
               <div className="flex items-center justify-between mb-2">
                 <span className="text-green-400 font-semibold flex items-center">
                   <Zap className="mr-2" size={16} />
-                  Reflex Brain
+                  Timeframe Confluence
                 </span>
                 <motion.div 
                   className="w-3 h-3 bg-green-500 rounded-full"
@@ -184,8 +184,8 @@ export default function Home() {
                   transition={{ duration: 2, repeat: Infinity, delay: 1 }}
                 />
               </div>
-              <p className="text-sm text-gray-400">Decision Filter</p>
-              <p className="text-xs text-gray-500">Llama 3 • Ultra-fast</p>
+              <p className="text-sm text-gray-400">Multiple Timeframes</p>
+              <p className="text-xs text-gray-500">5m • 15m • 30m • 1h • 4h • 1d</p>
             </motion.div>
           </div>
         </motion.div>
@@ -223,7 +223,7 @@ export default function Home() {
               IMPORTANT DISCLAIMER
             </p>
             <p className="text-xs">
-              This is a SIGNAL GENERATION SYSTEM for educational purposes only. 
+              This is a HIGH-CONFIDENCE SIGNAL GENERATION SYSTEM for educational purposes only. 
               It does NOT execute trades automatically. Always verify signals independently.
             </p>
             <motion.p 
@@ -234,11 +234,15 @@ export default function Home() {
             >
               <span className="flex items-center">
                 <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse" />
-                Signal-Only Mode Active
+                Multi-Timeframe Analysis Active
               </span>
               <span className="flex items-center">
                 <div className="w-2 h-2 bg-blue-400 rounded-full mr-2 animate-pulse" />
-                Paper Trading Enabled
+                Deep Market Confluence
+              </span>
+              <span className="flex items-center">
+                <div className="w-2 h-2 bg-purple-400 rounded-full mr-2 animate-pulse" />
+                Real-Time Data
               </span>
             </motion.p>
           </div>

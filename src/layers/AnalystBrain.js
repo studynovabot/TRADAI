@@ -145,9 +145,11 @@ class AnalystBrain {
     const snapshot = {
       signal: {
         asset: quantPrediction.currencyPair || this.config.currencyPair,
-        timeframe: '5M',
+        timeframe: quantPrediction.signal?.regime ? '15M' : '5M', // Use regime timeframe if available
         prediction: quantPrediction.direction,
         confidence: quantPrediction.confidence,
+        setupTag: quantPrediction.setupTag || 'GENERIC_SIGNAL',
+        regime: quantPrediction.regime || 'UNKNOWN',
         riskScore: quantPrediction.riskScore
       },
       multiTimeframeTrend: this.analyzeMultiTimeframeTrend(quantPrediction.features),
@@ -166,14 +168,22 @@ class AnalystBrain {
    * Generate structured prompt for LLM validation
    */
   generateValidationPrompt(quantPrediction, snapshot) {
+    // Include signal engine details if available
+    const signalDetails = quantPrediction.signal ? 
+      `Setup Type: ${snapshot.signal.setupTag}
+Market Regime: ${snapshot.signal.regime}
+Key Filters: ${quantPrediction.signal.keyFactors ? quantPrediction.signal.keyFactors.slice(0, 3).join(', ') : 'N/A'}
+Signal Reasoning: ${quantPrediction.signal.reasoning || 'N/A'}` : '';
+    
     return `You are a highly skilled technical analyst with 20+ years of forex trading experience. Analyze the following trading signal using ONLY technical confluence. No external data allowed.
 
 SIGNAL DETAILS:
 Asset: ${snapshot.signal.asset}
 Timeframe: ${snapshot.signal.timeframe}
-ML Prediction: ${snapshot.signal.prediction}
-ML Confidence: ${(snapshot.signal.confidence * 100).toFixed(1)}%
+Signal Direction: ${snapshot.signal.prediction}
+Signal Confidence: ${(snapshot.signal.confidence * 100).toFixed(1)}%
 Risk Score: ${(snapshot.signal.riskScore * 100).toFixed(1)}%
+${signalDetails}
 
 MULTI-TIMEFRAME ANALYSIS:
 ${this.formatMultiTimeframeAnalysis(snapshot.multiTimeframeTrend)}
