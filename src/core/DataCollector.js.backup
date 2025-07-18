@@ -15,12 +15,7 @@ class DataCollector {
     this.logger = Logger.getInstanceSync();
     this.apiKey = config.twelveDataApiKey;
     this.baseUrl = 'https://api.twelvedata.com';
-    this.useMockData = process.env.FORCE_REAL_DATA === 'true' ? false : (config.useMockData || !this.apiKey);
-    
-    // Log data source mode
-    if (process.env.LOG_DATA_SOURCE === 'true') {
-      console.log(this.useMockData ? '⚠️ DataCollector: MOCK DATA MODE' : '✅ DataCollector: REAL DATA MODE');
-    }
+    this.useMockData = config.useMockData || !this.apiKey;
 
     // Rate limiting (Twelve Data free tier: 800 requests/day)
     this.requestCount = 0;
@@ -124,13 +119,6 @@ class DataCollector {
    * Generate mock market data for testing/demo purposes
    */
   generateMockData(currencyPair, outputsize = 20) {
-    if (process.env.STRICT_REAL_DATA_MODE === 'true') {
-      throw new Error('Mock data generation disabled in strict real data mode');
-    }
-    
-    if (process.env.LOG_DATA_SOURCE === 'true') {
-      console.warn('⚠️ GENERATING MOCK DATA for', currencyPair);
-    }
     const candles = [];
     const basePrice = currencyPair === 'USD/EUR' ? 0.85 : 1.0;
     let currentPrice = basePrice;

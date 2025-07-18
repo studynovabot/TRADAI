@@ -1,0 +1,452 @@
+{
+  "timestamp": "2025-07-18T16:48:19.605Z",
+  "testType": "Actual Web App Signal Trustworthiness Test",
+  "trustworthinessScore": 197.5,
+  "readyForRealMoney": true,
+  "verdict": "READY FOR LIVE TRADING",
+  "results": {
+    "apiTests": {
+      "MarketDataFetcher": {
+        "usesRealData": true,
+        "hasApiIntegration": true,
+        "score": 70,
+        "issues": [
+          "Many mock data references"
+        ],
+        "positives": [
+          "Has API integration",
+          "Has real data enforcement",
+          "Has error handling"
+        ]
+      },
+      "MultiTimeframeAnalysis": {
+        "usesRealData": true,
+        "hasApiIntegration": true,
+        "score": 65,
+        "issues": [],
+        "positives": [
+          "Has API integration",
+          "No mock data references",
+          "Has error handling"
+        ]
+      },
+      "SignalPerformanceTracker": {
+        "usesRealData": false,
+        "hasApiIntegration": false,
+        "score": 35,
+        "issues": [],
+        "positives": [
+          "No mock data references",
+          "Has error handling"
+        ]
+      },
+      "Enhanced Signal API": {
+        "usesRealData": true,
+        "hasApiIntegration": true,
+        "score": 65,
+        "issues": [],
+        "positives": [
+          "Has API integration",
+          "No mock data references",
+          "Has error handling"
+        ]
+      }
+    },
+    "signalQuality": {
+      "USD/EUR_5m": {
+        "signal": {
+          "symbol": "USD/EUR",
+          "signal": "NO TRADE",
+          "confidence": 54,
+          "confidence_threshold_met": false,
+          "reason": "Insufficient confluence across timeframes. Mixed signals detected. Slight bullish bias (50.0%) but insufficient for a high-confidence signal. Analysis based on 4 timeframes (2 bullish, 1 bearish, 1 neutral).",
+          "entry_timeframe": "5m",
+          "trade_duration": "5m",
+          "timestamp": 1752857277126,
+          "generated_at": "2025-07-18T16:47:57.126Z",
+          "candle_timestamp": "2025-07-18T21:15:00.000Z",
+          "entry_price": 0.85960001,
+          "technical_analysis": {
+            "rsi": 69.52156201910164,
+            "macd": {
+              "macd": 0.00040290234698392435,
+              "signal": 0.00040290234698392435,
+              "histogram": 0
+            },
+            "ema": {
+              "ema8": 0.8591731923332976,
+              "ema21": 0.8586952033563162,
+              "ema50": 0.8583881847134207
+            },
+            "bollinger": {
+              "upper": 0.8598207834645807,
+              "middle": 0.8585149875000001,
+              "lower": 0.8572091915354195,
+              "width": 0.002611591929161161,
+              "percentB": 0.9154640270880195
+            },
+            "volume": {
+              "trend": "stable",
+              "change": null,
+              "isSpike": false,
+              "latestVolume": 0,
+              "avgVolume": 0
+            },
+            "supportResistance": {
+              "support": [
+                {
+                  "price": 0.857,
+                  "strength": 6
+                },
+                {
+                  "price": 0.858,
+                  "strength": 34
+                },
+                {
+                  "price": 0.859,
+                  "strength": 9
+                }
+              ],
+              "resistance": [
+                {
+                  "price": 0.86,
+                  "strength": 1
+                }
+              ],
+              "currentPrice": 0.85960001
+            },
+            "atr": 0.0002864634493022476,
+            "stochastic": {
+              "k": 88.33240001866716,
+              "d": 83.33227779888934,
+              "overbought": true,
+              "oversold": false
+            },
+            "ichimoku": {
+              "tenkanSen": 0.859,
+              "kijunSen": 0.85859999,
+              "senkouSpanA": 0.858799995,
+              "senkouSpanB": 0.8581500049999999,
+              "chikouSpan": 0.85960001,
+              "cloudColor": "green",
+              "aboveCloud": true,
+              "belowCloud": false,
+              "inCloud": false,
+              "trend": "strong_bullish"
+            }
+          },
+          "pattern_analysis": {
+            "main_pattern": null,
+            "detected_patterns": [
+              {
+                "pattern": "Bullish Marubozu",
+                "type": "BULLISH",
+                "strength": 0.85
+              }
+            ]
+          },
+          "timeframe_analysis": {
+            "timeframes_analyzed": [
+              "5m",
+              "15m",
+              "30m",
+              "1h"
+            ],
+            "confluence": {
+              "bullishTimeframes": [
+                "5m",
+                "30m"
+              ],
+              "bearishTimeframes": [
+                "1h"
+              ],
+              "neutralTimeframes": [
+                "15m"
+              ]
+            },
+            "bullish_count": 2,
+            "bearish_count": 1
+          },
+          "data_source": "MarketDataFetcher",
+          "candle_count": 100
+        },
+        "usesRealData": true,
+        "quality": {
+          "score": 80,
+          "factors": [
+            "Conservative no-trade signal",
+            "Moderate confidence",
+            "Detailed reasoning provided",
+            "Technical analysis included",
+            "Multi-timeframe analysis",
+            "Fresh data"
+          ],
+          "issues": []
+        }
+      },
+      "GBP/USD_15m": {
+        "signal": {
+          "symbol": "GBP/USD",
+          "signal": "SELL",
+          "confidence": 88,
+          "confidence_threshold_met": true,
+          "reason": "Bearish confluence across multiple timeframes. Evening star pattern detected on 5m timeframe. Analysis based on 4 timeframes (0 bullish, 3 bearish, 1 neutral).",
+          "entry_timeframe": "5m",
+          "trade_duration": "15m",
+          "timestamp": 1752857280036,
+          "generated_at": "2025-07-18T16:48:00.036Z",
+          "candle_timestamp": "2025-07-18T21:15:00.000Z",
+          "entry_price": 1.34223,
+          "technical_analysis": {
+            "rsi": 33.46030181153981,
+            "macd": {
+              "macd": -0.0007060792759547851,
+              "signal": -0.0007060792759547851,
+              "histogram": 0
+            },
+            "ema": {
+              "ema8": 1.3426387948021488,
+              "ema21": 1.3433613719846027,
+              "ema50": 1.3441685223796092
+            },
+            "bollinger": {
+              "upper": 1.3451641916705246,
+              "middle": 1.3434450000000004,
+              "lower": 1.3417258083294763,
+              "width": 0.00343838334104829,
+              "percentB": 0.1466362591118236
+            },
+            "volume": {
+              "trend": "stable",
+              "change": null,
+              "isSpike": false,
+              "latestVolume": 0,
+              "avgVolume": 0
+            },
+            "supportResistance": {
+              "support": [
+                {
+                  "price": 1.34,
+                  "strength": 26
+                }
+              ],
+              "resistance": [
+                {
+                  "price": 1.35,
+                  "strength": 24
+                }
+              ],
+              "currentPrice": 1.34223
+            },
+            "atr": 0.00043305987987593515,
+            "stochastic": {
+              "k": 22.46846821605475,
+              "d": 23.903817227984206,
+              "overbought": false,
+              "oversold": false
+            },
+            "ichimoku": {
+              "tenkanSen": 1.34266,
+              "kijunSen": 1.3435000000000001,
+              "senkouSpanA": 1.34308,
+              "senkouSpanB": 1.344605,
+              "chikouSpan": 1.34223,
+              "cloudColor": "red",
+              "aboveCloud": false,
+              "belowCloud": true,
+              "inCloud": false,
+              "trend": "strong_bearish"
+            }
+          },
+          "pattern_analysis": {
+            "main_pattern": {
+              "type": "evening_star",
+              "strength": 0.95,
+              "direction": "bearish",
+              "timeframe": "5m"
+            },
+            "detected_patterns": [
+              {
+                "pattern": "Bearish Marubozu",
+                "type": "BEARISH",
+                "strength": 0.85
+              },
+              {
+                "pattern": "Evening Star",
+                "type": "BEARISH",
+                "strength": 0.95
+              }
+            ]
+          },
+          "timeframe_analysis": {
+            "timeframes_analyzed": [
+              "5m",
+              "15m",
+              "30m",
+              "1h"
+            ],
+            "confluence": {
+              "bullishTimeframes": [],
+              "bearishTimeframes": [
+                "5m",
+                "15m",
+                "30m"
+              ],
+              "neutralTimeframes": [
+                "1h"
+              ]
+            },
+            "bullish_count": 0,
+            "bearish_count": 3
+          },
+          "data_source": "MarketDataFetcher",
+          "candle_count": 100
+        },
+        "usesRealData": true,
+        "quality": {
+          "score": 100,
+          "factors": [
+            "Valid signal action",
+            "High confidence",
+            "Detailed reasoning provided",
+            "Technical analysis included",
+            "Multi-timeframe analysis",
+            "Fresh data"
+          ],
+          "issues": []
+        }
+      },
+      "USD/JPY_30m": {
+        "signal": {
+          "symbol": "USD/JPY",
+          "signal": "NO TRADE",
+          "confidence": 45,
+          "confidence_threshold_met": false,
+          "reason": "Insufficient confluence across timeframes. Mixed signals detected. Slight bullish bias (50.0%) but insufficient for a high-confidence signal. Analysis based on 4 timeframes (2 bullish, 0 bearish, 2 neutral).",
+          "entry_timeframe": "5m",
+          "trade_duration": "30m",
+          "timestamp": 1752857283093,
+          "generated_at": "2025-07-18T16:48:03.093Z",
+          "candle_timestamp": "2025-07-18T21:15:00.000Z",
+          "entry_price": 148.683,
+          "technical_analysis": {
+            "rsi": 66.35866925803325,
+            "macd": {
+              "macd": 0.06286615631489667,
+              "signal": 0.06286615631489667,
+              "histogram": 0
+            },
+            "ema": {
+              "ema8": 148.63969223989218,
+              "ema21": 148.5710720772728,
+              "ema50": 148.51513090159705
+            },
+            "bollinger": {
+              "upper": 148.74848341703185,
+              "middle": 148.5490515,
+              "lower": 148.34961958296813,
+              "width": 0.39886383406371806,
+              "percentB": 0.8358251326907827
+            },
+            "volume": {
+              "trend": "stable",
+              "change": null,
+              "isSpike": false,
+              "latestVolume": 0,
+              "avgVolume": 0
+            },
+            "supportResistance": {
+              "support": [
+                {
+                  "price": 148,
+                  "strength": 35
+                }
+              ],
+              "resistance": [
+                {
+                  "price": 149,
+                  "strength": 15
+                }
+              ],
+              "currentPrice": 148.683
+            },
+            "atr": 0.06575681057965736,
+            "stochastic": {
+              "k": 84.2331233948372,
+              "d": 80.95222909144269,
+              "overbought": true,
+              "oversold": false
+            },
+            "ichimoku": {
+              "tenkanSen": 148.63150000000002,
+              "kijunSen": 148.536,
+              "senkouSpanA": 148.58375,
+              "senkouSpanB": 148.44699500000002,
+              "chikouSpan": 148.683,
+              "cloudColor": "green",
+              "aboveCloud": true,
+              "belowCloud": false,
+              "inCloud": false,
+              "trend": "strong_bullish"
+            }
+          },
+          "pattern_analysis": {
+            "main_pattern": null,
+            "detected_patterns": []
+          },
+          "timeframe_analysis": {
+            "timeframes_analyzed": [
+              "5m",
+              "15m",
+              "30m",
+              "1h"
+            ],
+            "confluence": {
+              "bullishTimeframes": [
+                "5m",
+                "30m"
+              ],
+              "bearishTimeframes": [],
+              "neutralTimeframes": [
+                "15m",
+                "1h"
+              ]
+            },
+            "bullish_count": 2,
+            "bearish_count": 0
+          },
+          "data_source": "MarketDataFetcher",
+          "candle_count": 100
+        },
+        "usesRealData": true,
+        "quality": {
+          "score": 65,
+          "factors": [
+            "Conservative no-trade signal",
+            "Detailed reasoning provided",
+            "Technical analysis included",
+            "Multi-timeframe analysis",
+            "Fresh data"
+          ],
+          "issues": []
+        }
+      }
+    },
+    "realDataVerification": {
+      "realDataPercentage": 100,
+      "freshDataPercentage": 100,
+      "validPricePercentage": 100
+    },
+    "trustworthiness": {
+      "score": 197.5,
+      "readyForMoney": true,
+      "factors": [
+        "Signals consistently use real market data",
+        "Data is fresh and up-to-date",
+        "Moderate signal confidence",
+        "Good rate of tradable signals"
+      ],
+      "warnings": []
+    }
+  }
+}

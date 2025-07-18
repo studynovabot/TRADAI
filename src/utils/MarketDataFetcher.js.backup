@@ -9,8 +9,6 @@ const axios = require('axios');
 
 class MarketDataFetcher {
   constructor(apiKey = process.env.MARKET_DATA_API_KEY) {
-    this.strictRealDataMode = process.env.STRICT_REAL_DATA_MODE === 'true';
-    this.logDataSource = process.env.LOG_DATA_SOURCE === 'true';
     this.apiKey = apiKey;
     this.baseUrl = 'https://api.twelvedata.com';
     this.supportedTimeframes = ['5min', '15min', '30min', '1h', '4h', '1day'];

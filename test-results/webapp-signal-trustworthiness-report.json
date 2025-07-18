@@ -1,0 +1,92 @@
+{
+  "timestamp": "2025-07-18T16:45:33.388Z",
+  "testType": "Web App Signal Generation Trustworthiness Test",
+  "trustworthinessScore": 55,
+  "readyForLiveTrading": false,
+  "results": {
+    "signalTests": {
+      "SignalEngine": {
+        "exists": false,
+        "score": 0,
+        "issues": [
+          "Component file not found"
+        ]
+      },
+      "TechnicalAnalysis": {
+        "exists": false,
+        "score": 0,
+        "issues": [
+          "Component file not found"
+        ]
+      },
+      "MarketDataFetcher": {
+        "score": 70,
+        "issues": [
+          "Extensive mock data usage"
+        ],
+        "positives": [
+          "Has API integration",
+          "Has real data enforcement",
+          "Has error handling"
+        ]
+      },
+      "AISignalGenerator": {
+        "exists": false,
+        "score": 0,
+        "issues": [
+          "Component file not found"
+        ]
+      }
+    },
+    "dataSourceVerification": {
+      "SignalEngine": {
+        "error": "SignalEngine file not found",
+        "usesRealData": false
+      }
+    },
+    "signalAccuracy": {
+      "USD/EUR_5m": {
+        "error": "No signal generated"
+      },
+      "GBP/USD_15m": {
+        "error": "No signal generated"
+      },
+      "USD/JPY_1h": {
+        "signal": {
+          "action": "HOLD",
+          "confidence": 8.548694370208239,
+          "entryPrice": 148.67599,
+          "timestamp": "2025-07-19 02:00:00",
+          "dataSource": "Direct API",
+          "candleCount": 50,
+          "priceChange": 0.0008548694370208239
+        },
+        "analysis": {
+          "qualityScore": 100,
+          "usesRealData": true,
+          "issues": [],
+          "positives": [
+            "Valid action",
+            "Valid confidence score",
+            "Has entry price",
+            "Fresh timestamp",
+            "Uses real data source",
+            "Sufficient data for analysis"
+          ]
+        }
+      }
+    },
+    "trustworthiness": {
+      "score": 55,
+      "factors": [
+        "High quality signals generated",
+        "Signals use real market data"
+      ],
+      "readyForMoney": false
+    }
+  },
+  "environment": {
+    "nodeVersion": "v22.15.0",
+    "platform": "win32"
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "timestamp": "2025-07-18T15:52:07.140Z",
+  "testType": "Real vs Synthetic Data Detection",
+  "verdict": "MIXED DATA",
+  "confidence": 75,
+  "readyForTrading": false,
+  "results": {
+    "realDataSources": 6,
+    "syntheticDataSources": 2,
+    "testResults": {
+      "USD/EUR_freshness": {
+        "ageMinutes": -267.9997,
+        "isFresh": true,
+        "timestamp": "2025-07-19 01:50:00",
+        "price": "0.85829997"
+      },
+      "GBP/USD_freshness": {
+        "ageMinutes": -267.97793333333334,
+        "isFresh": true,
+        "timestamp": "2025-07-19 01:50:00",
+        "price": "1.34371"
+      },
+      "USD/JPY_freshness": {
+        "ageMinutes": -267.95613333333336,
+        "isFresh": true,
+        "timestamp": "2025-07-19 01:50:00",
+        "price": "148.52299"
+      },
+      "price_movement_analysis": {
+        "volatility": 0.00012453958913218562,
+        "patternScore": 70,
+        "tickPrecision": 8,
+        "movements": [
+          -0.0001166006048425885,
+          -0.00011661420212908999,
+          0.00011662780258723477,
+          -0.00011661420212908999,
+          0.00011662780258723477,
+          -0.00011661420212908999,
+          0,
+          0,
+          0.00023325560517446954,
+          0,
+          0.00023311960558271535,
+          0.00011657342929073082,
+          -0.00011655984151028838,
+          -0.0001165034992192075,
+          0.00011651707386603167,
+          0.00011657342929073082,
+          0,
+          0.00023303810744674196,
+          0
+        ]
+      },
+      "volume_analysis": {
+        "candlesWithVolume": 0,
+        "avgVolume": 0,
+        "volumeVariance": 0,
+        "realismScore": 0
+      },
+      "cross_source_consistency": {
+        "sources": [
+          {
+            "name": "Twelve Data",
+            "price": 0.85829997
+          },
+          {
+            "name": "Alpha Vantage",
+            "price": 0.8583
+          }
+        ],
+        "avgPrice": 0.8582999849999999,
+        "maxDifference": 2.9999999928698173e-8,
+        "diffPercentage": 0.0000034952814229279263
+      },
+      "system_components": {
+        "mockReferences": 17,
+        "hasApiIntegration": true,
+        "hasErrorHandling": true
+      }
+    },
+    "recommendations": [],
+    "criticalIssues": [
+      "Volume patterns appear synthetic",
+      "System has extensive mock data fallbacks"
+    ],
+    "summary": {
+      "overallStatus": "MIXED DATA",
+      "confidence": 75,
+      "readyForTrading": false
+    }
+  },
+  "environment": {
+    "nodeVersion": "v22.15.0",
+    "platform": "win32",
+    "apiKeysConfigured": {
+      "twelveData": true,
+      "alphaVantage": true,
+      "finnhub": true
+    }
+  }
+}

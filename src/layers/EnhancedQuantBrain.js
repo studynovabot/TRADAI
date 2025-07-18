@@ -1,16 +1,20 @@
 /**
- * Enhanced Quant Brain - Layer 1: ML-Based Market Prediction
+ * Enhanced Quant Brain - Advanced ML Prediction Engine
  * 
- * This module implements an enhanced version of the first layer of the 3-layer AI trading system.
- * It uses multiple ML models to predict market direction with confidence scores.
+ * This module implements the enhanced quantitative analysis brain using
+ * XGBoost, LightGBM, and TabNet-style models with multi-timeframe technical indicators
+ * for 85-90% accuracy target
  */
 
 const { Logger } = require('../utils/Logger');
+const { TechnicalIndicators } = require('../utils/TechnicalIndicators');
+const { CandlestickPatterns } = require('../utils/CandlestickPatterns');
+const { MultiTimeframeAnalysis } = require('../utils/MultiTimeframeAnalysis');
 const { EnhancedRealML } = require('../ml/EnhancedRealML');
 const fs = require('fs-extra');
 const path = require('path');
 
-// Technical indicators
+// Technical indicators from technicalindicators library
 const RSI = require('technicalindicators').RSI;
 const EMA = require('technicalindicators').EMA;
 const MACD = require('technicalindicators').MACD;

@@ -1,0 +1,115 @@
+{
+  "timestamp": "2025-07-18T15:50:08.355Z",
+  "testType": "System Data Sources Comprehensive Test",
+  "results": {
+    "apiKeys": {
+      "Twelve Data": {
+        "configured": true,
+        "keyPreview": "72ada78c..."
+      },
+      "Finnhub": {
+        "configured": true,
+        "keyPreview": "d1t566pr..."
+      },
+      "Alpha Vantage": {
+        "configured": true,
+        "keyPreview": "B5V6LID8..."
+      },
+      "Polygon": {
+        "configured": true,
+        "keyPreview": "fjT4pb2V..."
+      },
+      "Groq": {
+        "configured": true,
+        "keyPreview": "gsk_C3qW..."
+      },
+      "Together AI": {
+        "configured": true,
+        "keyPreview": "gsk_THIP..."
+      }
+    },
+    "directApiTests": {
+      "TwelveData": {
+        "success": true,
+        "results": [
+          {
+            "pair": "USD/EUR",
+            "success": true,
+            "price": "0.85810000",
+            "timestamp": "2025-07-19 01:48:00",
+            "candleCount": 5
+          },
+          {
+            "pair": "GBP/USD",
+            "success": true,
+            "price": "1.34378",
+            "timestamp": "2025-07-19 01:48:00",
+            "candleCount": 5
+          },
+          {
+            "pair": "USD/JPY",
+            "success": true,
+            "price": "148.52000",
+            "timestamp": "2025-07-19 01:48:00",
+            "candleCount": 5
+          }
+        ],
+        "successRate": 100
+      },
+      "Finnhub": {
+        "success": false,
+        "error": "Request failed with status code 403"
+      },
+      "AlphaVantage": {
+        "success": true,
+        "exchangeRate": "0.85830000",
+        "lastRefreshed": "2025-07-18 15:49:48"
+      }
+    },
+    "systemComponents": {
+      "MarketDataFetcher": {
+        "success": true,
+        "hasApiIntegration": true,
+        "hasErrorHandling": true,
+        "hasMockFallback": true,
+        "testData": {
+          "candleCount": 5,
+          "latestPrice": 0.8581,
+          "appearsReal": false
+        }
+      }
+    },
+    "dataQuality": {
+      "USD/EUR": {
+        "candleCount": 10,
+        "freshnessMinutes": -267.94651666666664,
+        "priceRange": {
+          "min": 0.85759997,
+          "max": 0.8581
+        },
+        "qualityScore": 100,
+        "issues": []
+      },
+      "GBP/USD": {
+        "candleCount": 10,
+        "freshnessMinutes": -267.89141666666666,
+        "priceRange": {
+          "min": 1.34378,
+          "max": 1.34457
+        },
+        "qualityScore": 100,
+        "issues": []
+      }
+    },
+    "summary": {
+      "totalTests": 13,
+      "passed": 12,
+      "failed": 1,
+      "warnings": 0
+    }
+  },
+  "environment": {
+    "nodeVersion": "v22.15.0",
+    "platform": "win32"
+  }
+}

@@ -1,0 +1,262 @@
+{
+  "timestamp": "2025-07-18T15:55:30.714Z",
+  "apiKey": "72ada78c...",
+  "results": {
+    "apiConnected": true,
+    "testedPairs": {
+      "USD/EUR": {
+        "success": true,
+        "candle": {
+          "datetime": "2025-07-19 01:53:00",
+          "open": "0.85829997",
+          "high": "0.85829997",
+          "low": "0.85829997",
+          "close": "0.85829997"
+        },
+        "validation": {
+          "isReal": true,
+          "reasons": [
+            "Unusual price precision (8 decimals)"
+          ],
+          "checks": {
+            "timeRecency": -267.79516666666666,
+            "priceRange": {
+              "price": 0.85829997,
+              "expectedRange": {
+                "min": 0.8,
+                "max": 1.3
+              }
+            },
+            "ohlc": {
+              "open": 0.85829997,
+              "high": 0.85829997,
+              "low": 0.85829997,
+              "close": 0.85829997
+            },
+            "precision": 8
+          }
+        },
+        "isRealData": true
+      },
+      "EUR/USD": {
+        "success": true,
+        "candle": {
+          "datetime": "2025-07-19 01:53:00",
+          "open": "1.16474",
+          "high": "1.16485",
+          "low": "1.16471",
+          "close": "1.16481"
+        },
+        "validation": {
+          "isReal": true,
+          "reasons": [],
+          "checks": {
+            "timeRecency": -267.7628833333333,
+            "priceRange": {
+              "price": 1.16481,
+              "expectedRange": {
+                "min": 0.8,
+                "max": 1.3
+              }
+            },
+            "ohlc": {
+              "open": 1.16474,
+              "high": 1.16485,
+              "low": 1.16471,
+              "close": 1.16481
+            },
+            "precision": 5
+          }
+        },
+        "isRealData": true
+      },
+      "GBP/USD": {
+        "success": true,
+        "candle": {
+          "datetime": "2025-07-19 01:53:00",
+          "open": "1.34394",
+          "high": "1.34394",
+          "low": "1.34394",
+          "close": "1.34394"
+        },
+        "validation": {
+          "isReal": true,
+          "reasons": [],
+          "checks": {
+            "timeRecency": -267.73381666666666,
+            "priceRange": {
+              "price": 1.34394,
+              "expectedRange": {
+                "min": 1,
+                "max": 1.5
+              }
+            },
+            "ohlc": {
+              "open": 1.34394,
+              "high": 1.34394,
+              "low": 1.34394,
+              "close": 1.34394
+            },
+            "precision": 5
+          }
+        },
+        "isRealData": true
+      },
+      "USD/JPY": {
+        "success": true,
+        "candle": {
+          "datetime": "2025-07-19 01:53:00",
+          "open": "148.52299",
+          "high": "148.53400",
+          "low": "148.52200",
+          "close": "148.52400"
+        },
+        "validation": {
+          "isReal": true,
+          "reasons": [],
+          "checks": {
+            "timeRecency": -267.70143333333334,
+            "priceRange": {
+              "price": 148.524,
+              "expectedRange": {
+                "min": 100,
+                "max": 160
+              }
+            },
+            "ohlc": {
+              "open": 148.52299,
+              "high": 148.534,
+              "low": 148.522,
+              "close": 148.524
+            },
+            "precision": 3
+          }
+        },
+        "isRealData": true
+      },
+      "AUD/USD": {
+        "success": true,
+        "candle": {
+          "datetime": "2025-07-19 01:53:00",
+          "open": "0.65277988",
+          "high": "0.65282673",
+          "low": "0.65277988",
+          "close": "0.65282673"
+        },
+        "validation": {
+          "isReal": true,
+          "reasons": [
+            "Unusual price precision (8 decimals)"
+          ],
+          "checks": {
+            "timeRecency": -267.66898333333336,
+            "priceRange": {
+              "price": 0.65282673,
+              "expectedRange": {
+                "min": 0.6,
+                "max": 0.9
+              }
+            },
+            "ohlc": {
+              "open": 0.65277988,
+              "high": 0.65282673,
+              "low": 0.65277988,
+              "close": 0.65282673
+            },
+            "precision": 8
+          }
+        },
+        "isRealData": true
+      },
+      "USD/CAD": {
+        "success": true,
+        "candle": {
+          "datetime": "2025-07-19 01:53:00",
+          "open": "1.37157",
+          "high": "1.37162",
+          "low": "1.37110",
+          "close": "1.37153"
+        },
+        "validation": {
+          "isReal": true,
+          "reasons": [],
+          "checks": {
+            "timeRecency": -267.63645,
+            "priceRange": {
+              "price": 1.37153,
+              "expectedRange": {
+                "min": 1.2,
+                "max": 1.4
+              }
+            },
+            "ohlc": {
+              "open": 1.37157,
+              "high": 1.37162,
+              "low": 1.3711,
+              "close": 1.37153
+            },
+            "precision": 5
+          }
+        },
+        "isRealData": true
+      },
+      "USD/CHF": {
+        "success": true,
+        "candle": {
+          "datetime": "2025-07-19 01:53:00",
+          "open": "0.79995000",
+          "high": "0.79995000",
+          "low": "0.79987001",
+          "close": "0.79987001"
+        },
+        "validation": {
+          "isReal": false,
+          "reasons": [
+            "Price out of range (0.79987001)",
+            "Unusual price precision (8 decimals)"
+          ],
+          "checks": {
+            "timeRecency": -267.6073,
+            "priceRange": {
+              "price": 0.79987001,
+              "expectedRange": {
+                "min": 0.8,
+                "max": 1.1
+              }
+            },
+            "ohlc": {
+              "open": 0.79995,
+              "high": 0.79995,
+              "low": 0.79987001,
+              "close": 0.79987001
+            },
+            "precision": 8
+          }
+        },
+        "isRealData": false
+      },
+      "NZD/USD": {
+        "success": false,
+        "error": "You have run out of API credits for the current minute. 9 API credits were used, with the current limit being 8. Wait for the next minute or consider switching to a higher tier plan at https://twelvedata.com/pricing",
+        "isRealData": false
+      },
+      "USD/INR": {
+        "success": false,
+        "error": "You have run out of API credits for the current minute. 10 API credits were used, with the current limit being 8. Wait for the next minute or consider switching to a higher tier plan at https://twelvedata.com/pricing",
+        "isRealData": false
+      },
+      "USD/BRL": {
+        "success": false,
+        "error": "You have run out of API credits for the current minute. 11 API credits were used, with the current limit being 8. Wait for the next minute or consider switching to a higher tier plan at https://twelvedata.com/pricing",
+        "isRealData": false
+      }
+    },
+    "summary": {
+      "total": 10,
+      "successful": 7,
+      "failed": 3,
+      "realData": 6,
+      "mockData": 1
+    }
+  }
+}

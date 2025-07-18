@@ -23,14 +23,19 @@ class Config {
         'USD/ARS', 'USD/EGP', 'USD/BDT', 'USD/DZD'
       ],
       
-      // API Configuration
+      // API Configuration - Multi-Source Data Fusion
       twelveDataApiKey: process.env.TWELVE_DATA_API_KEY,
+      finnhubApiKey: process.env.FINNHUB_API_KEY,
+      alphaVantageApiKey: process.env.ALPHA_VANTAGE_API_KEY,
+      polygonApiKey: process.env.POLYGON_API_KEY,
+      
+      // AI Provider Configuration
       groqApiKey: process.env.GROQ_API_KEY,
       togetherApiKey: process.env.TOGETHER_API_KEY,
       fireworksApiKey: process.env.FIREWORKS_API_KEY,
       deepinfraApiKey: process.env.DEEPINFRA_API_KEY,
       openrouterApiKey: process.env.OPENROUTER_API_KEY,
-      aiProvider: process.env.AI_PROVIDER || 'fireworks', // 'groq', 'together', 'fireworks', 'deepinfra'
+      aiProvider: process.env.AI_PROVIDER || 'groq', // Primary AI provider
 
       // AI Enhancement Configuration
       useEnsemble: process.env.USE_ENSEMBLE !== 'false', // Default to true
@@ -70,6 +75,57 @@ class Config {
 
       // Pre-Signal Validation Configuration
       enablePreSignalValidation: process.env.ENABLE_PRE_SIGNAL_VALIDATION !== 'false', // Default to true
+      
+      // Enhanced Multi-Source Configuration
+      enableDataFusion: process.env.ENABLE_DATA_FUSION !== 'false',
+      minDataSources: parseInt(process.env.MIN_DATA_SOURCES) || 2,
+      crossVerifyCandles: process.env.CROSS_VERIFY_CANDLES !== 'false',
+      fillMissingData: process.env.FILL_MISSING_DATA !== 'false',
+      autoFallback: process.env.AUTO_FALLBACK !== 'false',
+      
+      // Performance Targets
+      targetAccuracy: parseFloat(process.env.TARGET_ACCURACY) || 87,
+      minSignalConfidence: parseFloat(process.env.MIN_SIGNAL_CONFIDENCE) || 80,
+      minSharpeRatio: parseFloat(process.env.MIN_SHARPE_RATIO) || 2.0,
+      maxDrawdown: parseFloat(process.env.MAX_DRAWDOWN) || 15,
+      
+      // Signal Quality Filters
+      enableConfluenceFilter: process.env.ENABLE_CONFLUENCE_FILTER !== 'false',
+      minConfluenceScore: parseInt(process.env.MIN_CONFLUENCE_SCORE) || 75,
+      requireVolumeConfirmation: process.env.REQUIRE_VOLUME_CONFIRMATION !== 'false',
+      enablePatternValidation: process.env.ENABLE_PATTERN_VALIDATION !== 'false',
+      
+      // Three-Brain Consensus
+      requireQuantConfidence: parseInt(process.env.REQUIRE_QUANT_CONFIDENCE) || 80,
+      requireAnalystValidation: process.env.REQUIRE_ANALYST_VALIDATION !== 'false',
+      requireReflexApproval: process.env.REQUIRE_REFLEX_APPROVAL !== 'false',
+      minBrainAgreement: parseInt(process.env.MIN_BRAIN_AGREEMENT) || 3,
+      
+      // Risk Management Filters
+      avoidHighVolatility: process.env.AVOID_HIGH_VOLATILITY !== 'false',
+      maxVolatilityThreshold: parseFloat(process.env.MAX_VOLATILITY_THRESHOLD) || 2.0,
+      avoidLowVolume: process.env.AVOID_LOW_VOLUME !== 'false',
+      minVolumeRatio: parseFloat(process.env.MIN_VOLUME_RATIO) || 0.8,
+      avoidNewsEvents: process.env.AVOID_NEWS_EVENTS !== 'false',
+      newsBufferMinutes: parseInt(process.env.NEWS_BUFFER_MINUTES) || 30,
+      avoidMarketOpenClose: process.env.AVOID_MARKET_OPEN_CLOSE !== 'false',
+      marketBufferMinutes: parseInt(process.env.MARKET_BUFFER_MINUTES) || 15,
+      
+      // Technical Filters
+      rejectConflictingSignals: process.env.REJECT_CONFLICTING_SIGNALS !== 'false',
+      rejectUncertaintyCandles: process.env.REJECT_UNCERTAINTY_CANDLES !== 'false',
+      rejectSuddenSpikes: process.env.REJECT_SUDDEN_SPIKES !== 'false',
+      maxWickRatio: parseFloat(process.env.MAX_WICK_RATIO) || 0.7,
+      
+      // Safe Zones Configuration
+      safeZonesOnly: process.env.SAFE_ZONES_ONLY === 'true',
+      avoidSupportResistance: process.env.AVOID_SUPPORT_RESISTANCE !== 'false',
+      srBufferPips: parseInt(process.env.SR_BUFFER_PIPS) || 5,
+      
+      // Multi-Timeframe Configuration
+      timeframes: process.env.TIMEFRAMES || '1m,3m,5m,15m,30m,1h,4h',
+      historicalLookback: parseInt(process.env.HISTORICAL_LOOKBACK) || 1000,
+      minCandlesForAnalysis: parseInt(process.env.MIN_CANDLES_FOR_ANALYSIS) || 500,
 
       // Spread validation
       maxSpreadPercent: parseFloat(process.env.MAX_SPREAD_PERCENT) || 0.05, // 0.05% max spread
