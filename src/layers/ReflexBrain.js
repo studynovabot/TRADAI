@@ -118,28 +118,48 @@ class ReflexBrain {
       return { passed: false, reason: 'Missing brain outputs' };
     }
     
+    // Prioritize signal engine confidence over legacy ML confidence
+    const primaryConfidence = quantPrediction.signal?.confidence || quantPrediction.confidence;
+    const hasSignalEngine = !!quantPrediction.signal;
+    
     // More lenient checks for signal-only mode
     // Only reject on HIGH_RISK, allow NO signals to pass for evaluation
     if (analystValidation.validation === 'HIGH_RISK') {
       return { passed: false, reason: 'Analyst Brain flagged high risk' };
     }
     
-    // More lenient confidence thresholds for signal generation
-    if (quantPrediction.confidence < 0.3) {
-      return { passed: false, reason: `Quant confidence too low: ${(quantPrediction.confidence * 100).toFixed(1)}%` };
+    // Use signal engine confidence if available, otherwise fall back to ML confidence
+    if (hasSignalEngine) {
+      // Signal engine has its own confidence thresholds (typically 65%+)
+      if (primaryConfidence < 0.65) {
+        return { passed: false, reason: `Signal engine confidence too low: ${(primaryConfidence * 100).toFixed(1)}%` };
+      }
+      
+      // Check if signal engine rejected the signal
+      if (!quantPrediction.signal.execute) {
+        return { passed: false, reason: quantPrediction.signal.reasoning || 'Signal engine rejected signal' };
+      }
+    } else {
+      // Legacy ML confidence thresholds (more lenient)
+      if (quantPrediction.confidence < 0.3) {
+        return { passed: false, reason: `Quant confidence too low: ${(quantPrediction.confidence * 100).toFixed(1)}%` };
+      }
     }
     
+    // Analyst validation confidence check
     if (analystValidation.confidence < 0.2) {
       return { passed: false, reason: `Analyst confidence too low: ${(analystValidation.confidence * 100).toFixed(1)}%` };
     }
     
-    // More lenient risk scores
-    if (quantPrediction.riskScore > 0.8) {
-      return { passed: false, reason: `Risk score too high: ${(quantPrediction.riskScore * 100).toFixed(1)}%` };
+    // Risk score check - use signal engine risk if available
+    const riskScore = quantPrediction.signal?.riskAssessment?.riskScore || quantPrediction.riskScore;
+    if (riskScore > 0.8) {
+      return { passed: false, reason: `Risk score too high: ${(riskScore * 100).toFixed(1)}%` };
     }
     
-    // More lenient confluence score for signal generation
-    if (analystValidation.confluenceScore < 20) {
+    // Confluence score check - more lenient for signal engine
+    const confluenceThreshold = hasSignalEngine ? 15 : 20;
+    if (analystValidation.confluenceScore < confluenceThreshold) {
       return { passed: false, reason: `Confluence too low: ${analystValidation.confluenceScore}/100` };
     }
     
@@ -174,18 +194,30 @@ class ReflexBrain {
    * Generate signal evaluation prompt for LLM
    */
   generateSignalEvaluationPrompt(quantPrediction, analystValidation) {
+    // Include signal engine details if available
+    const signalEngineDetails = quantPrediction.signal ? `
+SIGNAL ENGINE ANALYSIS:
+- Setup Tag: ${quantPrediction.setupTag || 'N/A'}
+- Market Regime: ${quantPrediction.regime || 'N/A'}
+- Signal Confidence: ${(quantPrediction.signal.confidence * 100).toFixed(1)}%
+- Key Factors: ${quantPrediction.signal.keyFactors?.join(', ') || 'N/A'}
+- Reasoning: ${quantPrediction.signal.reasoning || 'N/A'}
+- Passed Filters: ${quantPrediction.signal.passedFilters || 0}
+- Contradictions: ${quantPrediction.signal.contradictions || 0}
+` : '';
+
     return `BINARY OPTIONS SIGNAL QUALITY EVALUATION
 
 SIGNAL SUMMARY:
 Asset: ${quantPrediction.currencyPair || this.config.currencyPair}
 Direction: ${quantPrediction.direction}
-Timeframe: 5-minute signal
-
+Timeframe: ${quantPrediction.signal?.regime ? '15-minute' : '5-minute'} signal
+${signalEngineDetails}
 QUANT BRAIN (ML Analysis):
 - Prediction: ${quantPrediction.direction}
 - Confidence: ${(quantPrediction.confidence * 100).toFixed(1)}%
 - Risk Score: ${(quantPrediction.riskScore * 100).toFixed(1)}%
-- Key Technical Features: RSI, EMA, MACD, Bollinger Bands, Volume
+- Method: ${quantPrediction.signal ? 'Advanced Signal Engine' : 'Legacy ML Models'}
 
 ANALYST BRAIN (Technical Confluence):
 - Validation: ${analystValidation.validation}
@@ -196,7 +228,7 @@ ANALYST BRAIN (Technical Confluence):
 SIGNAL QUALITY ASSESSMENT:
 Evaluate this signal for manual trading decision. Consider:
 1. Technical confluence strength (${analystValidation.confluenceScore}/100)
-2. AI confidence levels (ML: ${(quantPrediction.confidence * 100).toFixed(1)}%, LLM: ${(analystValidation.confidence * 100).toFixed(1)}%)
+2. AI confidence levels (${quantPrediction.signal ? 'Signal Engine' : 'ML'}: ${(quantPrediction.confidence * 100).toFixed(1)}%, LLM: ${(analystValidation.confidence * 100).toFixed(1)}%)
 3. Risk factors (Risk Score: ${(quantPrediction.riskScore * 100).toFixed(1)}%)
 4. Multi-timeframe alignment
 5. Volume confirmation and market structure
@@ -482,7 +514,18 @@ REASON: Strong bullish confluence across multiple timeframes with RSI oversold b
         quantRisk: quantPrediction.riskScore,
         analystValidation: analystValidation.validation,
         analystConfidence: analystValidation.confidence,
-        confluenceScore: analystValidation.confluenceScore
+        confluenceScore: analystValidation.confluenceScore,
+        
+        // Signal engine details if available
+        signalEngine: quantPrediction.signal ? {
+          confidence: quantPrediction.signal.confidence,
+          setupTag: quantPrediction.setupTag,
+          regime: quantPrediction.regime,
+          passedFilters: quantPrediction.signal.passedFilters,
+          contradictions: quantPrediction.signal.contradictions,
+          keyFactors: quantPrediction.signal.keyFactors,
+          reasoning: quantPrediction.signal.reasoning
+        } : null
       },
       
       // Execution metadata

@@ -1,0 +1,293 @@
+{
+  "summary": {
+    "totalTests": 25,
+    "totalSignals": 0,
+    "validSignals": 0,
+    "accurateSignals": 0,
+    "averageConfidence": 0,
+    "byAsset": {
+      "USD/INR": {
+        "tests": 5,
+        "signals": 0,
+        "validSignals": 0,
+        "accurateSignals": 0,
+        "averageConfidence": 0
+      },
+      "EUR/USD": {
+        "tests": 5,
+        "signals": 0,
+        "validSignals": 0,
+        "accurateSignals": 0,
+        "averageConfidence": 0
+      },
+      "GBP/USD": {
+        "tests": 5,
+        "signals": 0,
+        "validSignals": 0,
+        "accurateSignals": 0,
+        "averageConfidence": 0
+      },
+      "USD/JPY": {
+        "tests": 5,
+        "signals": 0,
+        "validSignals": 0,
+        "accurateSignals": 0,
+        "averageConfidence": 0
+      },
+      "AUD/USD": {
+        "tests": 5,
+        "signals": 0,
+        "validSignals": 0,
+        "accurateSignals": 0,
+        "averageConfidence": 0
+      }
+    },
+    "byTimeframe": {
+      "5m": {
+        "tests": 5,
+        "signals": 0,
+        "validSignals": 0,
+        "accurateSignals": 0,
+        "averageConfidence": 0
+      },
+      "15m": {
+        "tests": 5,
+        "signals": 0,
+        "validSignals": 0,
+        "accurateSignals": 0,
+        "averageConfidence": 0
+      },
+      "30m": {
+        "tests": 5,
+        "signals": 0,
+        "validSignals": 0,
+        "accurateSignals": 0,
+        "averageConfidence": 0
+      },
+      "1h": {
+        "tests": 5,
+        "signals": 0,
+        "validSignals": 0,
+        "accurateSignals": 0,
+        "averageConfidence": 0
+      },
+      "4h": {
+        "tests": 5,
+        "signals": 0,
+        "validSignals": 0,
+        "accurateSignals": 0,
+        "averageConfidence": 0
+      }
+    },
+    "byRegime": {},
+    "bySetupTag": {},
+    "processingTime": 80
+  },
+  "details": [
+    {
+      "asset": "USD/INR",
+      "timeframe": "5m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "USD/INR",
+      "timeframe": "15m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "USD/INR",
+      "timeframe": "30m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0,
+      "error": "Cannot read properties of undefined (reading 'length')"
+    },
+    {
+      "asset": "USD/INR",
+      "timeframe": "1h",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "USD/INR",
+      "timeframe": "4h",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "EUR/USD",
+      "timeframe": "5m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "EUR/USD",
+      "timeframe": "15m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "EUR/USD",
+      "timeframe": "30m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0,
+      "error": "Cannot read properties of undefined (reading 'length')"
+    },
+    {
+      "asset": "EUR/USD",
+      "timeframe": "1h",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "EUR/USD",
+      "timeframe": "4h",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "GBP/USD",
+      "timeframe": "5m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "GBP/USD",
+      "timeframe": "15m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "GBP/USD",
+      "timeframe": "30m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0,
+      "error": "Cannot read properties of undefined (reading 'length')"
+    },
+    {
+      "asset": "GBP/USD",
+      "timeframe": "1h",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "GBP/USD",
+      "timeframe": "4h",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "USD/JPY",
+      "timeframe": "5m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "USD/JPY",
+      "timeframe": "15m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "USD/JPY",
+      "timeframe": "30m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0,
+      "error": "Cannot read properties of undefined (reading 'length')"
+    },
+    {
+      "asset": "USD/JPY",
+      "timeframe": "1h",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "USD/JPY",
+      "timeframe": "4h",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "AUD/USD",
+      "timeframe": "5m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "AUD/USD",
+      "timeframe": "15m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "AUD/USD",
+      "timeframe": "30m",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0,
+      "error": "Cannot read properties of undefined (reading 'length')"
+    },
+    {
+      "asset": "AUD/USD",
+      "timeframe": "1h",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    },
+    {
+      "asset": "AUD/USD",
+      "timeframe": "4h",
+      "signals": [],
+      "validSignals": 0,
+      "accurateSignals": 0,
+      "accuracy": 0
+    }
+  ]
+}

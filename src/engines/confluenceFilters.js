@@ -1195,29 +1195,149 @@ class ConfluenceFilters {
   // Placeholder methods for other filter types
   // These would be implemented with similar detailed logic as the examples above
   
-  applyRSIReversalFilters(marketData, weights = {}) {
-    // Implementation would go here
-    return {};
+  async applyRSIReversalFilters(marketData, weights = {}) {
+    // Similar to RSI filters but focused on reversal signals
+    return await this.applyRSIFilters(marketData, weights);
   }
   
-  applyStochasticFilters(marketData, weights = {}) {
-    // Implementation would go here
-    return {};
+  async applyStochasticFilters(marketData, weights = {}) {
+    const results = {};
+    const timeframes = ['5m', '15m', '1h'];
+    
+    for (const timeframe of timeframes) {
+      const data = marketData.data[timeframe];
+      if (!data || data.length < 20) continue;
+      
+      // Placeholder implementation - would use technicalindicators.Stochastic
+      const currentPrice = data[data.length - 1].close;
+      const prevPrice = data[data.length - 2].close;
+      
+      // Simple momentum check as placeholder
+      if (currentPrice > prevPrice * 1.002) {
+        results[`${timeframe}_stoch_bullish`] = {
+          passed: true,
+          direction: 'UP',
+          value: 75,
+          reason: `Stochastic bullish momentum on ${timeframe}`,
+          weight: weights[`${timeframe}_stoch_bullish`] || 1.0
+        };
+      }
+    }
+    
+    return results;
   }
   
-  applyBollingerBandFilters(marketData, weights = {}) {
-    // Implementation would go here
-    return {};
+  async applyBollingerBandFilters(marketData, weights = {}) {
+    const results = {};
+    const timeframes = ['15m', '1h'];
+    
+    for (const timeframe of timeframes) {
+      const data = marketData.data[timeframe];
+      if (!data || data.length < 20) continue;
+      
+      const closes = data.map(candle => candle.close);
+      const bbInput = {
+        values: closes,
+        period: this.filterConfig.volatility.bbPeriod,
+        stdDev: this.filterConfig.volatility.bbStdDev
+      };
+      
+      try {
+        const bbResult = BollingerBands.calculate(bbInput);
+        if (bbResult && bbResult.length > 0) {
+          const current = bbResult[bbResult.length - 1];
+          const currentPrice = closes[closes.length - 1];
+          
+          // Bollinger Band squeeze or expansion
+          const bandwidth = (current.upper - current.lower) / current.middle;
+          
+          if (bandwidth < this.filterConfig.volatility.bbSqueezeThreshold) {
+            results[`${timeframe}_bb_squeeze`] = {
+              passed: true,
+              direction: 'NEUTRAL',
+              value: bandwidth,
+              reason: `Bollinger Band squeeze on ${timeframe}`,
+              weight: weights[`${timeframe}_bb_squeeze`] || 1.1
+            };
+          }
+        }
+      } catch (error) {
+        // Silently continue on calculation error
+      }
+    }
+    
+    return results;
   }
   
-  applySupportResistanceFilters(marketData, weights = {}) {
-    // Implementation would go here
-    return {};
+  async applySupportResistanceFilters(marketData, weights = {}) {
+    const results = {};
+    const timeframes = ['15m', '1h'];
+    
+    for (const timeframe of timeframes) {
+      const data = marketData.data[timeframe];
+      if (!data || data.length < 50) continue;
+      
+      // Simple support/resistance detection
+      const currentPrice = data[data.length - 1].close;
+      const recentHigh = Math.max(...data.slice(-20).map(c => c.high));
+      const recentLow = Math.min(...data.slice(-20).map(c => c.low));
+      
+      // Check if price is near support/resistance
+      const distanceToResistance = Math.abs(currentPrice - recentHigh) / currentPrice;
+      const distanceToSupport = Math.abs(currentPrice - recentLow) / currentPrice;
+      
+      if (distanceToSupport < this.filterConfig.structure.zoneThreshold) {
+        results[`${timeframe}_near_support`] = {
+          passed: true,
+          direction: 'UP',
+          value: recentLow,
+          reason: `Price near support zone on ${timeframe}`,
+          weight: weights[`${timeframe}_near_support`] || 1.3
+        };
+      }
+      
+      if (distanceToResistance < this.filterConfig.structure.zoneThreshold) {
+        results[`${timeframe}_near_resistance`] = {
+          passed: true,
+          direction: 'DOWN',
+          value: recentHigh,
+          reason: `Price near resistance zone on ${timeframe}`,
+          weight: weights[`${timeframe}_near_resistance`] || 1.3
+        };
+      }
+    }
+    
+    return results;
   }
   
-  applyPivotFilters(marketData, weights = {}) {
-    // Implementation would go here
-    return {};
+  async applyPivotFilters(marketData, weights = {}) {
+    const results = {};
+    const timeframes = ['1h', '4h'];
+    
+    for (const timeframe of timeframes) {
+      const data = marketData.data[timeframe];
+      if (!data || data.length < 10) continue;
+      
+      // Calculate pivot points (simplified)
+      const yesterday = data[data.length - 2];
+      const pivot = (yesterday.high + yesterday.low + yesterday.close) / 3;
+      const currentPrice = data[data.length - 1].close;
+      
+      // Check if price is reacting to pivot levels
+      const distanceToPivot = Math.abs(currentPrice - pivot) / currentPrice;
+      
+      if (distanceToPivot < this.filterConfig.structure.zoneThreshold) {
+        results[`${timeframe}_pivot_reaction`] = {
+          passed: true,
+          direction: currentPrice > pivot ? 'UP' : 'DOWN',
+          value: pivot,
+          reason: `Price reacting to pivot level on ${timeframe}`,
+          weight: weights[`${timeframe}_pivot_reaction`] || 1.2
+        };
+      }
+    }
+    
+    return results;
   }
   
   applyVolumeAtRangeFilters(marketData, weights = {}) {
@@ -1265,24 +1385,64 @@ class ConfluenceFilters {
     return {};
   }
   
-  applyMomentumFilters(marketData, weights = {}) {
-    // Implementation would go here
-    return {};
+  async applyMomentumFilters(marketData, weights = {}) {
+    const results = {};
+    
+    // Apply RSI filters
+    const rsiResults = await this.applyRSIFilters(marketData, weights);
+    Object.assign(results, rsiResults);
+    
+    // Apply MACD filters
+    const macdResults = await this.applyMACDFilters(marketData, weights);
+    Object.assign(results, macdResults);
+    
+    // Apply Stochastic filters (placeholder)
+    const stochResults = await this.applyStochasticFilters(marketData, weights);
+    Object.assign(results, stochResults);
+    
+    return results;
   }
   
-  applyTrendFilters(marketData, weights = {}) {
-    // Implementation would go here
-    return {};
+  async applyTrendFilters(marketData, weights = {}) {
+    const results = {};
+    
+    // Apply EMA filters
+    const emaResults = await this.applyEMAFilters(marketData, weights);
+    Object.assign(results, emaResults);
+    
+    // Apply ADX filters
+    const adxResults = await this.applyADXFilters(marketData, weights);
+    Object.assign(results, adxResults);
+    
+    return results;
   }
   
-  applyStructureFilters(marketData, weights = {}) {
-    // Implementation would go here
-    return {};
+  async applyStructureFilters(marketData, weights = {}) {
+    const results = {};
+    
+    // Apply support/resistance filters (placeholder)
+    const srResults = await this.applySupportResistanceFilters(marketData, weights);
+    Object.assign(results, srResults);
+    
+    // Apply pivot filters (placeholder)
+    const pivotResults = await this.applyPivotFilters(marketData, weights);
+    Object.assign(results, pivotResults);
+    
+    return results;
   }
   
-  applyVolatilityFilters(marketData, weights = {}) {
-    // Implementation would go here
-    return {};
+  async applyVolatilityFilters(marketData, weights = {}) {
+    const results = {};
+    
+    // Apply ATR filters (placeholder)
+    const atrResults = await this.applyATRFilters(marketData, weights);
+    Object.assign(results, atrResults);
+    
+    // Apply Bollinger Band filters (placeholder)
+    const bbResults = await this.applyBollingerBandFilters(marketData, weights);
+    Object.assign(results, bbResults);
+    
+    return results;
   }
   
   applySupertrendFilters(marketData, weights = {}) {

@@ -4,9 +4,16 @@
  * Provides structured logging with file rotation and console output
  */
 
-const winston = require('winston');
 const path = require('path');
 const fs = require('fs-extra');
+
+// Try to load winston, fallback to console logging if not available
+let winston;
+try {
+  winston = require('winston');
+} catch (error) {
+  winston = null;
+}
 
 class Logger {
   static instance = null;
@@ -54,23 +61,24 @@ class Logger {
       const logDir = path.dirname(this.config.logging.file);
       await fs.ensureDir(logDir);
 
-      // Create winston logger
-      this.logger = winston.createLogger({
-        level: this.config.logging.level,
-        format: winston.format.combine(
-          winston.format.timestamp({
-            format: 'YYYY-MM-DD HH:mm:ss'
-          }),
-          winston.format.errors({ stack: true }),
-          winston.format.json()
-        ),
-        defaultMeta: { service: 'ai-trading-bot' },
-        transports: [
-          // File transport with rotation
-          new winston.transports.File({
-            filename: this.config.logging.file,
-            maxsize: this.parseSize(this.config.logging.maxSize),
-            maxFiles: this.config.logging.maxFiles,
+      if (winston) {
+        // Create winston logger
+        this.logger = winston.createLogger({
+          level: this.config.logging.level,
+          format: winston.format.combine(
+            winston.format.timestamp({
+              format: 'YYYY-MM-DD HH:mm:ss'
+            }),
+            winston.format.errors({ stack: true }),
+            winston.format.json()
+          ),
+          defaultMeta: { service: 'ai-trading-bot' },
+          transports: [
+            // File transport with rotation
+            new winston.transports.File({
+              filename: this.config.logging.file,
+              maxsize: this.parseSize(this.config.logging.maxSize),
+              maxFiles: this.config.logging.maxFiles,
             tailable: true
           }),
 
@@ -105,6 +113,15 @@ class Logger {
           )
         }));
       }
+    } else {
+      // Fallback to console logging
+      this.logger = {
+        info: (message, meta = {}) => console.log(`[INFO] ${message}`, meta),
+        error: (message, meta = {}) => console.error(`[ERROR] ${message}`, meta),
+        warn: (message, meta = {}) => console.warn(`[WARN] ${message}`, meta),
+        debug: (message, meta = {}) => console.debug(`[DEBUG] ${message}`, meta)
+      };
+    }
 
       this.isInitialized = true;
     } catch (error) {
