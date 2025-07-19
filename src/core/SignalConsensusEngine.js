@@ -268,37 +268,101 @@ class SignalConsensusEngine {
         const patternDir = this.normalizeDirection(patternPrediction.direction);
         const indicatorDir = this.normalizeDirection(indicatorPrediction.direction);
 
-        // Check if both predictions agree on direction
-        if (patternDir === 'NO_SIGNAL' || indicatorDir === 'NO_SIGNAL') {
+        // If we're in conservative mode, require stricter consensus
+        if (this.config.conservativeMode) {
+            // Modified approach: If one AI has a strong signal, use it even if the other is NO_SIGNAL
+            if (patternDir === 'NO_SIGNAL' && indicatorDir !== 'NO_SIGNAL' && indicatorPrediction.confidence >= 70) {
+                return {
+                    hasConsensus: true,
+                    direction: indicatorDir,
+                    confidenceDiff: 0,
+                    reason: `Using strong indicator signal (${indicatorPrediction.confidence}%) despite no pattern signal`
+                };
+            }
+            
+            if (indicatorDir === 'NO_SIGNAL' && patternDir !== 'NO_SIGNAL' && patternPrediction.confidence >= 70) {
+                return {
+                    hasConsensus: true,
+                    direction: patternDir,
+                    confidenceDiff: 0,
+                    reason: `Using strong pattern signal (${patternPrediction.confidence}%) despite no indicator signal`
+                };
+            }
+            
+            // If both are NO_SIGNAL, we can't generate a consensus
+            if (patternDir === 'NO_SIGNAL' && indicatorDir === 'NO_SIGNAL') {
+                return {
+                    hasConsensus: false,
+                    reason: 'Both AIs returned NO_SIGNAL',
+                    direction: 'NO_SIGNAL'
+                };
+            }
+            
+            // If directions conflict, use the one with higher confidence
+            if (patternDir !== indicatorDir && patternDir !== 'NO_SIGNAL' && indicatorDir !== 'NO_SIGNAL') {
+                const patternConf = patternPrediction.confidence || 0;
+                const indicatorConf = indicatorPrediction.confidence || 0;
+                
+                if (patternConf >= indicatorConf + 20) {
+                    // Pattern is significantly more confident
+                    return {
+                        hasConsensus: true,
+                        direction: patternDir,
+                        confidenceDiff: patternConf - indicatorConf,
+                        reason: `Using pattern signal (${patternConf}%) which is significantly more confident than indicator (${indicatorConf}%)`
+                    };
+                } else if (indicatorConf >= patternConf + 20) {
+                    // Indicator is significantly more confident
+                    return {
+                        hasConsensus: true,
+                        direction: indicatorDir,
+                        confidenceDiff: indicatorConf - patternConf,
+                        reason: `Using indicator signal (${indicatorConf}%) which is significantly more confident than pattern (${patternConf}%)`
+                    };
+                }
+                
+                // If confidence difference is not significant, prefer pattern analysis for OTC
+                return {
+                    hasConsensus: true,
+                    direction: patternDir,
+                    confidenceDiff: Math.abs(patternConf - indicatorConf),
+                    reason: `Using pattern signal (${patternConf}%) over indicator (${indicatorConf}%) for OTC trading`
+                };
+            }
+        } else {
+            // In non-conservative mode, be even more lenient
+            // If either has a signal, use it
+            if (patternDir !== 'NO_SIGNAL') {
+                return {
+                    hasConsensus: true,
+                    direction: patternDir,
+                    confidenceDiff: 0,
+                    reason: `Using pattern signal: ${patternDir}`
+                };
+            }
+            
+            if (indicatorDir !== 'NO_SIGNAL') {
+                return {
+                    hasConsensus: true,
+                    direction: indicatorDir,
+                    confidenceDiff: 0,
+                    reason: `Using indicator signal: ${indicatorDir}`
+                };
+            }
+            
+            // If both are NO_SIGNAL, we can't generate a consensus
             return {
                 hasConsensus: false,
-                reason: 'One or both AIs returned NO_SIGNAL',
+                reason: 'Both AIs returned NO_SIGNAL',
                 direction: 'NO_SIGNAL'
             };
         }
 
-        if (patternDir !== indicatorDir) {
-            return {
-                hasConsensus: false,
-                reason: `Direction mismatch: Pattern AI says ${patternDir}, Indicator AI says ${indicatorDir}`,
-                direction: 'NO_SIGNAL'
-            };
-        }
-
-        // Check confidence alignment
-        const confidenceDiff = Math.abs(patternPrediction.confidence - indicatorPrediction.confidence);
-        if (confidenceDiff > this.config.maxConflictTolerance) {
-            return {
-                hasConsensus: false,
-                reason: `Confidence mismatch: ${confidenceDiff.toFixed(1)}% difference exceeds tolerance`,
-                direction: 'NO_SIGNAL'
-            };
-        }
-
+        // If we get here, both signals agree
         return {
             hasConsensus: true,
             direction: patternDir,
-            confidenceDiff,
+            confidenceDiff: Math.abs(patternPrediction.confidence - indicatorPrediction.confidence),
             reason: `Both AIs agree on ${patternDir} direction`
         };
     }
