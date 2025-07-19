@@ -426,6 +426,73 @@ class QuotexDataExtractor {
         }
     }
 
+    /**
+     * Check if current asset is OTC
+     */
+    isOTCAsset(assetName) {
+        if (!assetName) return false;
+        
+        const name = assetName.toLowerCase();
+        
+        // Common OTC indicators in Quotex
+        if (name.includes('otc') || 
+            name.includes('(w)') || 
+            name.includes('weekend') || 
+            name.includes('synthetic') ||
+            name.includes('random') ||
+            name.includes('crypto idx') ||
+            name.includes('crypto index') ||
+            name.includes('boom') ||
+            name.includes('crash') ||
+            name.includes('volatility') ||
+            name.includes('jump index')) {
+            return true;
+        }
+        
+        // Check for OTC badge in DOM
+        const otcBadge = document.querySelector('.otc-badge, .weekend-badge, [data-otc="true"], .otc-label');
+        if (otcBadge) {
+            return true;
+        }
+        
+        // Check if we're on a weekend (Saturday or Sunday)
+        const day = new Date().getDay();
+        if (day === 0 || day === 6) {
+            // On weekends, most forex pairs are OTC in Quotex
+            if (
+                name.includes('eur/usd') || 
+                name.includes('gbp/usd') || 
+                name.includes('usd/jpy') || 
+                name.includes('aud/usd') || 
+                name.includes('usd/cad') || 
+                name.includes('eur/jpy') ||
+                name.includes('gbp/jpy') ||
+                name.includes('eur/gbp') ||
+                name.includes('aud/jpy') ||
+                name.includes('usd/chf')
+            ) {
+                return true;
+            }
+            
+            // On weekends, most indices are OTC
+            if (
+                name.includes('dax') || 
+                name.includes('cac') || 
+                name.includes('ftse') || 
+                name.includes('dow') || 
+                name.includes('nasdaq') || 
+                name.includes('s&p') || 
+                name.includes('sp500') || 
+                name.includes('nikkei') || 
+                name.includes('hang seng')
+            ) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     isValidCandleData(data) {
         if (!data || typeof data !== 'object') return false;
         
@@ -680,18 +747,44 @@ class QuotexDataExtractor {
     
     dispatchDataEvent(data) {
         try {
+            // Get current asset
+            const currentAsset = this.getCurrentAsset();
+            
+            // Check if it's an OTC asset
+            const isOTC = this.isOTCAsset(currentAsset);
+            
             // Create custom event with extracted data
             const event = new CustomEvent('CANDLE_DATA_EXTRACTED', {
                 detail: {
                     timeframe: data.timeframe,
                     candles: data.candles,
                     timestamp: Date.now(),
-                    method: this.currentMethod
+                    method: this.currentMethod,
+                    asset: currentAsset,
+                    isOTC: isOTC,
+                    broker: 'Quotex'
                 }
             });
             
             // Dispatch on document
             document.dispatchEvent(event);
+            
+            // If it's an OTC asset, also dispatch an OTC-specific event
+            if (isOTC) {
+                const otcEvent = new CustomEvent('OTC_DATA_EXTRACTED', {
+                    detail: {
+                        timeframe: data.timeframe,
+                        candles: data.candles,
+                        timestamp: Date.now(),
+                        method: this.currentMethod,
+                        asset: currentAsset,
+                        isOTC: true,
+                        broker: 'Quotex'
+                    }
+                });
+                
+                document.dispatchEvent(otcEvent);
+            }
         } catch (error) {
             console.error('[Quotex Extractor] Error dispatching data event:', error);
         }

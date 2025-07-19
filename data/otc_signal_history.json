@@ -1,0 +1,52 @@
+{
+  "signals": [
+    {
+      "signal": {
+        "pair": "EUR/USD",
+        "timeframe": "5m",
+        "direction": "NO_SIGNAL",
+        "confidence": 0,
+        "riskScore": "HIGH",
+        "reason": "No matching patterns found",
+        "dataSourcesUsed": {
+          "otc": "historical_database",
+          "historical": "pattern database"
+        },
+        "generatedAt": "2025-07-19T04:53:57.489Z",
+        "processingTime": 0,
+        "signalId": "OTC_EUR/USD_5m_1752900837489",
+        "mode": "OTC",
+        "analysis": {
+          "patternMatches": {
+            "count": 0,
+            "averageSimilarity": 0,
+            "highestSimilarity": 0
+          }
+        }
+      },
+      "marketContext": {
+        "pair": "EUR/USD",
+        "timeframe": "5m",
+        "dataQuality": 1,
+        "patternMatchCount": 0
+      },
+      "timestamp": 1752900837499
+    }
+  ],
+  "performance": {
+    "totalSignals": 1,
+    "successfulSignals": 0,
+    "avgProcessingTime": 181,
+    "avgConfidence": 0,
+    "dataSourceStats": {
+      "otc": {
+        "broker": 1
+      },
+      "historical": {
+        "patterns": 1
+      },
+      "failures": 0
+    }
+  },
+  "lastUpdated": "2025-07-19T04:53:57.513Z"
+}

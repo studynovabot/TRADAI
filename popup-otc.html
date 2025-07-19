@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Candle Sniper - OTC Mode</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="popup-otc.css">
+</head>
+<body class="otc-mode">
+  <div class="container">
+    <header>
+      <div class="logo">
+        <img src="assets/logo.png" alt="AI Candle Sniper Logo">
+        <h1>AI Candle Sniper <span class="otc-badge">OTC</span></h1>
+      </div>
+      <div class="mode-switch">
+        <button id="standardModeBtn" class="mode-btn">Standard</button>
+        <button id="otcModeBtn" class="mode-btn active">OTC</button>
+      </div>
+    </header>
+
+    <!-- Status Panel -->
+    <div class="status-panel">
+      <div>
+        <span class="status-label">OTC Status:</span>
+        <span id="otc-status" class="status-value inactive">Inactive</span>
+      </div>
+      <div>
+        <span class="status-label">Broker:</span>
+        <span id="broker-name" class="status-value">Unknown</span>
+      </div>
+      <div>
+        <span class="status-label">Last Update:</span>
+        <span id="last-update" class="status-value">Never</span>
+      </div>
+    </div>
+
+    <!-- Weekend Notice -->
+    <div id="weekend-notice" class="weekend-notice hidden">
+      🌅 OTC Mode Active - Weekend Trading Available
+    </div>
+
+    <!-- Control Panel -->
+    <div class="control-panel">
+      <button id="activate-otc" class="btn btn-success">Activate OTC</button>
+      <button id="deactivate-otc" class="btn btn-danger" disabled>Deactivate OTC</button>
+    </div>
+
+    <!-- Selection Panel -->
+    <div class="selection-panel">
+      <div class="selection-row">
+        <span class="selection-label">Asset:</span>
+        <select id="asset-list" class="selection-dropdown" disabled>
+          <option value="">Select Asset</option>
+          <option value="EURUSD_OTC">EUR/USD OTC</option>
+          <option value="GBPUSD_OTC">GBP/USD OTC</option>
+          <option value="USDJPY_OTC">USD/JPY OTC</option>
+          <option value="AUDUSD_OTC">AUD/USD OTC</option>
+          <option value="USDCAD_OTC">USD/CAD OTC</option>
+          <option value="USDCHF_OTC">USD/CHF OTC</option>
+          <option value="NZDUSD_OTC">NZD/USD OTC</option>
+          <option value="EURGBP_OTC">EUR/GBP OTC</option>
+          <option value="EURJPY_OTC">EUR/JPY OTC</option>
+          <option value="GBPJPY_OTC">GBP/JPY OTC</option>
+        </select>
+      </div>
+      <div class="selection-row">
+        <span class="selection-label">Timeframe:</span>
+        <select id="timeframe-list" class="selection-dropdown" disabled>
+          <option value="1M">1 Minute</option>
+          <option value="3M">3 Minutes</option>
+          <option value="5M" selected>5 Minutes</option>
+          <option value="15M">15 Minutes</option>
+          <option value="30M">30 Minutes</option>
+          <option value="1H">1 Hour</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="control-panel">
+      <button id="generate-signal" class="btn btn-primary" disabled>Generate Signal</button>
+      <button id="place-trade" class="btn btn-success" disabled>Place Trade</button>
+    </div>
+
+    <!-- Signal Panel -->
+    <div id="signal-panel" class="signal-panel" style="display: none;">
+      <div class="signal-header">
+        <span class="signal-title">AI Signal</span>
+        <span id="signal-confidence" class="signal-confidence">High</span>
+      </div>
+      
+      <div id="signal-direction" class="signal-direction direction-neutral">
+        Waiting for signal...
+      </div>
+      
+      <div class="signal-details">
+        <div class="signal-detail">
+          <span>Asset:</span>
+          <span id="signal-asset">--</span>
+        </div>
+        <div class="signal-detail">
+          <span>Timeframe:</span>
+          <span id="signal-timeframe">--</span>
+        </div>
+        <div class="signal-detail">
+          <span>Entry:</span>
+          <span id="signal-entry">--</span>
+        </div>
+        <div class="signal-detail">
+          <span>Expiry:</span>
+          <span id="signal-expiry">--</span>
+        </div>
+      </div>
+      
+      <div id="signal-reason" class="signal-reason">
+        Signal analysis will appear here...
+      </div>
+    </div>
+
+    <!-- Performance Metrics -->
+    <div class="section">
+      <h3>Performance</h3>
+      <div class="metrics-grid">
+        <div class="metric">
+          <span class="metric-label">Total Trades</span>
+          <span id="total-trades" class="metric-value">0</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Win Rate</span>
+          <span id="win-rate" class="metric-value">0%</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Profit/Loss</span>
+          <span id="profit-loss" class="metric-value">$0.00</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Best Streak</span>
+          <span id="best-streak" class="metric-value">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trade History -->
+    <div class="section">
+      <h3>Recent Trades</h3>
+      <div id="trade-history" class="trade-history">
+        <div class="trade-item">
+          <span class="trade-pair">No trades yet</span>
+          <span class="trade-direction">-</span>
+          <span class="trade-time">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Status -->
+    <div class="section">
+      <h3>System Status</h3>
+      <div class="system-status">
+        <div class="status-item">
+          <span class="status-component">Data Extractor</span>
+          <span id="extractor-status" class="component-status unknown">Unknown</span>
+        </div>
+        <div class="status-item">
+          <span class="status-component">Data Validator</span>
+          <span id="validator-status" class="component-status unknown">Unknown</span>
+        </div>
+        <div class="status-item">
+          <span class="status-component">Error Handler</span>
+          <span id="error-handler-status" class="component-status unknown">Unknown</span>
+        </div>
+        <div class="status-item">
+          <span class="status-component">Background Script</span>
+          <span id="background-status" class="component-status unknown">Unknown</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div id="debug-panel" class="debug-panel" style="display: none;">
+      <h3>Debug Information</h3>
+      <div class="debug-content">
+        <div class="debug-item">
+          <span class="debug-label">Data Points:</span>
+          <span id="debug-data-points">0</span>
+        </div>
+        <div class="debug-item">
+          <span class="debug-label">Error Rate:</span>
+          <span id="debug-error-rate">0%</span>
+        </div>
+        <div class="debug-item">
+          <span class="debug-label">Memory Usage:</span>
+          <span id="debug-memory">0 MB</span>
+        </div>
+        <div class="debug-item">
+          <span class="debug-label">Response Time:</span>
+          <span id="debug-response-time">0 ms</span>
+        </div>
+      </div>
+      <div class="debug-actions">
+        <button id="run-tests" class="btn btn-secondary">Run Tests</button>
+        <button id="clear-logs" class="btn btn-secondary">Clear Logs</button>
+        <button id="export-data" class="btn btn-secondary">Export Data</button>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-links">
+        <button id="toggle-debug" class="link-button">Debug</button>
+        <button id="show-help" class="link-button">Help</button>
+        <button id="show-settings" class="link-button">Settings</button>
+      </div>
+      <div class="footer-info">
+        AI Candle Sniper OTC v1.0.0
+      </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading...</div>
+    </div>
+
+    <!-- Notification Container -->
+    <div id="notification-container"></div>
+  </div>
+
+  <script src="popup-otc.js"></script>
+</body>
+</html>

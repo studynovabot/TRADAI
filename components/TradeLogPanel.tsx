@@ -248,9 +248,9 @@ export function TradeLogPanel() {
     }
   };
 
-  const winRate = tradeLogs.length > 0 
-    ? (tradeLogs.filter(log => log.result === 'win').length / tradeLogs.filter(log => log.result !== 'pending' && log.result !== 'expired').length * 100) || 0
-    : 0;
+  // const winRate = tradeLogs.length > 0 
+  //   ? (tradeLogs.filter(log => log.result === 'win').length / tradeLogs.filter(log => log.result !== 'pending' && log.result !== 'expired').length * 100) || 0
+  //   : 0;
 
   return (
     <div className="bg-gray-800/50 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50 shadow-2xl">
@@ -258,7 +258,6 @@ export function TradeLogPanel() {
         <TrendingUp className="mr-3 text-purple-400" size={24} />
         Performance Tracker
       </h2>
-
       {/* Tab Navigation */}
       <div className="flex mb-6 bg-gray-700/50 rounded-lg p-1">
         <button
@@ -360,40 +359,47 @@ export function TradeLogPanel() {
                         {log.signal}
                       </span>
                     </div>
-                    <div className={`px-2 py-1 rounded-full text-xs border font-medium ${getResultBg(log.result)} ${getResultColor(log.result)}`}>
-                      {getResultLabel(log.result)}
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getResultBg(log.result)}`}>
+                        {getResultLabel(log.result)}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        {new Date(log.timestamp).toLocaleTimeString()}
+                      </span>
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-3 gap-2 text-sm mt-2">
-                    <div>
-                      <span className="text-gray-400">Confidence:</span>
-                      <span className="text-white ml-1">{log.confidence.toFixed(1)}%</span>
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center space-x-4">
+                      <span className="text-gray-400">
+                        Confidence: <span className="text-white">{log.confidence}%</span>
+                      </span>
+                      <span className="text-gray-400">
+                        Duration: <span className="text-white">{log.trade_duration}</span>
+                      </span>
                     </div>
-                    <div>
-                      <span className="text-gray-400">Duration:</span>
-                      <span className="text-white ml-1">{log.trade_duration}</span>
-                    </div>
-                    {log.profit_loss !== undefined && log.result !== 'pending' && (
-                      <div>
-                        <span className="text-gray-400">P/L:</span>
-                        <span className={`ml-1 ${log.profit_loss >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {log.profit_loss >= 0 ? '+' : ''}{log.profit_loss.toFixed(2)}%
-                        </span>
-                      </div>
+                    {log.profit_loss !== undefined && (
+                      <span className={`font-medium ${
+                        log.profit_loss > 0 ? 'text-green-400' : 
+                        log.profit_loss < 0 ? 'text-red-400' : 'text-gray-400'
+                      }`}>
+                        {log.profit_loss > 0 ? '+' : ''}{log.profit_loss.toFixed(2)}%
+                      </span>
                     )}
                   </div>
                   
-                  <div className="mt-2 text-xs text-gray-400">
-                    {new Date(log.timestamp).toLocaleString()}
-                  </div>
+                  {log.reason && (
+                    <div className="mt-2 text-xs text-gray-400 bg-gray-600/30 rounded p-2">
+                      {log.reason}
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
               <div className="text-center py-12 bg-gray-700/30 rounded-lg border border-gray-600/50">
-                <div className="text-4xl mb-3">📊</div>
-                <p className="text-gray-300 font-medium">No trades logged yet</p>
-                <p className="text-sm text-gray-400 mt-2">Generate and log your first signal to get started</p>
+                <Clock className="mx-auto mb-3 text-gray-400" size={48} />
+                <p className="text-gray-300 font-medium">No trade history available</p>
+                <p className="text-sm text-gray-400 mt-2">Generate signals and log results to see your trading history</p>
               </div>
             )}
           </div>
@@ -504,7 +510,7 @@ export function TradeLogPanel() {
                   </div>
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-sm text-gray-300">Low Confidence (<70%)</span>
+                      <span className="text-sm text-gray-300">Low Confidence (&lt;70%)</span>
                       <span className="text-sm text-red-400">{performanceStats.confidenceAccuracy.low}%</span>
                     </div>
                     <div className="w-full bg-gray-600 rounded-full h-2">

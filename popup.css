@@ -21,10 +21,36 @@ body {
 
 /* Header */
 .header {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-bottom: 20px;
     padding: 12px 0;
     border-bottom: 2px solid #3b3b52;
+}
+
+/* Mode Switch */
+.mode-switch {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.mode-btn {
+    background-color: #3b3b52;
+    color: #9ca3af;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.mode-btn.active {
+    background-color: #7c3aed;
+    color: white;
+    font-weight: bold;
 }
 
 .header h1 {

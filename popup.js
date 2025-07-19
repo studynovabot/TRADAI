@@ -37,6 +37,9 @@ class CandleSniperUI {
     }
 
     setupEventListeners() {
+        // Mode switch
+        document.getElementById('otcModeBtn').addEventListener('click', () => this.switchToOTCMode());
+        
         // Main control buttons
         document.getElementById('startAnalysis').addEventListener('click', () => this.startAnalysis());
         document.getElementById('stopAnalysis').addEventListener('click', () => this.stopAnalysis());
@@ -2019,6 +2022,34 @@ class CandleSniperUI {
                 this.displaySignal(response.signal);
             }
         });
+    }
+    
+    /**
+     * Switch to OTC mode
+     */
+    switchToOTCMode() {
+        // First check if we're on a weekend
+        const today = new Date().getDay();
+        const isWeekend = today === 0 || today === 6; // 0 = Sunday, 6 = Saturday
+        
+        if (!isWeekend) {
+            // Show confirmation dialog for weekday OTC mode
+            if (!confirm('OTC mode is primarily designed for weekend trading. Continue anyway?')) {
+                return;
+            }
+        }
+        
+        // Activate OTC mode in background
+        chrome.runtime.sendMessage({
+            action: 'activateOTCMode',
+            data: {
+                requestedBy: 'popup',
+                manualActivation: true
+            }
+        });
+        
+        // Navigate to OTC popup
+        window.location.href = 'popup-otc.html';
     }
 }
 

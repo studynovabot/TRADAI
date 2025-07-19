@@ -42,7 +42,79 @@ class CandleSniperEngine {
         await this.loadTradeHistory();
         await this.loadTradeSettings();
         
+        // Initialize OTC mode handler
+        await this.initializeOTCMode();
+        
         console.log('[Candle Sniper] ✅ Enhanced background engine ready');
+    }
+    
+    /**
+     * Initialize OTC mode components
+     */
+    async initializeOTCMode() {
+        try {
+            console.log('[Candle Sniper] Initializing OTC mode...');
+            
+            // Import OTC handler
+            // Note: In a real extension, this would be imported at the top of the file
+            // or included in the manifest.json as a background script
+            
+            // For now, we'll assume the OTC handler is already loaded
+            // and available as a global variable
+            
+            // Set up OTC data listener
+            this.setupOTCDataListener();
+            
+            console.log('[Candle Sniper] OTC mode initialized');
+        } catch (error) {
+            console.error('[Candle Sniper] Error initializing OTC mode:', error);
+        }
+    }
+    
+    /**
+     * Set up listener for OTC data from content scripts
+     */
+    setupOTCDataListener() {
+        // Listen for OTC data events from content scripts
+        chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+            try {
+                if (message && message.type === 'OTC_DATA') {
+                    // Process OTC data with error handling
+                    if (window.otcModeHandler) {
+                        await window.otcModeHandler.processOTCData(message.data);
+                        sendResponse({ success: true });
+                    } else {
+                        console.error('[Background] OTC mode handler not available');
+                        sendResponse({ success: false, error: 'OTC mode handler not available' });
+                    }
+                    return true;
+                }
+                
+                // Handle OTC offline mode
+                if (message && message.action === 'OTC_OFFLINE_MODE') {
+                    console.log('[Background] OTC offline mode activated:', message.data);
+                    // Handle offline mode logic here
+                    sendResponse({ success: true });
+                    return true;
+                }
+                
+                return false;
+            } catch (error) {
+                console.error('[Background] Error in OTC data listener:', error);
+                
+                // Use error handler if available
+                if (window.otcErrorHandler) {
+                    await window.otcErrorHandler.handleError(error, 'SYSTEM', {
+                        context: 'otc_data_listener',
+                        message: message,
+                        sender: sender
+                    });
+                }
+                
+                sendResponse({ success: false, error: error.message });
+                return true;
+            }
+        });
     }
     
     async loadTradeHistory() {
@@ -413,6 +485,39 @@ class CandleSniperEngine {
                         reason: this.getAutoTradeBlockReason()
                     });
                     break;
+                    
+                // OTC Mode messages
+                case 'activateOTCMode':
+                    this.handleActivateOTCMode(message.data, sender, sendResponse);
+                    return true; // Keep channel open for async response
+                    
+                case 'deactivateOTCMode':
+                    this.handleDeactivateOTCMode(sender, sendResponse);
+                    return true; // Keep channel open for async response
+                    
+                case 'getOTCExtractionStatus':
+                    this.handleGetOTCStatus(sendResponse);
+                    return true; // Keep channel open for async response
+                    
+                case 'getAvailableOTCPairs':
+                    this.handleGetAvailableOTCPairs(sendResponse);
+                    return true; // Keep channel open for async response
+                    
+                case 'getOTCHistoricalData':
+                    this.handleGetOTCHistoricalData(message.data, sendResponse);
+                    return true; // Keep channel open for async response
+                    
+                case 'generateOTCSignal':
+                    this.handleGenerateOTCSignal(message.data, sendResponse);
+                    return true; // Keep channel open for async response
+                    
+                case 'placeOTCTrade':
+                    this.handlePlaceOTCTrade(message.data, sender, sendResponse);
+                    return true; // Keep channel open for async response
+                    
+                case 'getOTCTradeHistory':
+                    this.handleGetOTCTradeHistory(sendResponse);
+                    return true; // Keep channel open for async response
             }
             
             // Return true to indicate we'll respond asynchronously
@@ -2632,6 +2737,340 @@ class RiskManager {
         });
         
         console.log('[Candle Sniper] 📝 REAL signal logged with full verification');
+    }
+    
+    // ==================== OTC MODE HANDLERS ====================
+    
+    /**
+     * Handle OTC mode activation
+     */
+    async handleActivateOTCMode(data, sender, sendResponse) {
+        try {
+            console.log('[Background] Activating OTC mode...');
+            
+            // Initialize OTC mode handler if not already done
+            if (!window.otcModeHandler) {
+                await this.initializeOTCMode();
+            }
+            
+            if (window.otcModeHandler) {
+                const result = await window.otcModeHandler.activateOTCMode(data);
+                
+                // If activation successful, inject content script
+                if (result.success && sender.tab?.id) {
+                    await this.injectOTCContentScript(sender.tab.id);
+                }
+                
+                sendResponse(result);
+            } else {
+                sendResponse({ 
+                    success: false, 
+                    error: 'OTC mode handler not available' 
+                });
+            }
+        } catch (error) {
+            console.error('[Background] Error activating OTC mode:', error);
+            
+            // Use error handler if available
+            if (window.otcErrorHandler) {
+                await window.otcErrorHandler.handleError(error, 'SYSTEM', {
+                    context: 'activate_otc_mode',
+                    data: data
+                });
+            }
+            
+            sendResponse({ 
+                success: false, 
+                error: error.message 
+            });
+        }
+    }
+    
+    /**
+     * Handle OTC mode deactivation
+     */
+    async handleDeactivateOTCMode(sender, sendResponse) {
+        try {
+            console.log('[Background] Deactivating OTC mode...');
+            
+            if (window.otcModeHandler) {
+                const result = await window.otcModeHandler.deactivateOTCMode();
+                sendResponse(result);
+            } else {
+                sendResponse({ 
+                    success: false, 
+                    error: 'OTC mode handler not available' 
+                });
+            }
+        } catch (error) {
+            console.error('[Background] Error deactivating OTC mode:', error);
+            
+            // Use error handler if available
+            if (window.otcErrorHandler) {
+                await window.otcErrorHandler.handleError(error, 'SYSTEM', {
+                    context: 'deactivate_otc_mode'
+                });
+            }
+            
+            sendResponse({ 
+                success: false, 
+                error: error.message 
+            });
+        }
+    }
+    
+    /**
+     * Handle get OTC status
+     */
+    async handleGetOTCStatus(sendResponse) {
+        try {
+            if (window.otcModeHandler) {
+                const status = await window.otcModeHandler.getStatus();
+                sendResponse(status);
+            } else {
+                sendResponse({
+                    isExtracting: false,
+                    broker: 'Unknown',
+                    lastUpdate: null,
+                    error: 'OTC mode handler not available'
+                });
+            }
+        } catch (error) {
+            console.error('[Background] Error getting OTC status:', error);
+            sendResponse({
+                isExtracting: false,
+                broker: 'Unknown',
+                lastUpdate: null,
+                error: error.message
+            });
+        }
+    }
+    
+    /**
+     * Handle get available OTC pairs
+     */
+    async handleGetAvailableOTCPairs(sendResponse) {
+        try {
+            if (window.otcModeHandler) {
+                const pairs = await window.otcModeHandler.getAvailablePairs();
+                sendResponse({
+                    success: true,
+                    pairs: pairs || []
+                });
+            } else {
+                sendResponse({
+                    success: false,
+                    pairs: [],
+                    error: 'OTC mode handler not available'
+                });
+            }
+        } catch (error) {
+            console.error('[Background] Error getting available OTC pairs:', error);
+            sendResponse({
+                success: false,
+                pairs: [],
+                error: error.message
+            });
+        }
+    }
+    
+    /**
+     * Handle get OTC historical data
+     */
+    async handleGetOTCHistoricalData(data, sendResponse) {
+        try {
+            if (window.otcModeHandler) {
+                const historicalData = await window.otcModeHandler.getHistoricalData(
+                    data.pair, 
+                    data.timeframe, 
+                    data.limit
+                );
+                sendResponse({
+                    success: true,
+                    data: historicalData
+                });
+            } else {
+                sendResponse({
+                    success: false,
+                    data: null,
+                    error: 'OTC mode handler not available'
+                });
+            }
+        } catch (error) {
+            console.error('[Background] Error getting OTC historical data:', error);
+            sendResponse({
+                success: false,
+                data: null,
+                error: error.message
+            });
+        }
+    }
+    
+    /**
+     * Handle generate OTC signal
+     */
+    async handleGenerateOTCSignal(data, sendResponse) {
+        try {
+            if (window.otcModeHandler) {
+                const signal = await window.otcModeHandler.generateSignal(
+                    data.pair, 
+                    data.timeframe
+                );
+                sendResponse({
+                    success: true,
+                    signal: signal
+                });
+            } else {
+                sendResponse({
+                    success: false,
+                    signal: null,
+                    error: 'OTC mode handler not available'
+                });
+            }
+        } catch (error) {
+            console.error('[Background] Error generating OTC signal:', error);
+            sendResponse({
+                success: false,
+                signal: null,
+                error: error.message
+            });
+        }
+    }
+    
+    /**
+     * Handle place OTC trade
+     */
+    async handlePlaceOTCTrade(data, sender, sendResponse) {
+        try {
+            if (!sender.tab?.id) {
+                sendResponse({
+                    success: false,
+                    error: 'No active tab for trade execution'
+                });
+                return;
+            }
+            
+            // Send trade request to content script
+            chrome.tabs.sendMessage(sender.tab.id, {
+                action: 'PLACE_OTC_TRADE',
+                data: data
+            }, (response) => {
+                if (chrome.runtime.lastError) {
+                    sendResponse({
+                        success: false,
+                        error: chrome.runtime.lastError.message
+                    });
+                } else {
+                    // Log trade if successful
+                    if (response && response.success) {
+                        this.logOTCTrade(response.trade);
+                    }
+                    sendResponse(response);
+                }
+            });
+        } catch (error) {
+            console.error('[Background] Error placing OTC trade:', error);
+            sendResponse({
+                success: false,
+                error: error.message
+            });
+        }
+    }
+    
+    /**
+     * Handle get OTC trade history
+     */
+    async handleGetOTCTradeHistory(sendResponse) {
+        try {
+            const result = await new Promise((resolve) => {
+                chrome.storage.local.get(['otcTradeHistory'], (data) => {
+                    resolve(data.otcTradeHistory || []);
+                });
+            });
+            
+            sendResponse({
+                success: true,
+                trades: result
+            });
+        } catch (error) {
+            console.error('[Background] Error getting OTC trade history:', error);
+            sendResponse({
+                success: false,
+                trades: [],
+                error: error.message
+            });
+        }
+    }
+    
+    /**
+     * Inject OTC content script into tab
+     */
+    async injectOTCContentScript(tabId) {
+        try {
+            console.log('[Background] Injecting OTC content script into tab:', tabId);
+            
+            // Check if content script is already injected
+            const response = await new Promise((resolve) => {
+                chrome.tabs.sendMessage(tabId, { action: 'PING' }, resolve);
+            });
+            
+            if (response && response.success) {
+                console.log('[Background] OTC content script already active');
+                return;
+            }
+            
+            // Inject content script
+            await chrome.scripting.executeScript({
+                target: { tabId: tabId },
+                files: ['otc-content.js']
+            });
+            
+            console.log('[Background] OTC content script injected successfully');
+        } catch (error) {
+            console.error('[Background] Error injecting OTC content script:', error);
+            
+            // Use error handler if available
+            if (window.otcErrorHandler) {
+                await window.otcErrorHandler.handleError(error, 'SYSTEM', {
+                    context: 'inject_otc_content_script',
+                    tabId: tabId
+                });
+            }
+        }
+    }
+    
+    /**
+     * Log OTC trade
+     */
+    async logOTCTrade(trade) {
+        try {
+            const tradeLog = {
+                ...trade,
+                id: `otc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                timestamp: Date.now(),
+                type: 'OTC'
+            };
+            
+            // Get existing trade history
+            const result = await new Promise((resolve) => {
+                chrome.storage.local.get(['otcTradeHistory'], resolve);
+            });
+            
+            const tradeHistory = result.otcTradeHistory || [];
+            tradeHistory.unshift(tradeLog);
+            
+            // Keep only last 100 trades
+            const limitedHistory = tradeHistory.slice(0, 100);
+            
+            // Save to storage
+            await new Promise((resolve) => {
+                chrome.storage.local.set({ otcTradeHistory: limitedHistory }, resolve);
+            });
+            
+            console.log('[Background] OTC trade logged:', tradeLog);
+        } catch (error) {
+            console.error('[Background] Error logging OTC trade:', error);
+        }
     }
 }
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Rocket, TrendingUp, Clock, Zap, AlertTriangle } from 'lucide-react';
+import { Rocket, TrendingUp, Clock, Zap, AlertTriangle, Calendar, ToggleLeft } from 'lucide-react';
 import { AssetSelector } from './AssetSelector';
 import { SignalOutput } from './SignalOutput';
 import { updateCurrentSignal } from './TradeLogPanel';
@@ -15,6 +15,7 @@ export interface SignalData {
   timestamp: string;
   candle_timestamp?: string;
   timeframe_analysis?: any;
+  mode?: 'REGULAR' | 'OTC';
 }
 
 export function SignalGeneratorPanel() {
@@ -25,6 +26,7 @@ export function SignalGeneratorPanel() {
   const [error, setError] = useState<string | null>(null);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisStage, setAnalysisStage] = useState('');
+  const [otcMode, setOtcMode] = useState(false);
 
   // Trade duration options
   const durations = [
@@ -36,7 +38,7 @@ export function SignalGeneratorPanel() {
   ];
 
   // Analysis stages for the progress indicator
-  const analysisStages = [
+  const regularAnalysisStages = [
     'Collecting market data...',
     'Analyzing 5m timeframe...',
     'Analyzing 15m timeframe...',
@@ -48,6 +50,22 @@ export function SignalGeneratorPanel() {
     'Validating signal quality...',
     'Finalizing trade recommendation...'
   ];
+  
+  // OTC mode analysis stages
+  const otcAnalysisStages = [
+    'Collecting OTC market data...',
+    'Extracting current price patterns...',
+    'Searching historical pattern database...',
+    'Finding similar weekend patterns...',
+    'Calculating pattern similarity scores...',
+    'Analyzing historical outcomes...',
+    'Determining prediction confidence...',
+    'Validating pattern match quality...',
+    'Finalizing OTC trade recommendation...'
+  ];
+  
+  // Use the appropriate stages based on mode
+  const analysisStages = otcMode ? otcAnalysisStages : regularAnalysisStages;
 
   const generateSignal = async () => {
     setIsGenerating(true);
@@ -70,14 +88,16 @@ export function SignalGeneratorPanel() {
       
       /* 
       // Actual API call for production use
-      const response = await fetch('/api/enhanced-generate-signal', {
+      const endpoint = otcMode ? '/api/otc-generate-signal' : '/api/enhanced-generate-signal';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           symbol: selectedAsset,
-          trade_duration: tradeDuration
+          trade_duration: tradeDuration,
+          otcMode: otcMode
         }),
       });
 
@@ -110,7 +130,12 @@ export function SignalGeneratorPanel() {
   const generateMockSignalData = (symbol, tradeDuration) => {
     // Randomize signal type with weighted probability
     const signalTypes = ['BUY', 'SELL', 'NO TRADE'];
-    const weights = [0.4, 0.4, 0.2]; // 40% buy, 40% sell, 20% no trade
+    
+    // Adjust weights based on mode
+    // OTC mode has slightly lower confidence (more NO TRADE signals)
+    const weights = otcMode 
+      ? [0.35, 0.35, 0.3]  // 35% buy, 35% sell, 30% no trade for OTC
+      : [0.4, 0.4, 0.2];   // 40% buy, 40% sell, 20% no trade for regular
     
     let signalTypeIndex = 0;
     const random = Math.random();
@@ -202,6 +227,17 @@ export function SignalGeneratorPanel() {
     };
     const formattedTimestamp = now.toLocaleString('en-IN', istOptions);
     
+    // Generate OTC-specific reason if in OTC mode
+    if (otcMode) {
+      if (signalType === 'BUY') {
+        reason = `Pattern match found with ${Math.round(75 + Math.random() * 15)}% similarity to historical weekend data. ${bullishTimeframes.length} similar patterns showed bullish continuation. RSI at ${rsi.toFixed(2)} indicates momentum. ${patternDirection.charAt(0).toUpperCase() + patternDirection.slice(1)} ${patternType.replace('_', ' ')} pattern detected with ${Math.round(patternStrength * 100)}% strength.`;
+      } else if (signalType === 'SELL') {
+        reason = `Pattern match found with ${Math.round(75 + Math.random() * 15)}% similarity to historical weekend data. ${bearishTimeframes.length} similar patterns showed bearish continuation. RSI at ${rsi.toFixed(2)} indicates momentum shift. ${patternDirection.charAt(0).toUpperCase() + patternDirection.slice(1)} ${patternType.replace('_', ' ')} pattern detected with ${Math.round(patternStrength * 100)}% strength.`;
+      } else {
+        reason = `Insufficient pattern matches in historical weekend data. Current pattern has only ${Math.round(50 + Math.random() * 20)}% similarity to known patterns. RSI at neutral level (${rsi.toFixed(2)}). Recommend waiting for clearer market direction.`;
+      }
+    }
+
     return {
       symbol,
       signal: signalType,
@@ -212,6 +248,7 @@ export function SignalGeneratorPanel() {
       timestamp: Date.now(),
       candle_timestamp: formattedTimestamp,
       entry_price: 1.0 + Math.random() * 0.1, // Mock price
+      mode: otcMode ? 'OTC' : 'REGULAR',
       indicators: {
         rsi,
         macd: {
@@ -241,7 +278,18 @@ export function SignalGeneratorPanel() {
           bullishTimeframes,
           bearishTimeframes
         }
-      }
+      },
+      // Add OTC-specific data if in OTC mode
+      ...(otcMode && {
+        patternMatches: {
+          count: Math.floor(3 + Math.random() * 7),
+          similarity: Math.round(75 + Math.random() * 20),
+          historicalOutcomes: {
+            bullish: Math.floor(Math.random() * 10),
+            bearish: Math.floor(Math.random() * 10)
+          }
+        }
+      })
     };
   };
 
@@ -332,6 +380,33 @@ export function SignalGeneratorPanel() {
             </option>
           ))}
         </select>
+      </div>
+      
+      {/* OTC Mode Toggle */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-gray-300 flex items-center">
+            <Calendar className="mr-2 text-cyan-400" size={16} />
+            Enable OTC Mode (Weekend Trading)
+          </label>
+          <div 
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+              otcMode ? 'bg-cyan-600' : 'bg-gray-600'
+            } cursor-pointer`}
+            onClick={() => setOtcMode(!otcMode)}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                otcMode ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </div>
+        </div>
+        <p className="mt-2 text-xs text-gray-400">
+          {otcMode 
+            ? "OTC Mode enabled: Using pattern matching for weekend trading signals" 
+            : "OTC Mode disabled: Using real-time market data for trading signals"}
+        </p>
       </div>
 
       {/* Generate Button */}
