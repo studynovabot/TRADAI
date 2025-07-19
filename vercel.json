@@ -1,10 +1,30 @@
 {
   "version": 2,
+  "name": "tradai-otc-signal-generator",
   "framework": "nextjs",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "env": {
     "NODE_ENV": "production"
-  }
+  },
+  "functions": {
+    "pages/api/otc-signal-generator.js": {
+      "maxDuration": 300
+    },
+    "pages/api/otc-signal-generator/health.js": {
+      "maxDuration": 30
+    }
+  },
+  "regions": ["iad1"],
+  "routes": [
+    {
+      "src": "/api/otc-signal-generator/(.*)",
+      "dest": "/api/otc-signal-generator/$1"
+    },
+    {
+      "src": "/otc-signal-generator",
+      "dest": "/otc-signal-generator"
+    }
+  ]
 }

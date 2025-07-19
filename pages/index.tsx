@@ -96,6 +96,25 @@ export default function Home() {
           >
             Multi-Timeframe Analysis | Deep Market Confluence
           </motion.p>
+          
+          {/* Navigation to OTC Signal Generator */}
+          <motion.div 
+            className="mb-6"
+            variants={itemVariants}
+          >
+            <motion.a
+              href="/otc-signal-generator"
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 rounded-lg font-bold text-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              🤖 NEW: OTC Signal Generator
+              <span className="ml-2 text-sm bg-yellow-400 text-black px-2 py-1 rounded-full">LIVE</span>
+            </motion.a>
+            <p className="text-sm text-gray-400 mt-2">
+              Real-time browser automation + OCR + AI pattern matching for OTC markets
+            </p>
+          </motion.div>
           <motion.div 
             className="text-sm text-gray-500 flex items-center justify-center gap-4"
             variants={itemVariants}

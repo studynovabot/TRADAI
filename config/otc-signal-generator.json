@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "name": "OTC Signal Generator",
+  "description": "Comprehensive OTC trading signal generator with browser automation and AI analysis",
+  "features": [
+    "Real-time browser automation",
+    "OCR-based data extraction",
+    "Historical pattern matching",
+    "AI indicator analysis",
+    "Dual AI consensus validation",
+    "Multi-timeframe analysis",
+    "Risk assessment",
+    "Signal logging"
+  ],
+  "supportedPlatforms": [
+    "quotex",
+    "pocketOption"
+  ],
+  "supportedPairs": [
+    "EUR/USD OTC",
+    "GBP/USD OTC",
+    "USD/JPY OTC",
+    "AUD/USD OTC",
+    "USD/CAD OTC",
+    "USD/CHF OTC",
+    "NZD/USD OTC",
+    "EUR/JPY OTC"
+  ],
+  "timeframes": [
+    "1M",
+    "3M",
+    "5M",
+    "15M",
+    "30M",
+    "1H"
+  ],
+  "setupDate": "2025-07-19T13:56:43.620Z"
+}
