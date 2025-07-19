@@ -1,0 +1,95 @@
+{
+  "timestamp": "2025-07-19T12:43:01.237Z",
+  "testType": "OTC Workflow Comprehensive Test",
+  "totalTests": 14,
+  "passedTests": 11,
+  "failedTests": 3,
+  "criticalIssues": [
+    "End-to-end workflow failed: Workflow produced no valid signal"
+  ],
+  "warnings": [
+    "Twelve Data showing stale data (>30 min old)",
+    "Alpha Vantage API failed: Invalid response from Alpha Vantage API",
+    "OTC data extraction failed: Unexpected token ')'",
+    "High number of synthetic data references (25)"
+  ],
+  "recommendations": [
+    "Address critical issues before production use",
+    "Reduce dependency on synthetic/mock data"
+  ],
+  "dataSourceValidation": {
+    "twelveData": {
+      "status": "CONNECTED",
+      "latestCandleAge": "578.0 minutes",
+      "dataFreshness": "STALE",
+      "samplePrice": "1.16207"
+    },
+    "alphaVantage": {
+      "status": "FAILED",
+      "error": "Invalid response from Alpha Vantage API"
+    },
+    "historicalData": {
+      "status": "AVAILABLE",
+      "dataFiles": 1,
+      "sampleFiles": [
+        "EUR_USD_OTC_5M.json"
+      ]
+    },
+    "otcExtractor": {
+      "status": "FAILED",
+      "error": "Unexpected token ')'"
+    },
+    "syntheticDataScan": {
+      "mockReferences": 2,
+      "simulatedDataReferences": 14,
+      "fallbackReferences": 1,
+      "testDataReferences": 8,
+      "totalReferences": 25,
+      "riskLevel": "HIGH"
+    }
+  },
+  "signalAuthenticity": {
+    "totalSignalsTested": 6,
+    "validSignals": 6,
+    "averageAuthenticityScore": 90,
+    "commonIssues": {
+      "Very low confidence suggests poor analysis": 6
+    },
+    "commonPositives": {
+      "Uses pattern matching": 6
+    },
+    "verdict": "AUTHENTIC"
+  },
+  "workflowIntegrity": {
+    "signalGenerator": {
+      "status": "WORKING",
+      "sampleSignal": {
+        "direction": "NO_SIGNAL",
+        "confidence": 0,
+        "reason": "No matching patterns found",
+        "mode": "OTC"
+      }
+    },
+    "patternMatcher": {
+      "status": "WORKING",
+      "sampleMatch": {
+        "direction": "NO_SIGNAL",
+        "confidence": 0,
+        "matchCount": 0
+      }
+    },
+    "historicalCollector": {
+      "status": "WORKING",
+      "dataAvailable": 10
+    }
+  },
+  "performanceMetrics": {
+    "totalTests": 5,
+    "successfulTests": 0,
+    "successRate": "0.0%",
+    "averageProcessingTime": "NaNms",
+    "averageConfidence": "NaN%",
+    "totalTestTime": "389ms"
+  },
+  "finalVerdict": "ACCEPTABLE"
+}

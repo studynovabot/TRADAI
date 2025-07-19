@@ -481,6 +481,5 @@ if (typeof window !== 'undefined') {
   
   window.OTCHistoricalDataCollector = BrowserOTCHistoricalData;
 }
-}
 
 module.exports = { OTCHistoricalDataCollector };
