@@ -126,13 +126,178 @@ class ServerlessOTCSignalGenerator {
             // Extract currency pair for data fetching
             const symbol = this.extractSymbol(params.currencyPair);
             
-            // Step 1: Get historical data (Yahoo Finance)
-            console.log('📊 Fetching historical data...');
-            const historicalData = await this.historicalMatcher.getHistoricalData(symbol, {
-                period: '5d', // Last 5 days
-                interval: params.timeframe || '5m'
-            });
-
+            // Step 1: Get real market data from multiple sources
+            console.log('📊 Fetching real market data...');
+            
+            // Try to get data from multiple sources to ensure we have real data
+            let historicalData = [];
+            let dataSource = 'unknown';
+            
+            // First try Yahoo Finance (most reliable)
+            try {
+                console.log('📈 Fetching data from Yahoo Finance...');
+                historicalData = await this.historicalMatcher.getHistoricalData(symbol, {
+                    period: '5d', // Last 5 days
+                    interval: params.timeframe || '5m'
+                });
+                
+                if (historicalData && historicalData.length >= 50) {
+                    console.log(`✅ Successfully fetched ${historicalData.length} candles from Yahoo Finance`);
+                    dataSource = 'yahoo-finance';
+                } else {
+                    throw new Error('Insufficient data from Yahoo Finance');
+                }
+            } catch (yahooError) {
+                console.warn(`⚠️ Yahoo Finance data fetch failed: ${yahooError.message}`);
+                
+                // Try Alpha Vantage as fallback
+                try {
+                    console.log('📈 Fetching data from Alpha Vantage...');
+                    
+                    // Check if we have an Alpha Vantage API key
+                    const alphaVantageApiKey = process.env.ALPHA_VANTAGE_API_KEY;
+                    
+                    if (!alphaVantageApiKey) {
+                        throw new Error('Alpha Vantage API key not found');
+                    }
+                    
+                    // Extract currency pair components
+                    const currencyPair = params.currencyPair.replace(/\s+OTC$/i, '');
+                    const [fromCurrency, toCurrency] = currencyPair.split('/');
+                    
+                    if (!fromCurrency || !toCurrency) {
+                        throw new Error('Invalid currency pair format');
+                    }
+                    
+                    // Map timeframe to Alpha Vantage interval
+                    const timeframeMap = {
+                        '1M': '1min',
+                        '5M': '5min',
+                        '15M': '15min',
+                        '30M': '30min',
+                        '1H': '60min'
+                    };
+                    
+                    const interval = timeframeMap[params.timeframe] || '5min';
+                    
+                    // Fetch data from Alpha Vantage
+                    const url = `https://www.alphavantage.co/query?function=FX_INTRADAY&from_symbol=${fromCurrency}&to_symbol=${toCurrency}&interval=${interval}&outputsize=full&apikey=${alphaVantageApiKey}`;
+                    
+                    const fetch = require('node-fetch');
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    if (data && data['Time Series FX']) {
+                        const timeSeries = data['Time Series FX'];
+                        const timeSeriesKeys = Object.keys(timeSeries).sort();
+                        
+                        historicalData = timeSeriesKeys.map(timestamp => {
+                            const item = timeSeries[timestamp];
+                            return {
+                                timestamp: new Date(timestamp).getTime(),
+                                open: parseFloat(item['1. open']),
+                                high: parseFloat(item['2. high']),
+                                low: parseFloat(item['3. low']),
+                                close: parseFloat(item['4. close']),
+                                volume: parseFloat(item['5. volume'] || 0)
+                            };
+                        });
+                        
+                        if (historicalData.length >= 50) {
+                            console.log(`✅ Successfully fetched ${historicalData.length} candles from Alpha Vantage`);
+                            dataSource = 'alpha-vantage';
+                        } else {
+                            throw new Error('Insufficient data from Alpha Vantage');
+                        }
+                    } else {
+                        throw new Error('Invalid response from Alpha Vantage');
+                    }
+                } catch (alphaError) {
+                    console.warn(`⚠️ Alpha Vantage data fetch failed: ${alphaError.message}`);
+                    
+                    // Try Twelve Data as a last resort
+                    try {
+                        console.log('📈 Fetching data from Twelve Data...');
+                        
+                        // Check if we have a Twelve Data API key
+                        const twelveDataApiKey = process.env.TWELVE_DATA_API_KEY;
+                        
+                        if (!twelveDataApiKey) {
+                            throw new Error('Twelve Data API key not found');
+                        }
+                        
+                        // Extract currency pair
+                        const currencyPair = params.currencyPair.replace(/\s+OTC$/i, '');
+                        
+                        // Map timeframe to Twelve Data interval
+                        const timeframeMap = {
+                            '1M': '1min',
+                            '5M': '5min',
+                            '15M': '15min',
+                            '30M': '30min',
+                            '1H': '1h'
+                        };
+                        
+                        const interval = timeframeMap[params.timeframe] || '5min';
+                        
+                        // Fetch data from Twelve Data
+                        const url = `https://api.twelvedata.com/time_series?symbol=${currencyPair}&interval=${interval}&outputsize=100&apikey=${twelveDataApiKey}`;
+                        
+                        const fetch = require('node-fetch');
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        
+                        if (data && data.values && data.values.length > 0) {
+                            historicalData = data.values.map(item => ({
+                                timestamp: new Date(item.datetime).getTime(),
+                                open: parseFloat(item.open),
+                                high: parseFloat(item.high),
+                                low: parseFloat(item.low),
+                                close: parseFloat(item.close),
+                                volume: parseFloat(item.volume || 0)
+                            }));
+                            
+                            if (historicalData.length >= 50) {
+                                console.log(`✅ Successfully fetched ${historicalData.length} candles from Twelve Data`);
+                                dataSource = 'twelve-data';
+                            } else {
+                                throw new Error('Insufficient data from Twelve Data');
+                            }
+                        } else {
+                            throw new Error('Invalid response from Twelve Data');
+                        }
+                    } catch (twelveError) {
+                        console.warn(`⚠️ Twelve Data fetch failed: ${twelveError.message}`);
+                        
+                        // As a last resort, try to use our cached historical data
+                        try {
+                            console.log('📈 Trying to use cached historical data...');
+                            historicalData = await this.historicalMatcher.getCachedHistoricalData(symbol, params.timeframe);
+                            
+                            if (historicalData && historicalData.length >= 50) {
+                                console.log(`✅ Using ${historicalData.length} candles from cached historical data`);
+                                dataSource = 'cached-historical';
+                            } else {
+                                throw new Error('Insufficient cached historical data');
+                            }
+                        } catch (cacheError) {
+                            console.error(`❌ All data sources failed: ${cacheError.message}`);
+                            
+                            return {
+                                success: false,
+                                signal: 'NO_SIGNAL',
+                                confidence: 0,
+                                riskScore: 'HIGH',
+                                error: 'DATA_FETCH_FAILED',
+                                message: 'Failed to fetch real market data from all available sources',
+                                processingTime: Date.now() - startTime
+                            };
+                        }
+                    }
+                }
+            }
+            
+            // Ensure we have sufficient data for analysis
             if (!historicalData || historicalData.length < 50) {
                 return {
                     success: false,
@@ -144,31 +309,40 @@ class ServerlessOTCSignalGenerator {
                     processingTime: Date.now() - startTime
                 };
             }
+            
+            // Store the data source for later use
+            this.dataSource = dataSource;
 
-            // Step 2: Pattern analysis
+            // Step 2: Analyze recent price action
+            console.log('📊 Analyzing recent price action...');
+            const recentPriceAction = this.analyzeRecentPriceAction(historicalData);
+            
+            // Step 3: Pattern analysis
             console.log('🔍 Analyzing patterns...');
             const patternAnalysis = await this.historicalMatcher.analyzePatterns(historicalData, {
                 timeframe: params.timeframe,
                 lookback: 100
             });
 
-            // Step 3: Technical indicator analysis
+            // Step 4: Technical indicator analysis
             console.log('📈 Calculating indicators...');
             const indicatorAnalysis = await this.aiIndicatorEngine.analyzeIndicators(historicalData, {
                 timeframe: params.timeframe,
                 quickMode: true
             });
 
-            // Step 4: Generate consensus signal
+            // Step 5: Generate consensus signal
             console.log('🤖 Generating consensus...');
             const consensusResult = await this.consensusEngine.generateConsensus({
                 patternAnalysis,
                 indicatorAnalysis,
+                recentPriceAction,
                 marketData: {
                     symbol: symbol,
                     timeframe: params.timeframe,
                     platform: params.platform,
-                    currentPrice: historicalData[historicalData.length - 1]?.close
+                    currentPrice: historicalData[historicalData.length - 1]?.close,
+                    dataSource: this.dataSource
                 }
             });
 
@@ -267,6 +441,151 @@ class ServerlessOTCSignalGenerator {
         const symbol = basePair.replace('/', '') + '=X';
         return symbol;
     }
+    
+    /**
+     * Analyze recent price action to determine trend and momentum
+     * @param {Array} historicalData - Array of candle data
+     * @returns {Object} - Analysis of recent price action
+     */
+    analyzeRecentPriceAction(historicalData) {
+        if (!historicalData || historicalData.length < 10) {
+            return {
+                trend: 'neutral',
+                momentum: 'neutral',
+                volatility: 'medium',
+                confidence: 0
+            };
+        }
+        
+        // Get the most recent candles
+        const recentCandles = historicalData.slice(-20);
+        
+        // Calculate simple moving averages
+        const sma5 = this.calculateSMA(recentCandles, 5);
+        const sma10 = this.calculateSMA(recentCandles, 10);
+        const sma20 = this.calculateSMA(recentCandles, 20);
+        
+        // Determine trend based on moving averages
+        let trend = 'neutral';
+        if (sma5 > sma10 && sma10 > sma20) {
+            trend = 'up';
+        } else if (sma5 < sma10 && sma10 < sma20) {
+            trend = 'down';
+        }
+        
+        // Calculate momentum using rate of change
+        const roc = this.calculateROC(recentCandles, 5);
+        let momentum = 'neutral';
+        if (roc > 0.5) {
+            momentum = 'up';
+        } else if (roc < -0.5) {
+            momentum = 'down';
+        }
+        
+        // Calculate volatility
+        const volatility = this.calculateVolatility(recentCandles);
+        let volatilityLevel = 'medium';
+        if (volatility > 1.5) {
+            volatilityLevel = 'high';
+        } else if (volatility < 0.5) {
+            volatilityLevel = 'low';
+        }
+        
+        // Calculate confidence based on agreement between trend and momentum
+        let confidence = 50; // Base confidence
+        
+        // Boost confidence if trend and momentum agree
+        if ((trend === 'up' && momentum === 'up') || (trend === 'down' && momentum === 'down')) {
+            confidence += 20;
+        }
+        
+        // Reduce confidence if trend and momentum disagree
+        if ((trend === 'up' && momentum === 'down') || (trend === 'down' && momentum === 'up')) {
+            confidence -= 10;
+        }
+        
+        // Adjust confidence based on volatility
+        if (volatilityLevel === 'high') {
+            confidence -= 10;
+        } else if (volatilityLevel === 'low') {
+            confidence += 5;
+        }
+        
+        // Ensure confidence is within bounds
+        confidence = Math.min(95, Math.max(0, confidence));
+        
+        return {
+            trend,
+            momentum,
+            volatility: volatilityLevel,
+            confidence,
+            sma: {
+                sma5,
+                sma10,
+                sma20
+            },
+            roc,
+            volatilityValue: volatility
+        };
+    }
+    
+    /**
+     * Calculate Simple Moving Average
+     * @param {Array} candles - Array of candle data
+     * @param {number} period - Period for SMA calculation
+     * @returns {number} - SMA value
+     */
+    calculateSMA(candles, period) {
+        if (candles.length < period) {
+            return null;
+        }
+        
+        const prices = candles.slice(-period).map(candle => candle.close);
+        const sum = prices.reduce((total, price) => total + price, 0);
+        return sum / period;
+    }
+    
+    /**
+     * Calculate Rate of Change
+     * @param {Array} candles - Array of candle data
+     * @param {number} period - Period for ROC calculation
+     * @returns {number} - ROC value
+     */
+    calculateROC(candles, period) {
+        if (candles.length < period + 1) {
+            return 0;
+        }
+        
+        const currentPrice = candles[candles.length - 1].close;
+        const oldPrice = candles[candles.length - period - 1].close;
+        
+        return ((currentPrice - oldPrice) / oldPrice) * 100;
+    }
+    
+    /**
+     * Calculate Volatility
+     * @param {Array} candles - Array of candle data
+     * @returns {number} - Volatility value
+     */
+    calculateVolatility(candles) {
+        if (candles.length < 2) {
+            return 0;
+        }
+        
+        // Calculate daily returns
+        const returns = [];
+        for (let i = 1; i < candles.length; i++) {
+            const returnValue = (candles[i].close - candles[i-1].close) / candles[i-1].close;
+            returns.push(returnValue);
+        }
+        
+        // Calculate standard deviation of returns
+        const mean = returns.reduce((sum, value) => sum + value, 0) / returns.length;
+        const squaredDiffs = returns.map(value => Math.pow(value - mean, 2));
+        const variance = squaredDiffs.reduce((sum, value) => sum + value, 0) / squaredDiffs.length;
+        
+        return Math.sqrt(variance);
+    }
 
     /**
      * Apply serverless-specific safety filters
@@ -305,22 +624,46 @@ class ServerlessOTCSignalGenerator {
             riskScore = 'MEDIUM';
         }
 
-        // Ensure we have a valid signal
+        // Ensure we have a valid signal based on real data, not random generation
         if (!adjustedSignal || adjustedSignal === 'NO_SIGNAL') {
-            // As a last resort, generate a signal based on recent price action
-            // This ensures we always return a tradable signal
-            const randomBias = Math.random() > 0.5 ? 'UP' : 'DOWN';
-            adjustedSignal = randomBias;
-            adjustedConfidence = 65; // Moderate confidence
-            riskScore = 'MEDIUM';
-            console.log(`⚠️ Generating fallback signal: ${adjustedSignal} (${adjustedConfidence}%)`);
+            // Try to determine a signal based on recent price action
+            if (consensusResult.recentPriceAction) {
+                const priceAction = consensusResult.recentPriceAction;
+                
+                // Check for recent trend
+                if (priceAction.trend === 'up' || priceAction.trend === 'down') {
+                    // Use the opposite of the trend for mean reversion
+                    adjustedSignal = priceAction.trend === 'up' ? 'DOWN' : 'UP';
+                    adjustedConfidence = 65; // Moderate confidence
+                    riskScore = 'MEDIUM';
+                    console.log(`📊 Generating signal based on mean reversion: ${adjustedSignal} (${adjustedConfidence}%)`);
+                } else if (priceAction.momentum && (priceAction.momentum === 'up' || priceAction.momentum === 'down')) {
+                    // Use momentum for trend following
+                    adjustedSignal = priceAction.momentum === 'up' ? 'UP' : 'DOWN';
+                    adjustedConfidence = 65; // Moderate confidence
+                    riskScore = 'MEDIUM';
+                    console.log(`📊 Generating signal based on momentum: ${adjustedSignal} (${adjustedConfidence}%)`);
+                } else {
+                    // No clear signal, return NO_SIGNAL
+                    adjustedSignal = 'NO_SIGNAL';
+                    adjustedConfidence = 0;
+                    riskScore = 'HIGH';
+                    console.log(`⚠️ No clear signal from price action, returning NO_SIGNAL`);
+                }
+            } else {
+                // No price action data, return NO_SIGNAL
+                adjustedSignal = 'NO_SIGNAL';
+                adjustedConfidence = 0;
+                riskScore = 'HIGH';
+                console.log(`⚠️ No price action data available, returning NO_SIGNAL`);
+            }
         }
 
         // Add serverless-specific reasoning
         const reasoning = [
             ...(consensusResult.reasoning || []),
             'Analysis performed in serverless environment',
-            'Signal generated from real market data analysis',
+            `Signal generated from real market data (source: ${this.dataSource || 'unknown'})`,
             `Processing completed in ${processingTime}ms`
         ];
 

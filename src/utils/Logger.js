@@ -242,4 +242,28 @@ class Logger {
   }
 }
 
-module.exports = { Logger };
+/**
+ * Create a logger instance with a specific module name
+ * @param {string} moduleName - Name of the module using the logger
+ * @returns {Logger} - Logger instance
+ */
+function createLogger(moduleName) {
+  const logger = Logger.getInstanceSync();
+  
+  // Return a wrapper that adds the module name to all logs
+  return {
+    debug: (message, meta = {}) => logger.debug(`[${moduleName}] ${message}`, meta),
+    info: (message, meta = {}) => logger.info(`[${moduleName}] ${message}`, meta),
+    warn: (message, meta = {}) => logger.warn(`[${moduleName}] ${message}`, meta),
+    error: (message, error = null, meta = {}) => logger.error(`[${moduleName}] ${message}`, error, meta),
+    logTrade: (tradeData) => logger.logTrade({ module: moduleName, ...tradeData }),
+    logDecision: (decisionData) => logger.logDecision({ module: moduleName, ...decisionData }),
+    logMarketData: (marketData) => logger.logMarketData({ module: moduleName, ...marketData }),
+    logTechnicalAnalysis: (analysisData) => logger.logTechnicalAnalysis({ module: moduleName, ...analysisData }),
+    logError: (context, error, additionalData = {}) => logger.logError(context, error, { module: moduleName, ...additionalData }),
+    logPerformance: (operation, duration, success = true) => logger.logPerformance(operation, duration, success),
+    logSystemStatus: (status, details = {}) => logger.logSystemStatus(status, { module: moduleName, ...details })
+  };
+}
+
+module.exports = { Logger, createLogger };
