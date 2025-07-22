@@ -25,9 +25,16 @@ try {
 }
 
 try {
-    cv = require('opencv4nodejs');
+    // Check if we're in Vercel environment
+    if (process.env.VERCEL) {
+        console.log('Running in Vercel environment. Using OpenCV mock implementation.');
+        cv = require('../../vercel-opencv-fix');
+    } else {
+        cv = require('opencv4nodejs');
+    }
 } catch (e) {
     // OpenCV not available
+    console.log('OpenCV not available:', e.message);
 }
 
 try {

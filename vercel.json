@@ -2,11 +2,13 @@
   "version": 2,
   "name": "tradai-otc-signal-generator",
   "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run vercel-build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "VERCEL": "1",
+    "OPENCV4NODEJS_DISABLE_AUTOBUILD": "1"
   },
   "functions": {
     "pages/api/otc-signal-generator.js": {
@@ -14,6 +16,9 @@
     },
     "pages/api/otc-signal-generator/health.js": {
       "maxDuration": 30
+    },
+    "pages/api/vercel-health.js": {
+      "maxDuration": 10
     }
   },
   "regions": ["iad1"],
@@ -25,6 +30,10 @@
     {
       "src": "/otc-signal-generator",
       "dest": "/otc-signal-generator"
+    },
+    {
+      "src": "/api/health",
+      "dest": "/api/vercel-health"
     }
   ]
 }

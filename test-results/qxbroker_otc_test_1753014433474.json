@@ -1,0 +1,11 @@
+{
+  "startTime": "2025-07-20T12:27:13.449Z",
+  "endTime": null,
+  "duration": 0,
+  "tests": [],
+  "success": false,
+  "error": {
+    "message": "this.technicalAnalyzer.initialize is not a function",
+    "stack": "TypeError: this.technicalAnalyzer.initialize is not a function\n    at QXBrokerOTCSignalGenerator.initialize (E:\\Ranveer\\TRADAI\\src\\core\\QXBrokerOTCSignalGenerator.js:502:40)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async runTest (E:\\Ranveer\\TRADAI\\tests\\qxBrokerOtcTest.js:72:5)"
+  }
+}

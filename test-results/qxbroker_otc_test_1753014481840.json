@@ -1,0 +1,55 @@
+{
+  "startTime": "2025-07-20T12:27:47.466Z",
+  "endTime": null,
+  "duration": 0,
+  "tests": [
+    {
+      "name": "Initialization",
+      "success": true,
+      "duration": 223,
+      "timestamp": "2025-07-20T12:27:47.701Z"
+    },
+    {
+      "name": "Login",
+      "success": true,
+      "duration": 9,
+      "timestamp": "2025-07-20T12:27:47.711Z"
+    },
+    {
+      "name": "Asset and Timeframe Selection",
+      "success": true,
+      "duration": 2018,
+      "timestamp": "2025-07-20T12:27:49.731Z"
+    },
+    {
+      "name": "Multi-Timeframe Data Collection",
+      "success": true,
+      "duration": 12091,
+      "timestamp": "2025-07-20T12:28:01.823Z",
+      "details": {
+        "collectedTimeframes": [
+          "1H",
+          "30M",
+          "15M",
+          "5M",
+          "3M",
+          "1M"
+        ],
+        "missingTimeframes": [],
+        "dataPoints": {
+          "1H": 30,
+          "30M": 30,
+          "15M": 30,
+          "5M": 30,
+          "3M": 30,
+          "1M": 30
+        }
+      }
+    }
+  ],
+  "success": false,
+  "error": {
+    "message": "startTime is not defined",
+    "stack": "ReferenceError: startTime is not defined\n    at QXBrokerOTCSignalGenerator.analyzeAndGenerateSignal (E:\\Ranveer\\TRADAI\\src\\core\\QXBrokerOTCSignalGenerator.js:861:46)\n    at async runTest (E:\\Ranveer\\TRADAI\\tests\\qxBrokerOtcTest.js:148:20)"
+  }
+}

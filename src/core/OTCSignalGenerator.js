@@ -972,16 +972,22 @@ class OTCSignalGenerator {
         
         try {
             // Check if opencv4nodejs is installed
+            let cv;
             try {
+                // Check if we're in Vercel environment
+                if (process.env.VERCEL) {
+                    this.logger.info('🔄 Running in Vercel environment. Using simplified pattern recognition.');
+                    return this.extractCandlesUsingSimpleImageAnalysis(screenshotPath, timeframe);
+                }
+                
                 require.resolve('opencv4nodejs');
+                // Import OpenCV
+                cv = require('opencv4nodejs');
             } catch (error) {
                 this.logger.warn('⚠️ opencv4nodejs is not installed. Using simplified pattern recognition.');
                 // Fallback to a simpler method if OpenCV is not available
                 return this.extractCandlesUsingSimpleImageAnalysis(screenshotPath, timeframe);
             }
-            
-            // Import OpenCV
-            const cv = require('opencv4nodejs');
             
             // Load the image
             const img = await cv.imreadAsync(screenshotPath);

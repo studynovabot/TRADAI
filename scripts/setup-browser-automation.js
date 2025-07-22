@@ -91,9 +91,15 @@ async function setupBrowserAutomation() {
         require.resolve('opencv4nodejs');
         console.log('✅ OpenCV is already installed');
     } catch (error) {
-        console.log('⚠️ OpenCV is not installed. This is optional but recommended for better chart recognition.');
-        console.log('Installing OpenCV can be complex. If you want to install it, please run:');
-        console.log('npm install opencv4nodejs --save');
+        // Check if we're in Vercel environment
+        if (process.env.VERCEL) {
+            console.log('⚠️ Running in Vercel environment. Using OpenCV mock implementation.');
+            // In Vercel, we'll use our mock implementation
+        } else {
+            console.log('⚠️ OpenCV is not installed. This is optional but recommended for better chart recognition.');
+            console.log('Installing OpenCV can be complex. If you want to install it, please run:');
+            console.log('npm install opencv4nodejs --save');
+        }
     }
     
     // Create configuration file
