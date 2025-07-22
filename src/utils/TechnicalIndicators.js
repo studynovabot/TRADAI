@@ -430,6 +430,276 @@ class TechnicalIndicators {
   }
 
   /**
+   * Calculate Stochastic RSI
+   * @param {Array} prices - Array of closing prices
+   * @param {Number} rsiPeriod - RSI period (default: 14)
+   * @param {Number} stochPeriod - Stochastic period (default: 14)
+   * @param {Number} kPeriod - %K smoothing period (default: 3)
+   * @param {Number} dPeriod - %D smoothing period (default: 3)
+   * @returns {Object} - Stochastic RSI values {k, d, overbought, oversold}
+   */
+  static calculateStochasticRSI(prices, rsiPeriod = 14, stochPeriod = 14, kPeriod = 3, dPeriod = 3) {
+    if (prices.length < rsiPeriod + stochPeriod + kPeriod + dPeriod) {
+      return null;
+    }
+
+    // Calculate RSI values for the entire price series
+    const rsiValues = [];
+    for (let i = rsiPeriod; i <= prices.length; i++) {
+      const rsi = this.calculateRSI(prices.slice(0, i), rsiPeriod);
+      if (rsi !== null) {
+        rsiValues.push(rsi);
+      }
+    }
+
+    if (rsiValues.length < stochPeriod) {
+      return null;
+    }
+
+    // Calculate Stochastic of RSI
+    const stochRSIValues = [];
+    for (let i = stochPeriod - 1; i < rsiValues.length; i++) {
+      const rsiSlice = rsiValues.slice(i - stochPeriod + 1, i + 1);
+      const highestRSI = Math.max(...rsiSlice);
+      const lowestRSI = Math.min(...rsiSlice);
+      const currentRSI = rsiValues[i];
+      
+      if (highestRSI === lowestRSI) {
+        stochRSIValues.push(50); // Default to middle if range is zero
+      } else {
+        const stochRSI = 100 * (currentRSI - lowestRSI) / (highestRSI - lowestRSI);
+        stochRSIValues.push(stochRSI);
+      }
+    }
+
+    // Smooth %K
+    let smoothedK = [];
+    if (kPeriod > 1) {
+      for (let i = kPeriod - 1; i < stochRSIValues.length; i++) {
+        const sum = stochRSIValues.slice(i - kPeriod + 1, i + 1).reduce((a, b) => a + b, 0);
+        smoothedK.push(sum / kPeriod);
+      }
+    } else {
+      smoothedK = stochRSIValues;
+    }
+
+    // Calculate %D (SMA of %K)
+    const d = [];
+    for (let i = dPeriod - 1; i < smoothedK.length; i++) {
+      const sum = smoothedK.slice(i - dPeriod + 1, i + 1).reduce((a, b) => a + b, 0);
+      d.push(sum / dPeriod);
+    }
+
+    const currentK = smoothedK[smoothedK.length - 1];
+    const currentD = d[d.length - 1];
+
+    return {
+      k: currentK,
+      d: currentD,
+      overbought: currentK > 80,
+      oversold: currentK < 20,
+      crossover: currentK > currentD ? 'bullish' : currentK < currentD ? 'bearish' : 'neutral'
+    };
+  }
+
+  /**
+   * Calculate VWAP (Volume Weighted Average Price)
+   * @param {Array} candles - Array of OHLC candles with volume
+   * @param {Number} period - Period for VWAP calculation (default: 20)
+   * @returns {Number} - VWAP value
+   */
+  static calculateVWAP(candles, period = 20) {
+    if (candles.length < period) {
+      return null;
+    }
+
+    const recentCandles = candles.slice(-period);
+    let totalVolume = 0;
+    let totalVolumePrice = 0;
+
+    recentCandles.forEach(candle => {
+      const typicalPrice = (candle.high + candle.low + candle.close) / 3;
+      const volume = candle.volume || 0;
+      
+      totalVolumePrice += typicalPrice * volume;
+      totalVolume += volume;
+    });
+
+    if (totalVolume === 0) {
+      return null;
+    }
+
+    return totalVolumePrice / totalVolume;
+  }
+
+  /**
+   * Calculate Williams %R
+   * @param {Array} candles - Array of OHLC candles
+   * @param {Number} period - Period for Williams %R (default: 14)
+   * @returns {Number} - Williams %R value
+   */
+  static calculateWilliamsR(candles, period = 14) {
+    if (candles.length < period) {
+      return null;
+    }
+
+    const recentCandles = candles.slice(-period);
+    const highs = recentCandles.map(candle => candle.high);
+    const lows = recentCandles.map(candle => candle.low);
+    const currentClose = candles[candles.length - 1].close;
+
+    const highestHigh = Math.max(...highs);
+    const lowestLow = Math.min(...lows);
+
+    if (highestHigh === lowestLow) {
+      return -50; // Default to middle if range is zero
+    }
+
+    const williamsR = -100 * (highestHigh - currentClose) / (highestHigh - lowestLow);
+    
+    return williamsR;
+  }
+
+  /**
+   * Calculate Commodity Channel Index (CCI)
+   * @param {Array} candles - Array of OHLC candles
+   * @param {Number} period - Period for CCI (default: 20)
+   * @returns {Number} - CCI value
+   */
+  static calculateCCI(candles, period = 20) {
+    if (candles.length < period) {
+      return null;
+    }
+
+    const recentCandles = candles.slice(-period);
+    
+    // Calculate typical prices
+    const typicalPrices = recentCandles.map(candle => 
+      (candle.high + candle.low + candle.close) / 3
+    );
+
+    // Calculate SMA of typical prices
+    const sma = typicalPrices.reduce((sum, price) => sum + price, 0) / period;
+
+    // Calculate mean deviation
+    const meanDeviation = typicalPrices.reduce((sum, price) => 
+      sum + Math.abs(price - sma), 0
+    ) / period;
+
+    if (meanDeviation === 0) {
+      return 0;
+    }
+
+    const currentTypicalPrice = typicalPrices[typicalPrices.length - 1];
+    const cci = (currentTypicalPrice - sma) / (0.015 * meanDeviation);
+
+    return cci;
+  }
+
+  /**
+   * Calculate Money Flow Index (MFI)
+   * @param {Array} candles - Array of OHLC candles with volume
+   * @param {Number} period - Period for MFI (default: 14)
+   * @returns {Number} - MFI value
+   */
+  static calculateMFI(candles, period = 14) {
+    if (candles.length < period + 1) {
+      return null;
+    }
+
+    const recentCandles = candles.slice(-(period + 1));
+    let positiveMoneyFlow = 0;
+    let negativeMoneyFlow = 0;
+
+    for (let i = 1; i < recentCandles.length; i++) {
+      const current = recentCandles[i];
+      const previous = recentCandles[i - 1];
+      
+      const currentTypicalPrice = (current.high + current.low + current.close) / 3;
+      const previousTypicalPrice = (previous.high + previous.low + previous.close) / 3;
+      const rawMoneyFlow = currentTypicalPrice * (current.volume || 0);
+
+      if (currentTypicalPrice > previousTypicalPrice) {
+        positiveMoneyFlow += rawMoneyFlow;
+      } else if (currentTypicalPrice < previousTypicalPrice) {
+        negativeMoneyFlow += rawMoneyFlow;
+      }
+    }
+
+    if (negativeMoneyFlow === 0) {
+      return 100;
+    }
+
+    const moneyFlowRatio = positiveMoneyFlow / negativeMoneyFlow;
+    const mfi = 100 - (100 / (1 + moneyFlowRatio));
+
+    return mfi;
+  }
+
+  /**
+   * Calculate Parabolic SAR
+   * @param {Array} candles - Array of OHLC candles
+   * @param {Number} step - Acceleration factor step (default: 0.02)
+   * @param {Number} max - Maximum acceleration factor (default: 0.2)
+   * @returns {Object} - Parabolic SAR values
+   */
+  static calculateParabolicSAR(candles, step = 0.02, max = 0.2) {
+    if (candles.length < 2) {
+      return null;
+    }
+
+    const result = [];
+    let trend = 1; // 1 for uptrend, -1 for downtrend
+    let sar = candles[0].low;
+    let ep = candles[0].high; // Extreme point
+    let af = step; // Acceleration factor
+
+    for (let i = 1; i < candles.length; i++) {
+      const candle = candles[i];
+      
+      // Calculate new SAR
+      sar = sar + af * (ep - sar);
+      
+      if (trend === 1) { // Uptrend
+        if (candle.low <= sar) {
+          // Trend reversal to downtrend
+          trend = -1;
+          sar = ep;
+          ep = candle.low;
+          af = step;
+        } else {
+          if (candle.high > ep) {
+            ep = candle.high;
+            af = Math.min(af + step, max);
+          }
+        }
+      } else { // Downtrend
+        if (candle.high >= sar) {
+          // Trend reversal to uptrend
+          trend = 1;
+          sar = ep;
+          ep = candle.high;
+          af = step;
+        } else {
+          if (candle.low < ep) {
+            ep = candle.low;
+            af = Math.min(af + step, max);
+          }
+        }
+      }
+      
+      result.push({
+        sar: sar,
+        trend: trend,
+        ep: ep,
+        af: af
+      });
+    }
+
+    return result[result.length - 1];
+  }
+
+  /**
    * Calculate all indicators for a given set of candles
    * @param {Array} candles - Array of OHLC candles
    * @returns {Object} - All calculated indicators
@@ -446,14 +716,21 @@ class TechnicalIndicators {
     
     return {
       rsi: this.calculateRSI(closes),
+      rsi7: this.calculateRSI(closes, 7),
       macd: this.calculateMACD(closes),
-      ema: this.calculateMultipleEMAs(closes, [8, 21, 50]),
+      ema: this.calculateMultipleEMAs(closes, [9, 20, 50]),
       bollinger: this.calculateBollingerBands(closes),
       volume: this.calculateVolumeTrend(volumes),
       supportResistance: this.calculateSupportResistance(candles),
       atr: this.calculateATR(candles),
       stochastic: this.calculateStochastic(candles),
-      ichimoku: this.calculateIchimoku(candles)
+      stochasticRSI: this.calculateStochasticRSI(closes),
+      ichimoku: this.calculateIchimoku(candles),
+      vwap: this.calculateVWAP(candles),
+      williamsR: this.calculateWilliamsR(candles),
+      cci: this.calculateCCI(candles),
+      mfi: this.calculateMFI(candles),
+      parabolicSAR: this.calculateParabolicSAR(candles)
     };
   }
 }

@@ -1,0 +1,211 @@
+{
+  "timestamp": "2025-07-22T16:08:55.573Z",
+  "version": "2.0.0",
+  "system": "Ultra-Precision Trading Signal System",
+  "results": {
+    "environment": {
+      "nodeVersion": {
+        "version": "v22.15.0",
+        "valid": true,
+        "requirement": ">=18.0.0"
+      },
+      "variables": {
+        "ALPHA_VANTAGE_API_KEY": {
+          "set": false,
+          "required": true,
+          "masked": "Not set"
+        },
+        "TWELVE_DATA_API_KEY": {
+          "set": false,
+          "required": true,
+          "masked": "Not set"
+        },
+        "MARKET_DATA_API_KEY": {
+          "set": false,
+          "required": false,
+          "value": "Not set"
+        },
+        "STRICT_REAL_DATA_MODE": {
+          "set": false,
+          "required": false,
+          "value": "Not set"
+        },
+        "LOG_DATA_SOURCE": {
+          "set": false,
+          "required": false,
+          "value": "Not set"
+        }
+      },
+      "fileSystem": {
+        "writable": true
+      }
+    },
+    "dependencies": {
+      "axios": {
+        "installed": true,
+        "version": "1.7.2"
+      },
+      "technicalindicators": {
+        "installed": true,
+        "version": "3.1.0"
+      },
+      "tulind": {
+        "installed": true,
+        "version": "0.8.20"
+      },
+      "yahoo-finance2": {
+        "installed": false,
+        "error": "Package subpath './package.json' is not defined by \"exports\" in E:\\Ranveer\\TRADAI\\node_modules\\yahoo-finance2\\package.json"
+      },
+      "simple-statistics": {
+        "installed": true,
+        "version": "7.8.8"
+      },
+      "ml-matrix": {
+        "installed": false,
+        "error": "Package subpath './package.json' is not defined by \"exports\" in E:\\Ranveer\\TRADAI\\node_modules\\ml-matrix\\package.json"
+      },
+      "ml-regression": {
+        "installed": true,
+        "version": "2.0.0"
+      },
+      "coreFiles": {
+        "../src/core/UltraPrecisionSignalGenerator.js": {
+          "exists": true
+        },
+        "../src/core/MultiSourceDataFetcher.js": {
+          "exists": true
+        },
+        "../src/utils/TechnicalIndicators.js": {
+          "exists": true
+        },
+        "../src/utils/CandlestickPatterns.js": {
+          "exists": true
+        },
+        "../services/alphaVantageService.ts": {
+          "exists": true
+        },
+        "../services/twelveDataService.ts": {
+          "exists": true
+        }
+      }
+    },
+    "dataSources": {
+      "alphaVantage": {
+        "status": "unavailable",
+        "reason": "API key not configured"
+      },
+      "twelveData": {
+        "status": "unavailable",
+        "reason": "API key not configured"
+      },
+      "yahooFinance": {
+        "status": "error",
+        "reason": "No data from Yahoo Finance"
+      },
+      "testFetch": {
+        "success": true,
+        "candles": 3
+      }
+    },
+    "indicators": {
+      "RSI": {
+        "working": true,
+        "result": "Valid calculation"
+      },
+      "MACD": {
+        "working": true,
+        "result": "Valid calculation"
+      },
+      "EMA": {
+        "working": true,
+        "result": "Valid calculation"
+      },
+      "Bollinger Bands": {
+        "working": true,
+        "result": "Valid calculation"
+      },
+      "Stochastic RSI": {
+        "working": true,
+        "result": "Valid calculation"
+      },
+      "ATR": {
+        "working": true,
+        "result": "Valid calculation"
+      }
+    },
+    "patterns": {
+      "Bullish Engulfing": {
+        "detected": true,
+        "patterns": [
+          "detected",
+          "bullishCount",
+          "bearishCount",
+          "summary",
+          "mainPattern"
+        ]
+      },
+      "Bearish Engulfing": {
+        "detected": true,
+        "patterns": [
+          "detected",
+          "bullishCount",
+          "bearishCount",
+          "summary",
+          "mainPattern"
+        ]
+      },
+      "Hammer": {
+        "detected": true,
+        "patterns": [
+          "detected",
+          "bullishCount",
+          "bearishCount",
+          "summary",
+          "mainPattern"
+        ]
+      }
+    },
+    "signals": {
+      "EURUSD": {
+        "generated": true,
+        "confidence": 50,
+        "direction": "SELL",
+        "generationTime": 172,
+        "reasons": 5
+      },
+      "GBPUSD": {
+        "generated": true,
+        "confidence": 60,
+        "direction": "SELL",
+        "generationTime": 127,
+        "reasons": 5
+      }
+    },
+    "api": {
+      "ultra-precision-signal.ts": {
+        "exists": true
+      },
+      "UltraPrecisionSignalDashboard.tsx": {
+        "exists": true
+      },
+      "ultra-precision-signals.tsx": {
+        "exists": true
+      }
+    },
+    "tests": {
+      "passed": 11,
+      "failed": 1,
+      "total": 12,
+      "passRate": "91.7"
+    },
+    "overall": {
+      "status": "pending",
+      "issues": [
+        "Missing dependency: yahoo-finance2",
+        "Missing dependency: ml-matrix",
+        "1 tests failed"
+      ]
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Rocket, TrendingUp, Clock, Zap } from 'lucide-react';
+import { Rocket, TrendingUp, Clock, Zap, Target } from 'lucide-react';
 import { AssetSelector } from './AssetSelector';
 import { SignalOutput } from './SignalOutput';
 import { updateCurrentSignal } from './TradeLogPanel';
@@ -15,40 +15,133 @@ export interface SignalData {
   timestamp: string | number;
   candle_timestamp?: string;
   timeframe_analysis?: any;
-  mode?: 'REGULAR';
+  mode?: 'SNIPER' | 'SCALPING' | 'SWING' | 'REGULAR';
   entry_price?: number;
+  // Enhanced signal structure for MT5 compatibility
+  pair?: string;
+  trade_type?: 'BUY' | 'SELL';
+  entry?: number;
+  stop_loss?: number;
+  take_profit?: number;
+  rr_ratio?: number;
+  timeframe?: string;
+  trade_mode?: string;
+  risk_per_trade?: string;
+  execution_platform?: string;
 }
 
 export function SignalGeneratorPanel() {
   const [selectedAsset, setSelectedAsset] = useState('EUR/USD');
-  const [tradeDuration, setTradeDuration] = useState('3M');
+  const [tradeDuration, setTradeDuration] = useState('5M');
+  const [tradeMode, setTradeMode] = useState('SCALPING');
+  const [riskPerTrade, setRiskPerTrade] = useState('1');
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentSignal, setCurrentSignal] = useState<SignalData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [analysisStage, setAnalysisStage] = useState('');
-  // Trade duration options
-  const durations = [
-    { value: '1M', label: '1 Minute' },
-    { value: '3M', label: '3 Minutes' },
-    { value: '5M', label: '5 Minutes' },
-    { value: '10M', label: '10 Minutes' },
-    { value: '15M', label: '15 Minutes' }
+  // Trading mode configurations
+  const tradingModes = [
+    {
+      value: 'SNIPER',
+      label: 'Sniper Mode',
+      icon: '🎯',
+      description: 'High-frequency, low-capital, fast-exit trades (1-2M)',
+      timeframes: ['1M', '2M'],
+      defaultTimeframe: '1M',
+      confidence: '70-80%',
+      rrRatio: '0.2-0.5',
+      slPips: '3-5',
+      tpPips: '6-8',
+      color: 'bg-red-500/20 text-red-400 border-red-500/30'
+    },
+    {
+      value: 'SCALPING',
+      label: 'Scalping Mode',
+      icon: '⚡',
+      description: 'Medium-frequency, medium-risk, better reward (5-15M)',
+      timeframes: ['5M', '10M', '15M'],
+      defaultTimeframe: '5M',
+      confidence: '80%+',
+      rrRatio: '1.5-2.5',
+      slPips: '8-12',
+      tpPips: '15-25',
+      color: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+    },
+    {
+      value: 'SWING',
+      label: 'Swing Mode',
+      icon: '📈',
+      description: 'Low-frequency, high-capital, ultra-high-accuracy (30M-1H)',
+      timeframes: ['30M', '1H'],
+      defaultTimeframe: '30M',
+      confidence: '85-95%',
+      rrRatio: '2.5-3.0+',
+      slPips: '20-30',
+      tpPips: '50-100+',
+      color: 'bg-blue-500/20 text-blue-400 border-blue-500/30'
+    }
   ];
 
-  // Analysis stages for the progress indicator
-  const analysisStages = [
-    'Collecting market data...',
-    'Analyzing 5m timeframe...',
-    'Analyzing 15m timeframe...',
-    'Analyzing 30m timeframe...',
-    'Analyzing 1h timeframe...',
-    'Analyzing 4h timeframe...',
-    'Analyzing 1d timeframe...',
-    'Calculating indicator confluence...',
-    'Validating signal quality...',
-    'Finalizing trade recommendation...'
-  ];
+  // Get available timeframes based on selected mode
+  const getAvailableTimeframes = () => {
+    const mode = tradingModes.find(m => m.value === tradeMode);
+    return mode ? mode.timeframes.map(tf => ({ value: tf, label: tf })) : [];
+  };
+
+  // Risk percentage options
+  const riskOptions = ['0.5', '1', '2', '3', '5'];
+
+  // Dynamic analysis stages based on trading mode
+  const getAnalysisStages = (mode: string) => {
+    const baseStages = ['Collecting real-time market data...', 'Initializing technical analysis...'];
+    
+    switch (mode) {
+      case 'SNIPER':
+        return [
+          ...baseStages,
+          'Analyzing 1M price action...',
+          'Calculating EMA 9/20 crossover...',
+          'Checking RSI(7) extreme levels...',
+          'Detecting pinbar/engulfing patterns...',
+          'Validating sniper entry conditions...',
+          'Calculating 3-5 pip stop loss...',
+          'Setting 6-8 pip take profit...',
+          'Finalizing high-frequency signal...'
+        ];
+      case 'SCALPING':
+        return [
+          ...baseStages,
+          'Analyzing 5M-15M timeframes...',
+          'Calculating MACD crossover signals...',
+          'Analyzing EMA 20/50/200 trend...',
+          'Checking RSI(14) momentum...',
+          'Identifying support/resistance levels...',
+          'Evaluating engulfing patterns...',
+          'Computing 8-12 pip stop loss...',
+          'Setting 15-25 pip take profit...',
+          'Validating scalping parameters...',
+          'Finalizing medium-frequency signal...'
+        ];
+      case 'SWING':
+        return [
+          ...baseStages,
+          'Multi-timeframe analysis (30M-1H)...',
+          'Calculating Fibonacci retracements...',
+          'Detecting RSI divergence patterns...',
+          'Analyzing MACD reversal zones...',
+          'Volume profile analysis...',
+          'Advanced candlestick formations...',
+          'Morning/Evening Star detection...',
+          'Computing 20-30 pip stop loss...',
+          'Setting 50-100+ pip take profit...',
+          'Deep confluence validation...',
+          'Finalizing high-accuracy swing signal...'
+        ];
+      default:
+        return baseStages;
+    }
+  };
 
   const generateSignal = async () => {
     setIsGenerating(true);
@@ -56,29 +149,23 @@ export function SignalGeneratorPanel() {
     setCurrentSignal(null);
     setAnalysisProgress(0);
     
-    // Start the progress animation
+    // Start the progress animation with mode-specific stages
     startProgressAnimation();
 
     try {
-      // For development/demo purposes, we'll simulate the API call
-      // In production, uncomment the actual API call below
+      console.log(`🎯 Generating ${tradeMode} signal for ${selectedAsset} on ${tradeDuration} timeframe`);
       
-      // Simulate API delay for realistic analysis time
-      await new Promise(resolve => setTimeout(resolve, 15000));
-      
-      // Generate mock data for demonstration
-      const mockData = generateMockSignalData(selectedAsset, tradeDuration);
-      
-      /* 
-      // Actual API call for production use
-      const response = await fetch('/api/enhanced-generate-signal', {
+      // Real API call to enhanced signal generator with trading mode support
+      const response = await fetch('/api/enhanced-ai-signal', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           symbol: selectedAsset,
-          trade_duration: tradeDuration
+          trade_duration: tradeDuration,
+          trade_mode: tradeMode,
+          risk_per_trade: riskPerTrade
         }),
       });
 
@@ -87,14 +174,21 @@ export function SignalGeneratorPanel() {
       if (!response.ok) {
         throw new Error(data.error || 'Failed to generate signal');
       }
-      */
       
       // Ensure we complete the progress animation
       await completeProgressAnimation();
 
-      // Process the signal data
-      setCurrentSignal(mockData);
-      updateCurrentSignal(mockData); // Update for TradeLogPanel
+      // Process the enhanced signal data
+      const enhancedSignal = {
+        ...data,
+        mode: tradeMode,
+        trade_mode: tradeMode.toLowerCase(),
+        risk_per_trade: `${riskPerTrade}%`,
+        execution_platform: 'MT5'
+      };
+
+      setCurrentSignal(enhancedSignal);
+      updateCurrentSignal(enhancedSignal); // Update for TradeLogPanel
 
     } catch (error) {
       console.error('Signal generation error:', error);
@@ -106,163 +200,32 @@ export function SignalGeneratorPanel() {
       setIsGenerating(false);
     }
   };
-  
-  // Generate mock signal data for demonstration
-  const generateMockSignalData = (symbol: string, tradeDuration: string) => {
-    // Randomize signal type with weighted probability
-    const signalTypes = ['BUY', 'SELL', 'NO TRADE'] as const;
-    
-    // Set weights for signal types
-    const weights = [0.4, 0.4, 0.2];   // 40% buy, 40% sell, 20% no trade
-    
-    let signalTypeIndex = 0;
-    const random = Math.random();
-    let cumulativeWeight = 0;
-    
-    for (let i = 0; i < weights.length; i++) {
-      cumulativeWeight += weights[i];
-      if (random < cumulativeWeight) {
-        signalTypeIndex = i;
-        break;
-      }
-    }
-    
-    const signalType = signalTypes[signalTypeIndex];
-    
-    // Generate confidence based on signal type
-    let confidence = 0;
-    if (signalType === 'NO TRADE') {
-      confidence = 50 + Math.floor(Math.random() * 20); // 50-70%
-    } else {
-      confidence = 75 + Math.floor(Math.random() * 20); // 75-95%
-    }
-    
-    // Generate mock indicator values
-    const rsi = signalType === 'BUY' ? 30 + Math.random() * 10 : 
-               signalType === 'SELL' ? 70 - Math.random() * 10 : 
-               45 + Math.random() * 10;
-               
-    const macdValue = signalType === 'BUY' ? 0.0001 + Math.random() * 0.0005 : 
-                     signalType === 'SELL' ? -0.0001 - Math.random() * 0.0005 : 
-                     0.00001 * (Math.random() - 0.5);
-                     
-    const macdSignal = signalType === 'BUY' ? macdValue - 0.0002 : 
-                      signalType === 'SELL' ? macdValue + 0.0002 : 
-                      macdValue + 0.00001 * (Math.random() - 0.5);
-    
-    // Generate mock pattern
-    const patternTypes = ['hammer', 'engulfing', 'doji', 'marubozu', 'morning_star', 'evening_star'];
-    const patternType = patternTypes[Math.floor(Math.random() * patternTypes.length)];
-    const patternStrength = 0.7 + Math.random() * 0.25;
-    const patternDirection = signalType === 'BUY' ? 'bullish' : 
-                            signalType === 'SELL' ? 'bearish' : 
-                            Math.random() > 0.5 ? 'bullish' : 'bearish';
-    
-    // Generate timeframe analysis
-    const timeframesAnalyzed = ['5m', '15m', '30m', '1h', '4h', '1d'];
-    let bullishTimeframes: string[] = [];
-    let bearishTimeframes: string[] = [];
-    
-    if (signalType === 'BUY') {
-      // For BUY signals, more timeframes should be bullish
-      bullishTimeframes = timeframesAnalyzed.filter(() => Math.random() > 0.3);
-      bearishTimeframes = timeframesAnalyzed.filter(tf => !bullishTimeframes.includes(tf));
-    } else if (signalType === 'SELL') {
-      // For SELL signals, more timeframes should be bearish
-      bearishTimeframes = timeframesAnalyzed.filter(() => Math.random() > 0.3);
-      bullishTimeframes = timeframesAnalyzed.filter(tf => !bearishTimeframes.includes(tf));
-    } else {
-      // For NO TRADE, mixed signals
-      timeframesAnalyzed.forEach(tf => {
-        if (Math.random() > 0.5) {
-          bullishTimeframes.push(tf);
-        } else {
-          bearishTimeframes.push(tf);
-        }
-      });
-    }
-    
-    // Generate reason text based on signal type
-    let reason = '';
-    if (signalType === 'BUY') {
-      reason = `Strong bullish momentum detected across ${bullishTimeframes.length} timeframes. RSI indicates oversold conditions at ${rsi.toFixed(2)}. MACD shows bullish crossover. ${patternDirection.charAt(0).toUpperCase() + patternDirection.slice(1)} ${patternType.replace('_', ' ')} pattern detected with ${Math.round(patternStrength * 100)}% strength. Volume is increasing, supporting the upward move.`;
-    } else if (signalType === 'SELL') {
-      reason = `Strong bearish momentum detected across ${bearishTimeframes.length} timeframes. RSI indicates overbought conditions at ${rsi.toFixed(2)}. MACD shows bearish crossover. ${patternDirection.charAt(0).toUpperCase() + patternDirection.slice(1)} ${patternType.replace('_', ' ')} pattern detected with ${Math.round(patternStrength * 100)}% strength. Volume is increasing, supporting the downward move.`;
-    } else {
-      reason = `Mixed signals across timeframes. RSI at neutral level (${rsi.toFixed(2)}). MACD showing minimal momentum. Conflicting patterns detected. Recommend waiting for clearer market direction.`;
-    }
-    
-    // Generate current timestamp in IST (UTC+5:30)
-    const now = new Date();
-    const istOptions = { 
-      timeZone: 'Asia/Kolkata',
-      hour12: true,
-      hour: '2-digit' as const,
-      minute: '2-digit' as const,
-      second: '2-digit' as const,
-      day: '2-digit' as const,
-      month: 'short' as const
-    };
-    const formattedTimestamp = now.toLocaleString('en-IN', istOptions);
-    
-    // No additional reason generation needed
-
-    return {
-      symbol,
-      signal: signalType,
-      confidence,
-      reason,
-      timeframe: '5m', // Base timeframe for entry
-      trade_duration: tradeDuration,
-      timestamp: Date.now(),
-      candle_timestamp: formattedTimestamp,
-      entry_price: 1.0 + Math.random() * 0.1, // Mock price
-      mode: 'REGULAR' as const,
-      indicators: {
-        rsi,
-        macd: {
-          macd: macdValue,
-          signal: macdSignal,
-          histogram: macdValue - macdSignal
-        },
-        ema: {
-          ema8: 1.0 + Math.random() * 0.1,
-          ema21: 1.0 + Math.random() * 0.1,
-          ema50: 1.0 + Math.random() * 0.1
-        },
-        volume: {
-          trend: signalType === 'NO TRADE' ? 'stable' : 'increasing',
-          change: signalType === 'NO TRADE' ? 2.5 : 15.8,
-          isSpike: signalType !== 'NO TRADE' && Math.random() > 0.7
-        },
-        pattern: {
-          type: patternType,
-          direction: patternDirection,
-          strength: patternStrength
-        }
-      },
-      timeframe_analysis: {
-        timeframes_analyzed: timeframesAnalyzed,
-        confluence: {
-          bullishTimeframes,
-          bearishTimeframes
-        }
-      }
-    };
-  };
 
   // Simulate the analysis progress animation
   const startProgressAnimation = () => {
     let currentStage = 0;
     let progress = 0;
     
+    // Get dynamic stages based on current trade mode
+    const currentStages = getAnalysisStages(tradeMode);
+    
+    // Calculate timing based on trade mode
+    const modeTimings = {
+      'SNIPER': 200,    // Faster for sniper mode
+      'SCALPING': 300,  // Medium for scalping
+      'SWING': 400      // Slower for swing (more analysis)
+    };
+    
+    const updateInterval = modeTimings[tradeMode as keyof typeof modeTimings] || 300;
+    
     const interval = setInterval(() => {
       progress += 1;
       
       // Update the stage text at certain progress points
-      if (progress % 10 === 0 && currentStage < analysisStages.length - 1) {
+      const stageInterval = Math.floor(90 / currentStages.length);
+      if (progress % stageInterval === 0 && currentStage < currentStages.length - 1) {
         currentStage++;
-        setAnalysisStage(analysisStages[currentStage]);
+        setAnalysisStage(currentStages[currentStage]);
       }
       
       setAnalysisProgress(progress);
@@ -270,12 +233,12 @@ export function SignalGeneratorPanel() {
       // Stop at 90% and wait for the actual response
       if (progress >= 90) {
         clearInterval(interval);
-        setAnalysisStage('Finalizing trade recommendation...');
+        setAnalysisStage(`Finalizing ${tradeMode.toLowerCase()} signal...`);
       }
-    }, 300); // Update every 300ms
+    }, updateInterval);
     
     // Start with the first stage
-    setAnalysisStage(analysisStages[0]);
+    setAnalysisStage(currentStages[0]);
     
     // Store the interval ID to clear it later if needed
     return interval;
@@ -321,20 +284,82 @@ export function SignalGeneratorPanel() {
         />
       </div>
 
-      {/* Trade Duration Selection */}
+      {/* Trading Mode Selection */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center">
+          <Zap className="mr-2 text-cyan-400" size={16} />
+          Select Trading Mode
+        </label>
+        <div className="grid grid-cols-1 gap-3">
+          {tradingModes.map((mode) => (
+            <motion.div
+              key={mode.value}
+              className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                tradeMode === mode.value
+                  ? mode.color
+                  : 'bg-gray-700/50 border-gray-600 hover:border-gray-500'
+              }`}
+              onClick={() => {
+                setTradeMode(mode.value);
+                setTradeDuration(mode.defaultTimeframe);
+              }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className="text-2xl mr-3">{mode.icon}</span>
+                  <div>
+                    <h3 className="font-semibold text-white">{mode.label}</h3>
+                    <p className="text-sm text-gray-400">{mode.description}</p>
+                  </div>
+                </div>
+                <div className="text-right text-sm">
+                  <div className="text-gray-300">Confidence: {mode.confidence}</div>
+                  <div className="text-gray-400">R/R: {mode.rrRatio}</div>
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-gray-400">
+                SL: {mode.slPips} pips | TP: {mode.tpPips} pips
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      {/* Timeframe Selection (Dynamic based on mode) */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center">
           <Clock className="mr-2 text-cyan-400" size={16} />
-          How long will this trade last?
+          Timeframe
         </label>
         <select
           value={tradeDuration}
           onChange={(e) => setTradeDuration(e.target.value)}
           className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         >
-          {durations.map((duration) => (
-            <option key={duration.value} value={duration.value}>
-              {duration.label}
+          {getAvailableTimeframes().map((timeframe) => (
+            <option key={timeframe.value} value={timeframe.value}>
+              {timeframe.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Risk Management */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-300 mb-3 flex items-center">
+          <Target className="mr-2 text-cyan-400" size={16} />
+          Risk Per Trade
+        </label>
+        <select
+          value={riskPerTrade}
+          onChange={(e) => setRiskPerTrade(e.target.value)}
+          className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          {riskOptions.map((risk) => (
+            <option key={risk} value={risk}>
+              {risk}% of account
             </option>
           ))}
         </select>
