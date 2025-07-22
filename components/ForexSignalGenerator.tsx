@@ -60,17 +60,47 @@ export function ForexSignalGenerator() {
   const riskOptions = ['0.5', '1', '2', '3', '5'];
 
   // Analysis stages for the progress indicator
-  const analysisStages = [
-    'Collecting market data...',
-    'Analyzing price action patterns...',
-    'Calculating technical indicators...',
-    'Evaluating multi-timeframe confluence...',
-    'Determining optimal entry point...',
-    'Calculating stop-loss and take-profit levels...',
-    'Computing risk-reward ratio...',
-    'Evaluating signal confidence...',
-    'Finalizing trade recommendation...'
-  ];
+  const getAnalysisStages = (mode: string) => {
+    const baseStages = ['Collecting market data...', 'Analyzing price action patterns...'];
+    
+    switch (mode) {
+      case 'sniper':
+        return [
+          ...baseStages,
+          'Calculating EMA 9/20 crossover...',
+          'Checking RSI(7) extreme levels...',
+          'Detecting pinbar/engulfing patterns...',
+          'Finalizing sniper entry...'
+        ];
+      case 'scalping':
+        return [
+          ...baseStages,
+          'Calculating MACD crossover signals...',
+          'Analyzing EMA 20/50/200 trend...',
+          'Checking RSI(14) momentum...',
+          'Identifying support/resistance levels...',
+          'Evaluating engulfing patterns...',
+          'Computing scalping parameters...',
+          'Finalizing scalping signal...'
+        ];
+      case 'swing':
+        return [
+          ...baseStages,
+          'Multi-timeframe analysis...',
+          'Calculating Fibonacci retracements...',
+          'Detecting RSI divergence...',
+          'Analyzing MACD reversal zones...',
+          'Volume profile analysis...',
+          'Advanced candlestick formations...',
+          'Computing swing parameters...',
+          'Finalizing swing signal...'
+        ];
+      default:
+        return baseStages;
+    }
+  };
+
+  const analysisStages = getAnalysisStages(tradeMode);
 
   const generateSignal = async () => {
     setIsGenerating(true);
@@ -82,45 +112,193 @@ export function ForexSignalGenerator() {
     startProgressAnimation();
 
     try {
-      // Make API call to generate signal
-      const response = await fetch('/api/forex-signal-generator', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          pair: selectedPair,
-          trade_mode: tradeMode,
-          risk: risk
-        }),
-      });
-
-      const data = await response.json();
+      // Try the new Vercel-optimized endpoint first
+      const endpoints = [
+        '/api/vercel-forex-signal',
+        '/api/forex-signal-generator'
+      ];
+      
+      let response = null;
+      let data = null;
+      let success = false;
+      
+      // Try each endpoint until one works
+      for (const endpoint of endpoints) {
+        try {
+          console.log(`🔍 Trying endpoint: ${endpoint}`);
+          response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              pair: selectedPair,
+              trade_mode: tradeMode,
+              risk: risk
+            }),
+            // Add a timeout to prevent hanging requests
+            signal: AbortSignal.timeout(15000) // Increased timeout for real analysis
+          });
+          
+          data = await response.json();
+          console.log(`📊 Response from ${endpoint}:`, data);
+          
+          if (response.ok) {
+            if (data.error) {
+              // API returned a legitimate "no signal" response
+              console.log(`⚠️ ${endpoint} returned: ${data.error}`);
+              // Continue to next endpoint, but store this as a valid response
+              if (!success) {
+                // If no previous success, we'll use this error response
+                success = true;
+              }
+            } else if (data.pair && data.trade_type) {
+              // API returned a valid signal
+              console.log(`✅ ${endpoint} returned valid signal`);
+              success = true;
+              break;
+            }
+          }
+        } catch (endpointError) {
+          console.warn(`❌ Error with endpoint ${endpoint}:`, endpointError);
+          // Continue to the next endpoint
+        }
+      }
 
       // Ensure we complete the progress animation
       await completeProgressAnimation();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate signal');
+      if (!success || !data) {
+        throw new Error('All signal generation endpoints failed');
       }
 
+      // Handle API responses
       if (data.error) {
+        // API returned a legitimate "no signal" response
+        console.log('📊 API Response: No signal detected');
         setError(data.error);
         return;
       }
 
       // Process the signal data
-      setCurrentSignal(data);
+      if (data.pair && data.trade_type) {
+        console.log('✅ Processing valid signal data:', data);
+        setCurrentSignal(data);
+      } else {
+        throw new Error('Invalid signal data format received from API');
+      }
 
     } catch (error) {
-      console.error('Signal generation error:', error);
-      setError(error instanceof Error ? error.message : 'Unknown error occurred');
+      console.error('❌ Signal generation error:', error);
       
       // Complete the progress animation even on error
       await completeProgressAnimation();
+      
+      // Show error message instead of generating fallback
+      setError(`API Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}. Please try again.`);
+      
+      // Only generate fallback in development mode or if explicitly needed
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('🔄 Generating fallback signal for development');
+        generateFallbackSignal();
+      }
     } finally {
       setIsGenerating(false);
     }
+  };
+  
+  // Generate a fallback signal on the client side if all API endpoints fail
+  const generateFallbackSignal = () => {
+    const now = new Date();
+    const isBuy = now.getMinutes() % 2 === 0;
+    const tradeType = isBuy ? 'BUY' : 'SELL';
+    
+    // Generate base price based on currency pair
+    let basePrice = 1.0;
+    if (selectedPair.includes('USD')) {
+      if (selectedPair.startsWith('EUR')) basePrice = 1.05;
+      else if (selectedPair.startsWith('GBP')) basePrice = 1.25;
+      else if (selectedPair.startsWith('AUD')) basePrice = 0.65;
+      else if (selectedPair.startsWith('NZD')) basePrice = 0.60;
+      else if (selectedPair.includes('JPY')) basePrice = 150;
+    }
+    
+    // Calculate SL/TP based on mode
+    let slPips, tpPips, confidence, timeframe;
+    
+    switch (tradeMode) {
+      case 'sniper':
+        slPips = 3 + Math.floor(Math.random() * 3); // 3-5 pips
+        tpPips = 6 + Math.floor(Math.random() * 3); // 6-8 pips
+        confidence = 70 + Math.floor(Math.random() * 10); // 70-80%
+        timeframe = '1M';
+        break;
+        
+      case 'scalping':
+        slPips = 8 + Math.floor(Math.random() * 5); // 8-12 pips
+        tpPips = 15 + Math.floor(Math.random() * 11); // 15-25 pips
+        confidence = 80 + Math.floor(Math.random() * 6); // 80-85%
+        timeframe = '5M';
+        break;
+        
+      case 'swing':
+        slPips = 20 + Math.floor(Math.random() * 11); // 20-30 pips
+        tpPips = 50 + Math.floor(Math.random() * 51); // 50-100 pips
+        confidence = 85 + Math.floor(Math.random() * 11); // 85-95%
+        timeframe = '1H';
+        break;
+        
+      default:
+        slPips = 10;
+        tpPips = 20;
+        confidence = 80;
+        timeframe = '5M';
+    }
+    
+    // Convert pips to price for major pairs
+    const pipValue = selectedPair.includes('JPY') ? 0.01 : 0.0001;
+    const decimals = selectedPair.includes('JPY') ? 3 : 5;
+    
+    // Calculate entry, SL, TP
+    let entry = parseFloat(basePrice.toFixed(decimals));
+    let stopLoss, takeProfit;
+    
+    if (tradeType === 'BUY') {
+      stopLoss = parseFloat((entry - (slPips * pipValue)).toFixed(decimals));
+      takeProfit = parseFloat((entry + (tpPips * pipValue)).toFixed(decimals));
+    } else { // SELL
+      stopLoss = parseFloat((entry + (slPips * pipValue)).toFixed(decimals));
+      takeProfit = parseFloat((entry - (tpPips * pipValue)).toFixed(decimals));
+    }
+    
+    // Calculate RR ratio
+    const rrRatio = parseFloat((tpPips / slPips).toFixed(2));
+    
+    // Generate reason
+    const reasons = [
+      `Strong ${tradeType === 'BUY' ? 'bullish' : 'bearish'} momentum detected on ${selectedPair}`,
+      `Multiple timeframe confirmation for ${tradeType} signal on ${selectedPair}`,
+      `${tradeType === 'BUY' ? 'RSI indicates oversold conditions' : 'RSI indicates overbought conditions'}`,
+      `MACD ${tradeType === 'BUY' ? 'bullish' : 'bearish'} crossover with increasing histogram momentum`,
+      `Price broke ${tradeType === 'BUY' ? 'above key resistance' : 'below key support'} with strong volume`
+    ];
+    
+    const reason = `[FALLBACK DEMO] ${reasons[Math.floor(Math.random() * reasons.length)]}`;
+    
+    setCurrentSignal({
+      pair: selectedPair,
+      trade_type: tradeType,
+      entry,
+      stop_loss: stopLoss,
+      take_profit: takeProfit,
+      rr_ratio: rrRatio,
+      confidence,
+      timeframe,
+      trade_mode: tradeMode,
+      reason,
+      risk_per_trade: risk + '%',
+      execution_platform: 'MT5'
+    });
   };
 
   // Simulate the analysis progress animation
@@ -128,11 +306,19 @@ export function ForexSignalGenerator() {
     let currentStage = 0;
     let progress = 0;
     
+    // Calculate expected analysis time based on trade mode
+    const expectedTime = tradeMode === 'sniper' ? 2000 : 
+                        tradeMode === 'scalping' ? 5500 : 
+                        tradeMode === 'swing' ? 15000 : 5000;
+    
+    // Calculate interval to reach 90% in expected time
+    const updateInterval = Math.max(100, expectedTime / 90);
+    
     const interval = setInterval(() => {
       progress += 1;
       
       // Update the stage text at certain progress points
-      if (progress % 10 === 0 && currentStage < analysisStages.length - 1) {
+      if (progress % 15 === 0 && currentStage < analysisStages.length - 1) {
         currentStage++;
         setAnalysisStage(analysisStages[currentStage]);
       }
@@ -144,7 +330,7 @@ export function ForexSignalGenerator() {
         clearInterval(interval);
         setAnalysisStage('Finalizing trade recommendation...');
       }
-    }, 150); // Update every 150ms for faster animation
+    }, updateInterval);
     
     // Start with the first stage
     setAnalysisStage(analysisStages[0]);

@@ -18,6 +18,12 @@
     },
     "pages/api/vercel-health.js": {
       "maxDuration": 10
+    },
+    "pages/api/vercel-forex-signal.js": {
+      "maxDuration": 10
+    },
+    "pages/api/forex-signal-generator.ts": {
+      "maxDuration": 30
     }
   },
   "regions": ["iad1"],
@@ -33,6 +39,14 @@
     {
       "src": "/api/health",
       "dest": "/api/vercel-health"
+    },
+    {
+      "src": "/api/forex-signal-generator",
+      "dest": "/api/vercel-forex-signal"
+    },
+    {
+      "src": "/forex-signal-generator",
+      "dest": "/forex-signal-generator"
     }
   ]
 }
