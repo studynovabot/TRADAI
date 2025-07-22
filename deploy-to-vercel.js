@@ -1,5 +1,5 @@
 /**
- * Vercel Deployment Script for OTC Signal Generator
+ * Vercel Deployment Script for TRADAI Signal Generator
  * 
  * Handles deployment preparation and verification
  */
@@ -50,10 +50,10 @@ class VercelDeployment {
             'next.config.js',
             'vercel.json',
             '.env.production',
-            'pages/otc-signal-generator.tsx',
-            'components/OTCSignalGenerator.tsx',
-            'pages/api/otc-signal-generator.js',
-            'pages/api/otc-signal-generator/health.js'
+            'pages/forex-signal-generator.tsx',
+            'components/ForexSignalGenerator.tsx',
+            'components/ForexSignalOutput.tsx',
+            'pages/api/forex-signal-generator.ts'
         ];
 
         for (const file of requiredFiles) {
@@ -161,7 +161,7 @@ class VercelDeployment {
         try {
             // Test health endpoint
             console.log('   🏥 Testing health endpoint...');
-            const healthUrl = `${this.deploymentUrl}/api/otc-signal-generator/health`;
+            const healthUrl = `${this.deploymentUrl}/api/health`;
             
             const fetch = (await import('node-fetch')).default;
             const healthResponse = await fetch(healthUrl, { timeout: 30000 });
@@ -173,9 +173,30 @@ class VercelDeployment {
                 throw new Error(`Health check failed: ${healthResponse.status}`);
             }
 
+            // Test Forex Signal Generator API
+            console.log('   📊 Testing Forex Signal Generator API...');
+            const apiUrl = `${this.deploymentUrl}/api/forex-signal-generator`;
+            const apiResponse = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    pair: 'EUR/USD',
+                    trade_mode: 'scalping',
+                    risk: '1'
+                }),
+                timeout: 60000
+            });
+            
+            if (apiResponse.ok) {
+                const apiData = await apiResponse.json();
+                console.log(`   ✅ Forex API check passed: ${apiData.pair}`);
+            } else {
+                console.warn(`   ⚠️ Forex API check returned status: ${apiResponse.status}`);
+            }
+
             // Test main page
             console.log('   🌐 Testing main page...');
-            const pageUrl = `${this.deploymentUrl}/otc-signal-generator`;
+            const pageUrl = `${this.deploymentUrl}/forex-signal-generator`;
             const pageResponse = await fetch(pageUrl, { timeout: 30000 });
             
             if (pageResponse.ok) {
@@ -213,11 +234,11 @@ class VercelDeployment {
         if (failed === 0) {
             console.log('\n🎉 === DEPLOYMENT SUCCESSFUL ===');
             if (this.deploymentUrl) {
-                console.log(`🌐 Your OTC Signal Generator is live at:`);
-                console.log(`   ${this.deploymentUrl}/otc-signal-generator`);
+                console.log(`🌐 Your TRADAI Signal Generator is live at:`);
+                console.log(`   ${this.deploymentUrl}/forex-signal-generator`);
                 console.log(`\n🔗 API Endpoints:`);
-                console.log(`   Health: ${this.deploymentUrl}/api/otc-signal-generator/health`);
-                console.log(`   Main API: ${this.deploymentUrl}/api/otc-signal-generator`);
+                console.log(`   Health: ${this.deploymentUrl}/api/health`);
+                console.log(`   Forex API: ${this.deploymentUrl}/api/forex-signal-generator`);
             }
             console.log('\n💡 Next Steps:');
             console.log('   1. Test the deployed application');

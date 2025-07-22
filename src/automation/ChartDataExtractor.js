@@ -14,7 +14,7 @@
 
 const fs = require('fs-extra');
 const path = require('path');
-const { createLogger } = require('../utils/logger');
+const { createLogger } = require('../utils/logger-wrapper');
 
 // Try to load optional dependencies
 let tesseract, cv, sharp;

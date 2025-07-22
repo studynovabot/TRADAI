@@ -5,8 +5,8 @@ interface AssetSelectorProps {
   onAssetChange: (asset: string) => void;
 }
 
-export function AssetSelector({ selectedAsset, onAssetChange }: AssetSelectorProps) {
-  const [activeCategory, setActiveCategory] = useState('forex');
+export function AssetSelector({ selectedAsset, onAssetChange, defaultCategory = 'forex' }: AssetSelectorProps & { defaultCategory?: string }) {
+  const [activeCategory, setActiveCategory] = useState(defaultCategory);
 
   const assets = {
     forex: [

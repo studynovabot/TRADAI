@@ -276,7 +276,7 @@ try {
 // Import utilities
 let createLogger;
 try {
-  const { createLogger: CL } = require('../utils/logger');
+  const { createLogger: CL } = require('../utils/logger-wrapper');
   createLogger = CL;
 } catch (error) {
   console.warn('Logger module not available, using fallback');

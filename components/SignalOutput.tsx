@@ -1,6 +1,6 @@
 import React from 'react';
 import { SignalData } from './SignalGeneratorPanel';
-import { Clock, TrendingUp, BarChart2, AlertCircle, Calendar, Layers } from 'lucide-react';
+import { Clock, TrendingUp } from 'lucide-react';
 
 interface SignalOutputProps {
   signal: SignalData;
@@ -39,12 +39,6 @@ export function SignalOutput({ signal }: SignalOutputProps) {
           <span className="text-2xl mr-3">🎯</span>
           AI Signal Generated
         </div>
-        {signal.mode === 'OTC' && (
-          <div className="px-3 py-1 rounded-full text-xs font-medium bg-purple-900/30 text-purple-400 flex items-center">
-            <Calendar className="mr-1" size={14} />
-            OTC MODE
-          </div>
-        )}
       </h3>
 
       {/* Signal Direction */}
@@ -53,7 +47,7 @@ export function SignalOutput({ signal }: SignalOutputProps) {
           <span className="text-gray-400">Trade Direction:</span>
           {isNoTradeSignal ? (
             <div className="px-4 py-2 rounded-full font-bold text-lg bg-gray-600/20 text-gray-300 border border-gray-500">
-              <AlertCircle className="inline mr-2" size={18} />
+              <span className="inline mr-2">⚠️</span>
               NO TRADE
             </div>
           ) : (
@@ -137,7 +131,7 @@ export function SignalOutput({ signal }: SignalOutputProps) {
       {/* Technical Indicators */}
       <div className="mb-6">
         <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
-          <BarChart2 className="mr-2" size={18} />
+          <TrendingUp className="mr-2" size={18} />
           Technical Indicators:
         </h4>
         <div className="grid grid-cols-2 gap-4">
@@ -199,34 +193,7 @@ export function SignalOutput({ signal }: SignalOutputProps) {
         </div>
       )}
 
-      {/* OTC Pattern Matching (only shown in OTC mode) */}
-      {signal.mode === 'OTC' && signal.patternMatches && (
-        <div className="mb-6">
-          <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
-            <Layers className="mr-2" size={18} />
-            Pattern Matching Analysis:
-          </h4>
-          <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-            <div className="grid grid-cols-2 gap-4 mb-3">
-              <div>
-                <div className="text-sm text-gray-400">Pattern Matches</div>
-                <div className="text-white font-semibold">
-                  {signal.patternMatches.count || 0} historical matches
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-400">Similarity Score</div>
-                <div className="text-white font-semibold">
-                  {signal.patternMatches.similarity || 0}%
-                </div>
-              </div>
-            </div>
-            <div className="mt-2 text-sm text-gray-300">
-              Pattern matching uses historical data to find similar market conditions and predict outcomes.
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Pattern section removed */}
 
       {/* Signal Details */}
       <div className="border-t border-gray-700 pt-4">
@@ -248,10 +215,9 @@ export function SignalOutput({ signal }: SignalOutputProps) {
           <div>
             <span className="text-gray-400">Analysis:</span>
             <span className="text-white ml-2 font-semibold">
-              {signal.mode === 'OTC' ? 'Pattern Matching' : 
-                (signal.timeframe_analysis ? 
-                  `${signal.timeframe_analysis.timeframes_analyzed.length} timeframes` : 
-                  'Standard')}
+              {signal.timeframe_analysis ? 
+                `${signal.timeframe_analysis.timeframes_analyzed.length} timeframes` : 
+                'Standard'}
             </span>
           </div>
         </div>

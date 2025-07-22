@@ -16,7 +16,7 @@ const { OTCSignalGenerator } = require('./OTCSignalGenerator');
 const { BrowserAutomation } = require('../automation/BrowserAutomation');
 const { ChartDataExtractor } = require('../automation/ChartDataExtractor');
 const { NextCandlePredictor } = require('./NextCandlePredictor');
-const { createLogger } = require('../utils/logger');
+const { createLogger } = require('../utils/logger-wrapper');
 const fs = require('fs-extra');
 const path = require('path');
 

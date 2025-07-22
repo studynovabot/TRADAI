@@ -8,7 +8,7 @@
  * 4. Combining multiple prediction models for improved accuracy
  */
 
-const { createLogger } = require('../utils/logger');
+const { createLogger } = require('../utils/logger-wrapper');
 const fs = require('fs-extra');
 const path = require('path');
 

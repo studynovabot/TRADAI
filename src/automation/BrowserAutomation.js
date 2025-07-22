@@ -16,7 +16,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs-extra');
 const path = require('path');
-const { createLogger } = require('../utils/logger');
+const { createLogger } = require('../utils/logger-wrapper');
 const { setTimeout } = require('timers/promises');
 
 class BrowserAutomation {
