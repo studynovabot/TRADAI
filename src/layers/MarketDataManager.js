@@ -509,33 +509,16 @@ class MarketDataManager {
   }
 
   /**
-   * Generate mock candle data for testing
+   * DISABLED: Mock candle generation not allowed in production
    */
   generateMockCandles(count) {
-    const candles = [];
-    let price = 82.50; // Starting price for USD/INR
-    const now = Date.now();
-    
-    for (let i = 0; i < count; i++) {
-      const timestamp = now - (count - i - 1) * 60 * 1000; // 1 minute intervals
-      
-      const open = price;
-      const change = (Math.random() - 0.5) * 0.1; // ±0.05 max change
-      const high = open + Math.abs(change) + Math.random() * 0.02;
-      const low = open - Math.abs(change) - Math.random() * 0.02;
-      const close = open + change;
-      
-      candles.push({
-        timestamp,
-        open: parseFloat(open.toFixed(4)),
-        high: parseFloat(high.toFixed(4)),
-        low: parseFloat(low.toFixed(4)),
-        close: parseFloat(close.toFixed(4)),
-        volume: Math.floor(Math.random() * 1000) + 100
-      });
-      
-      price = close;
+    // STRICT MODE: No mock data allowed
+    if (process.env.STRICT_REAL_DATA_MODE === 'true' || process.env.USE_MOCK_DATA === 'false') {
+      throw new Error('Mock candle generation disabled. Real market data required in strict mode.');
     }
+
+    // Legacy fallback (should not be reached in production)
+    throw new Error('Mock candle generation disabled in strict mode.');
     
     return candles;
   }

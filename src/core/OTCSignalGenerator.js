@@ -948,10 +948,9 @@ class OTCSignalGenerator {
             
             this.logger.info(`✅ Extracted ${candles.length} candles from screenshot`);
             
-            // If we couldn't extract enough candles, use a fallback method
+            // STRICT MODE: Require minimum candles from real screenshot analysis
             if (candles.length < 10) {
-                this.logger.warn(`⚠️ Not enough candles extracted (${candles.length}). Using chart pattern recognition...`);
-                return await this.extractCandlesUsingChartPatternRecognition(screenshotPath, timeframe);
+                throw new Error(`Insufficient candles extracted from screenshot (${candles.length}/10 minimum). Screenshot may not contain valid broker chart data.`);
             }
             
             return candles;
@@ -1109,26 +1108,15 @@ class OTCSignalGenerator {
             
         } catch (error) {
             this.logger.error(`❌ Simple image analysis error: ${error.message}`);
-            
-            // As a last resort, return a minimal set of candles
-            const candles = [];
-            const timeframeMinutes = this.getTimeframeMinutes(timeframe);
-            const now = Date.now();
-            
-            for (let i = 0; i < 20; i++) {
-                const timestamp = now - (20 - i) * timeframeMinutes * 60 * 1000;
-                candles.push({
-                    timestamp,
-                    open: 1.0,
-                    high: 1.001,
-                    low: 0.999,
-                    close: 1.0,
-                    volume: 100
-                });
+
+            // STRICT MODE: No fallback to synthetic data - throw error
+            if (process.env.STRICT_REAL_DATA_MODE === 'true' || process.env.USE_MOCK_DATA === 'false') {
+                throw new Error(`Screenshot analysis failed: ${error.message}. Real broker screenshot required for OTC signal generation.`);
             }
-            
-            this.logger.warn(`⚠️ Returning minimal candle set as last resort`);
-            return candles;
+
+            // Legacy fallback (should not be reached in production)
+            this.logger.error(`❌ CRITICAL: Screenshot analysis failed and no real data available. OTC signal generation impossible.`);
+            throw new Error(`Screenshot analysis failed and no fallback allowed in strict mode: ${error.message}`);
         }
     }
     

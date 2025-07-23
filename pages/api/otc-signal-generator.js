@@ -179,10 +179,48 @@ async function handler(req, res) {
         console.log(`🏢 Platform: ${platform}`);
 
         // Validate required parameters
-        if (!currencyPair) {
+        const missingParams = [];
+        if (!currencyPair) missingParams.push('currencyPair');
+        if (!timeframe) missingParams.push('timeframe');
+        if (!tradeDuration) missingParams.push('tradeDuration');
+
+        if (missingParams.length > 0) {
             return res.status(400).json({
-                error: 'Missing required parameter',
-                message: 'currencyPair is required',
+                error: 'Missing required parameters',
+                message: `The following parameters are required: ${missingParams.join(', ')}`,
+                missingParameters: missingParams,
+                requestId
+            });
+        }
+
+        // Validate parameter values
+        const validPairs = ['USD/PKR', 'USD/DZD', 'EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD'];
+        const validTimeframes = ['1m', '3m', '5m', '15m', '30m'];
+        const validDurations = ['1', '3', '5', '10', '15'];
+
+        if (!validPairs.includes(currencyPair)) {
+            return res.status(400).json({
+                error: 'Invalid currency pair',
+                message: `Currency pair '${currencyPair}' is not supported`,
+                supportedPairs: validPairs,
+                requestId
+            });
+        }
+
+        if (!validTimeframes.includes(timeframe)) {
+            return res.status(400).json({
+                error: 'Invalid timeframe',
+                message: `Timeframe '${timeframe}' is not supported`,
+                supportedTimeframes: validTimeframes,
+                requestId
+            });
+        }
+
+        if (!validDurations.includes(tradeDuration)) {
+            return res.status(400).json({
+                error: 'Invalid trade duration',
+                message: `Trade duration '${tradeDuration}' is not supported`,
+                supportedDurations: validDurations,
                 requestId
             });
         }

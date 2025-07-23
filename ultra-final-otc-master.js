@@ -182,12 +182,16 @@ class UltraFinalOTCMaster {
             };
             
         } catch (error) {
-            console.log(`   ⚠️ OCR extraction failed, using simulation: ${error.message}`);
-            return {
-                RSI: this.generateSimulatedRSI(),
-                MACD: this.generateSimulatedMACD(),
-                BB: { upper: 1.1032, lower: 1.1004, middle: 1.1018 }
-            };
+            console.log(`   ❌ OCR extraction failed: ${error.message}`);
+
+            // STRICT MODE: No fallback to simulated indicators
+            if (process.env.STRICT_REAL_DATA_MODE === 'true' || process.env.USE_MOCK_DATA === 'false') {
+                throw new Error(`OCR indicator extraction failed: ${error.message}. Real broker screenshot required.`);
+            }
+
+            // Legacy fallback (should not be reached in production)
+            console.warn(`⚠️ WARNING: Using simulated indicators - this should not happen in production!`);
+            throw new Error(`OCR extraction failed and no fallback allowed in strict mode: ${error.message}`);
         }
     }
     
@@ -671,8 +675,14 @@ class UltraFinalOTCMaster {
      * HELPER METHODS
      */
     
-    // Generate fallback data for testing
+    // DISABLED: Fallback data generation not allowed in production
     async getFallbackOTCData(asset, timeframe) {
+        // STRICT MODE: No fallback to simulated data
+        if (process.env.STRICT_REAL_DATA_MODE === 'true' || process.env.USE_MOCK_DATA === 'false') {
+            throw new Error(`Fallback OTC data disabled for ${asset}. Real market data required in strict mode.`);
+        }
+
+        console.warn(`⚠️ WARNING: Using fallback simulated data for ${asset} - this should not happen in production!`);
         const candles = this.generateSimulatedCandles(10);
         return {
             asset: asset,

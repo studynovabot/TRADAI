@@ -122,14 +122,19 @@ class MarketDataFetcher {
   }
 
   /**
-   * Generate realistic mock market data when API is unavailable
+   * DISABLED: Mock data generation not allowed in production
    * @param {String} symbol - Trading symbol
    * @param {String} timeframe - Timeframe
    * @param {Number} limit - Number of candles
-   * @returns {Array} - Array of mock OHLCV candles
+   * @returns {Array} - Throws error in strict mode
    */
   generateMockData(symbol, timeframe, limit = 100) {
-    console.log(`Generating mock data for ${symbol} on ${timeframe} timeframe`);
+    // STRICT MODE: No mock data allowed
+    if (process.env.STRICT_REAL_DATA_MODE === 'true' || process.env.USE_MOCK_DATA === 'false') {
+      throw new Error(`Mock data generation disabled for ${symbol}. Real market data required in strict mode.`);
+    }
+
+    console.warn(`⚠️ WARNING: Generating mock data for ${symbol} on ${timeframe} timeframe - this should not happen in production!`);
     
     // Set base price based on symbol
     let basePrice = 100;

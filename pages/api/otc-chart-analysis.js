@@ -116,6 +116,34 @@ export default async function handler(req, res) {
             });
         }
 
+        // Validate image data is provided
+        if (!imageData) {
+            return res.status(400).json({
+                success: false,
+                error: 'MISSING_IMAGE_DATA',
+                message: 'No chart screenshot provided. Please upload a screenshot of your broker trading platform.',
+                requestId,
+                processingTime: Date.now() - startTime,
+                guidance: {
+                    required: 'Screenshot from broker platform (QXBroker, Quotex, PocketOption, etc.)',
+                    mustShow: ['Price charts with candlesticks', 'Currency pair name', 'Timeframe indicator'],
+                    formats: ['PNG', 'JPEG', 'BMP'],
+                    maxSize: '10MB'
+                }
+            });
+        }
+
+        // Validate image data format
+        if (typeof imageData !== 'string' || !imageData.includes('base64')) {
+            return res.status(400).json({
+                success: false,
+                error: 'INVALID_IMAGE_FORMAT',
+                message: 'Invalid image data format. Please upload a valid image file.',
+                requestId,
+                processingTime: Date.now() - startTime
+            });
+        }
+
         // Initialize chart analyzer
         console.log('🔧 Initializing chart screenshot analyzer...');
         const analyzer = new ChartScreenshotAnalyzer({
@@ -206,19 +234,62 @@ export default async function handler(req, res) {
 
     } catch (error) {
         const processingTime = Date.now() - startTime;
-        
+
         console.error(`\n❌ === CHART ANALYSIS REQUEST FAILED ===`);
         console.error(`🆔 Request ID: ${requestId}`);
         console.error(`❌ Error: ${error.message}`);
         console.error(`⏱️ Failed after: ${processingTime}ms`);
 
-        res.status(500).json({
+        // Provide specific error messages based on error type
+        let errorCode = 'INTERNAL_SERVER_ERROR';
+        let statusCode = 500;
+        let userMessage = 'Chart screenshot analysis failed due to internal error';
+
+        if (error.message.includes('No image data provided')) {
+            errorCode = 'MISSING_IMAGE_DATA';
+            statusCode = 400;
+            userMessage = 'No chart screenshot provided. Please upload a screenshot of your broker trading platform showing price charts.';
+        } else if (error.message.includes('Invalid image format')) {
+            errorCode = 'INVALID_IMAGE_FORMAT';
+            statusCode = 400;
+            userMessage = 'Invalid image format. Please upload a PNG, JPEG, or BMP screenshot of your broker platform.';
+        } else if (error.message.includes('Image file too large')) {
+            errorCode = 'IMAGE_TOO_LARGE';
+            statusCode = 400;
+            userMessage = 'Image file is too large. Please upload a screenshot smaller than 10MB.';
+        } else if (error.message.includes('does not appear to contain a valid broker')) {
+            errorCode = 'INVALID_BROKER_SCREENSHOT';
+            statusCode = 422;
+            userMessage = 'Screenshot does not appear to be from a valid broker trading platform. Please upload a screenshot from QXBroker, Quotex, PocketOption, or similar platform showing price charts with candlesticks.';
+        } else if (error.message.includes('Screenshot analysis failed')) {
+            errorCode = 'SCREENSHOT_ANALYSIS_FAILED';
+            statusCode = 422;
+            userMessage = 'Unable to analyze the provided screenshot. Please ensure the image is clear and shows a broker trading platform with visible price charts and candlesticks.';
+        } else if (error.message.includes('Real screenshot analysis failed')) {
+            errorCode = 'OCR_ANALYSIS_FAILED';
+            statusCode = 422;
+            userMessage = 'Failed to extract market data from screenshot. Please ensure the screenshot clearly shows price charts with visible numbers and candlesticks from a broker platform.';
+        }
+
+        res.status(statusCode).json({
             success: false,
-            error: 'INTERNAL_SERVER_ERROR',
-            message: 'Chart screenshot analysis failed due to internal error',
+            error: errorCode,
+            message: userMessage,
+            technicalDetails: error.message,
             requestId,
             processingTime,
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            guidance: {
+                validScreenshots: [
+                    'Screenshots from QXBroker, Quotex, PocketOption, IQ Option',
+                    'Must show price charts with candlesticks',
+                    'Currency pair should be visible (e.g., USD/EUR, GBP/USD)',
+                    'Chart timeframe should be visible (e.g., 1m, 5m, 15m)',
+                    'Image should be clear and not blurry'
+                ],
+                supportedFormats: ['PNG', 'JPEG', 'BMP'],
+                maxFileSize: '10MB'
+            }
         });
     }
 }

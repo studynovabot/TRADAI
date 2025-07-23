@@ -250,14 +250,9 @@ class EnhancedOTCSignalGenerator extends OTCSignalGenerator {
                 }
             }
             
-            // Final fallback: Simulated data (only if not in strict mode)
-            if (!dataCollectionSuccess && !strictRealDataMode) {
-                this.logger.warn('⚠️ All data collection methods failed. Using simulated data as last resort.');
-                marketData = await this.generateSimulatedMarketData(pair, actualTimeframe);
-                dataSource = 'simulated';
-                dataCollectionMethod = 'simulation';
-            } else if (!dataCollectionSuccess && strictRealDataMode) {
-                throw new Error('Failed to collect real market data in strict mode');
+            // STRICT MODE: No fallback to simulated data
+            if (!dataCollectionSuccess) {
+                throw new Error('Failed to collect real market data. No simulated data allowed in strict mode.');
             }
             
             // Validate market data

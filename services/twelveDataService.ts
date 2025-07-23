@@ -13,10 +13,18 @@ export class TwelveDataService {
   async getOHLCV(symbol: string, timeframe: string, outputsize: number = 100) {
     try {
       console.log(`📊 Fetching ${symbol} data for ${timeframe} timeframe`);
-      
+
+      // Validate API key exists
+      if (!this.apiKey || this.apiKey === 'your_twelve_data_api_key_here') {
+        throw new Error('TwelveData API key not configured or using placeholder value');
+      }
+
       // Convert timeframe to Twelve Data format
       const interval = this.convertTimeframe(timeframe);
-      
+
+      console.log(`🔗 Making API call to TwelveData: ${symbol}, ${interval}, ${outputsize} candles`);
+      const startTime = Date.now();
+
       const response = await axios.get(`${this.baseUrl}/time_series`, {
         params: {
           symbol: symbol,
@@ -25,15 +33,25 @@ export class TwelveDataService {
           apikey: this.apiKey,
           format: 'json'
         },
-        timeout: 10000
+        timeout: 15000 // Increased timeout for real API calls
       });
 
+      const apiCallTime = Date.now() - startTime;
+      console.log(`⏱️ TwelveData API call completed in ${apiCallTime}ms`);
+
+      // Validate API response
       if (response.data.status === 'error') {
-        throw new Error(response.data.message || 'API returned error');
+        throw new Error(`TwelveData API error: ${response.data.message || 'Unknown error'}`);
       }
 
       if (!response.data.values || response.data.values.length === 0) {
-        throw new Error('No data returned from API');
+        throw new Error(`No market data returned from TwelveData API for ${symbol}`);
+      }
+
+      // Validate data quality - ensure we have real market data
+      const firstCandle = response.data.values[0];
+      if (!firstCandle.open || !firstCandle.high || !firstCandle.low || !firstCandle.close) {
+        throw new Error('Invalid market data structure received from TwelveData API');
       }
 
       // Convert to standard format
@@ -49,13 +67,22 @@ export class TwelveDataService {
       // Sort by timestamp (oldest first)
       ohlcvData.sort((a: any, b: any) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
-      console.log(`✅ Fetched ${ohlcvData.length} candles for ${symbol}`);
+      // Log data source validation
+      console.log(`✅ Fetched ${ohlcvData.length} REAL candles for ${symbol} from TwelveData API`);
+      console.log(`📊 Latest candle: ${ohlcvData[ohlcvData.length - 1].timestamp} - Close: ${ohlcvData[ohlcvData.length - 1].close}`);
+
       return ohlcvData;
 
     } catch (error) {
       console.error('❌ Twelve Data API error:', error);
-      
-      // Return demo data if API fails
+
+      // STRICT MODE: No fallback to mock data - throw error to force real data usage
+      if (process.env.STRICT_REAL_DATA_MODE === 'true' || process.env.USE_MOCK_DATA === 'false') {
+        throw new Error(`Real market data unavailable for ${symbol}: ${error.message}. No mock data allowed in strict mode.`);
+      }
+
+      // Legacy fallback (should not be reached in production)
+      console.warn('⚠️ WARNING: Falling back to demo data - this should not happen in production!');
       return this.getDemoData(symbol, timeframe, outputsize);
     }
   }

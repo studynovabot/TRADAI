@@ -720,30 +720,8 @@ class CandleSniperEngine {
     }
 
     generateMockCandleData(timeframe) {
-        const count = 100;
-        const candles = [];
-        let basePrice = 1.20000;
-        
-        for (let i = 0; i < count; i++) {
-            const change = (Math.random() - 0.5) * 0.001;
-            const open = basePrice;
-            const close = basePrice + change;
-            const high = Math.max(open, close) + Math.random() * 0.0005;
-            const low = Math.min(open, close) - Math.random() * 0.0005;
-            
-            candles.push({
-                timestamp: Date.now() - (count - i) * this.getTimeframeMilliseconds(timeframe),
-                open: open,
-                high: high,
-                low: low,
-                close: close,
-                volume: Math.random() * 1000 + 500
-            });
-            
-            basePrice = close;
-        }
-        
-        return candles;
+        // STRICT MODE: No mock data allowed
+        throw new Error(`Mock candle data generation disabled. Real market data required in strict mode.`);
     }
 
     calculateIndicators(candleData) {
