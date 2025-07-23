@@ -19,6 +19,28 @@ class AdvancedChartAnalysisSetup {
     }
 
     /**
+     * Install chocolatey package manager if not available (Windows only)
+     */
+    async installChocolatey() {
+        if (process.platform !== 'win32') return;
+
+        try {
+            await execAsync('choco --version');
+            console.log('   ✅ Chocolatey already installed');
+        } catch (error) {
+            console.log('   📦 Installing Chocolatey package manager...');
+            try {
+                const installScript = 'Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(\'https://community.chocolatey.org/install.ps1\'))';
+                await execAsync(`powershell -Command "${installScript}"`);
+                console.log('   ✅ Chocolatey installed successfully');
+            } catch (chocoError) {
+                console.log('   ⚠️ Failed to install Chocolatey automatically');
+                throw new Error('Please install Chocolatey manually from https://chocolatey.org/install or install CMake and Visual Studio Build Tools manually');
+            }
+        }
+    }
+
+    /**
      * Main setup process
      */
     async runSetup() {
@@ -26,15 +48,16 @@ class AdvancedChartAnalysisSetup {
         console.log('=' .repeat(60));
         
         try {
+            await this.installChocolatey();
             await this.checkPrerequisites();
             await this.installDependencies();
             await this.setupDirectories();
             await this.configureSystem();
             await this.validateInstallation();
             await this.generateSetupReport();
-            
+
             console.log('\n🎉 Setup completed successfully!');
-            
+
         } catch (error) {
             console.error('\n❌ Setup failed:', error.message);
             await this.generateErrorReport(error);
@@ -47,30 +70,78 @@ class AdvancedChartAnalysisSetup {
      */
     async checkPrerequisites() {
         console.log('\n📋 Step 1: Checking Prerequisites...');
-        
+
         const step = { name: 'Prerequisites Check', startTime: Date.now(), success: false };
-        
+
         try {
             // Check Node.js version
             const nodeVersion = process.version;
             const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
-            
+
             if (majorVersion < 18) {
                 throw new Error(`Node.js 18+ required, found ${nodeVersion}`);
             }
-            
+
             console.log(`   ✅ Node.js version: ${nodeVersion}`);
-            
+
             // Check available memory
             const memoryUsage = process.memoryUsage();
             const availableMemory = memoryUsage.heapTotal / 1024 / 1024; // MB
-            
+
             if (availableMemory < 512) {
                 this.warnings.push('Low available memory detected. Performance may be affected.');
             }
-            
+
             console.log(`   ✅ Available memory: ${availableMemory.toFixed(0)}MB`);
-            
+
+            // Check for cmake (required for opencv4nodejs)
+            try {
+                const { stdout } = await execAsync('cmake --version');
+                console.log('   ✅ CMake found');
+            } catch (error) {
+                console.log('   ❌ CMake not found - installing...');
+                try {
+                    if (process.platform === 'win32') {
+                        await execAsync('choco install cmake -y');
+                        console.log('   ✅ CMake installed via chocolatey');
+                    } else {
+                        throw new Error('Please install CMake manually for your platform');
+                    }
+                } catch (installError) {
+                    throw new Error('CMake installation failed. Please install CMake manually from https://cmake.org/download/');
+                }
+            }
+
+            // Check for Python (required for opencv4nodejs compilation)
+            try {
+                const { stdout } = await execAsync('python --version');
+                console.log('   ✅ Python found');
+            } catch (error) {
+                try {
+                    const { stdout } = await execAsync('python3 --version');
+                    console.log('   ✅ Python3 found');
+                } catch (error3) {
+                    this.warnings.push('Python not found - may be required for opencv4nodejs compilation');
+                }
+            }
+
+            // Check for Visual Studio Build Tools (Windows only)
+            if (process.platform === 'win32') {
+                try {
+                    const { stdout } = await execAsync('where cl');
+                    console.log('   ✅ Visual Studio Build Tools found');
+                } catch (error) {
+                    console.log('   ⚠️ Visual Studio Build Tools not found');
+                    console.log('   💡 Installing Visual Studio Build Tools via chocolatey...');
+                    try {
+                        await execAsync('choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Workload.VCTools" -y');
+                        console.log('   ✅ Visual Studio Build Tools installed');
+                    } catch (buildToolsError) {
+                        this.warnings.push('Visual Studio Build Tools not found - may be required for opencv4nodejs compilation on Windows');
+                    }
+                }
+            }
+
             // Check disk space
             try {
                 const stats = await fs.stat(process.cwd());
@@ -78,7 +149,7 @@ class AdvancedChartAnalysisSetup {
             } catch (error) {
                 throw new Error('Cannot access current directory');
             }
-            
+
             // Check package.json
             try {
                 const packageJson = await fs.readFile('package.json', 'utf8');
@@ -87,16 +158,16 @@ class AdvancedChartAnalysisSetup {
             } catch (error) {
                 throw new Error('package.json not found or invalid');
             }
-            
+
             step.success = true;
             console.log('   ✅ All prerequisites met');
-            
+
         } catch (error) {
             step.error = error.message;
             this.errors.push(error.message);
             throw error;
         }
-        
+
         step.duration = Date.now() - step.startTime;
         this.setupSteps.push(step);
     }
@@ -127,7 +198,7 @@ class AdvancedChartAnalysisSetup {
 
             // Check which dependencies are missing
             const missingDeps = [];
-            
+
             for (const dep of requiredDependencies) {
                 try {
                     require.resolve(dep);
@@ -136,29 +207,57 @@ class AdvancedChartAnalysisSetup {
                     missingDeps.push(dep);
                 }
             }
-            
+
             if (missingDeps.length > 0) {
                 console.log(`   📥 Installing missing dependencies: ${missingDeps.join(', ')}`);
-                
-                // Install missing dependencies
-                const installCommand = `npm install ${missingDeps.join(' ')}`;
-                const { stdout, stderr } = await execAsync(installCommand);
-                
-                if (stderr && !stderr.includes('WARN')) {
-                    throw new Error(`Installation failed: ${stderr}`);
+
+                // Special handling for opencv4nodejs
+                if (missingDeps.includes('opencv4nodejs')) {
+                    console.log('   🔧 Installing opencv4nodejs with special configuration...');
+
+                    // Set environment variables for opencv4nodejs
+                    process.env.OPENCV4NODEJS_DISABLE_AUTOBUILD = '0';
+                    process.env.OPENCV_VERSION = '4.5.5';
+
+                    // Install opencv4nodejs separately with longer timeout
+                    try {
+                        const { stdout, stderr } = await execAsync('npm install opencv4nodejs --timeout=600000', {
+                            timeout: 600000 // 10 minutes timeout
+                        });
+                        console.log('   ✅ opencv4nodejs installed successfully');
+
+                        // Remove opencv4nodejs from missing deps list
+                        const index = missingDeps.indexOf('opencv4nodejs');
+                        missingDeps.splice(index, 1);
+                    } catch (opencvError) {
+                        console.log(`   ❌ opencv4nodejs installation failed: ${opencvError.message}`);
+                        throw new Error(`opencv4nodejs installation failed. Please ensure CMake and Python are properly installed. Error: ${opencvError.message}`);
+                    }
                 }
-                
-                console.log('   ✅ Dependencies installed successfully');
+
+                // Install remaining dependencies
+                if (missingDeps.length > 0) {
+                    const installCommand = `npm install ${missingDeps.join(' ')}`;
+                    const { stdout, stderr } = await execAsync(installCommand);
+
+                    if (stderr && !stderr.includes('WARN') && !stderr.includes('deprecated')) {
+                        throw new Error(`Installation failed: ${stderr}`);
+                    }
+
+                    console.log('   ✅ Remaining dependencies installed successfully');
+                }
             } else {
                 console.log('   ✅ All dependencies already installed');
             }
-            
+
             // Verify installations
+            console.log('   🔍 Verifying all installations...');
             for (const dep of requiredDependencies) {
                 try {
                     require.resolve(dep);
+                    console.log(`   ✅ ${dep} verified`);
                 } catch (error) {
-                    throw new Error(`Failed to verify installation of ${dep}`);
+                    throw new Error(`Failed to verify installation of ${dep}: ${error.message}`);
                 }
             }
             
@@ -172,32 +271,16 @@ class AdvancedChartAnalysisSetup {
         } catch (error) {
             step.error = error.message;
             this.errors.push(error.message);
-            
-            // Try alternative installation methods
-            console.log('   ⚠️ Standard installation failed, trying alternatives...');
+
+            console.log('   ❌ Dependency installation failed');
             console.log(`   🔍 Error details: ${error.message}`);
+            console.log('   💡 Please ensure all prerequisites are met:');
+            console.log('      - CMake is installed and in PATH');
+            console.log('      - Python is installed and in PATH');
+            console.log('      - Visual Studio Build Tools are installed (Windows)');
+            console.log('      - Sufficient disk space and memory available');
 
-            try {
-                // Ensure requiredDependencies is available
-                if (!requiredDependencies || !Array.isArray(requiredDependencies)) {
-                    throw new Error('requiredDependencies is not properly defined');
-                }
-
-                // Try installing without opencv4nodejs (optional)
-                const essentialDeps = requiredDependencies.filter(dep => dep !== 'opencv4nodejs');
-                console.log(`   📦 Trying to install essential dependencies: ${essentialDeps.join(', ')}`);
-
-                const installCommand = `npm install ${essentialDeps.join(' ')}`;
-                const { stdout, stderr } = await execAsync(installCommand);
-
-                console.log('   ✅ Essential dependencies installed successfully');
-                this.warnings.push('opencv4nodejs installation failed - computer vision features may be limited');
-                step.success = true;
-
-            } catch (altError) {
-                console.log(`   ❌ Alternative installation failed: ${altError.message}`);
-                throw new Error(`All installation methods failed: ${altError.message}`);
-            }
+            throw new Error(`Dependency installation failed: ${error.message}`);
         }
         
         step.duration = Date.now() - step.startTime;

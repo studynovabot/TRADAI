@@ -1,0 +1,28 @@
+{
+  "timestamp": "2025-07-23T14:03:20.614Z",
+  "totalAnalyses": 3,
+  "aiProvider": "Groq",
+  "results": [
+    {
+      "filename": "Screenshot 2025-07-23 173130.png",
+      "currencyPair": "USD/BRL",
+      "timeframe": "3m",
+      "confidence": 90,
+      "signalsGenerated": 3
+    },
+    {
+      "filename": "Screenshot 2025-07-23 173205.png",
+      "currencyPair": "USD/BRL",
+      "timeframe": "1m",
+      "confidence": 82,
+      "signalsGenerated": 3
+    },
+    {
+      "filename": "Screenshot 2025-07-23 173231.png",
+      "currencyPair": "GBP/USD",
+      "timeframe": "3m",
+      "confidence": 92,
+      "signalsGenerated": 3
+    }
+  ]
+}

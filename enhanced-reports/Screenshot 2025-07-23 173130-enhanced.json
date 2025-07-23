@@ -1,0 +1,94 @@
+{
+  "title": "🚀 COMPREHENSIVE TECHNICAL ANALYSIS WITH INDICATORS - USD/BRL",
+  "filename": "Screenshot 2025-07-23 173130.png",
+  "timestamp": "2025-07-23T14:03:20.245Z",
+  "screenshotAnalysis": {
+    "title": "📊 SCREENSHOT ANALYSIS (3m timeframe) - DETAILED ANALYSIS:",
+    "currencyPair": "USD/BRL",
+    "timeframe": "3m",
+    "currentPrice": 0.1754,
+    "indicators": {
+      "title": "🔍 INDICATORS ANALYSIS:",
+      "ema5": "- **EMA 5 (Yellow):** Price above EMA 5 - BULLISH SIGNAL",
+      "sma20": "- **SMA 20 (Red):** Price breaking above SMA 20 - TREND REVERSAL",
+      "stochastic": "- **Stochastic Oscillator:** %K: 53, %D: 36 - OVERSOLD"
+    },
+    "supportResistance": {
+      "title": "🎯 SUPPORT & RESISTANCE:",
+      "levels": {
+        "support": [
+          0.1750492,
+          0.1752246
+        ],
+        "resistance": [
+          0.1755754,
+          0.1757508
+        ],
+        "currentLevel": 0.1754
+      }
+    }
+  },
+  "nextCandleSignals": {
+    "title": "🚨 NEXT 3 CANDLES TRADING SIGNALS",
+    "currencyPair": "USD/BRL",
+    "timeframe": "3m",
+    "currentPrice": 0.1754,
+    "signals": [
+      {
+        "candle": 1,
+        "direction": "LONG",
+        "confidence": 92,
+        "entry": 0.17536,
+        "target": 0.17553,
+        "stopLoss": 0.17525,
+        "timeHorizon": "Next 3 minutes",
+        "expectedMove": "0.100%",
+        "riskReward": "1:1.7",
+        "formattedDirection": "📈 LONG SIGNAL - 92% CONFIDENCE",
+        "formattedEntry": "Entry: 0.17536",
+        "formattedTarget": "Target: 0.17553",
+        "formattedStopLoss": "Stop Loss: 0.17525",
+        "formattedTimeHorizon": "Next 3 minutes"
+      },
+      {
+        "candle": 2,
+        "direction": "LONG",
+        "confidence": 89,
+        "entry": 0.17544,
+        "target": 0.17555,
+        "stopLoss": 0.17538,
+        "timeHorizon": "Next 6 minutes",
+        "expectedMove": "0.060%",
+        "riskReward": "1:1.7",
+        "formattedDirection": "📈 LONG SIGNAL - 89% CONFIDENCE",
+        "formattedEntry": "Entry: 0.17544",
+        "formattedTarget": "Target: 0.17555",
+        "formattedStopLoss": "Stop Loss: 0.17538",
+        "formattedTimeHorizon": "Next 6 minutes"
+      },
+      {
+        "candle": 3,
+        "direction": "LONG",
+        "confidence": 86,
+        "entry": 0.17538,
+        "target": 0.17569,
+        "stopLoss": 0.17519,
+        "timeHorizon": "Next 9 minutes",
+        "expectedMove": "0.179%",
+        "riskReward": "1:1.7",
+        "formattedDirection": "📈 LONG SIGNAL - 86% CONFIDENCE",
+        "formattedEntry": "Entry: 0.17538",
+        "formattedTarget": "Target: 0.17569",
+        "formattedStopLoss": "Stop Loss: 0.17519",
+        "formattedTimeHorizon": "Next 9 minutes"
+      }
+    ],
+    "overallConfidence": 90
+  },
+  "marketStructure": {
+    "trend": "BULLISH",
+    "momentum": "MODERATE",
+    "volatility": "MEDIUM"
+  },
+  "finalVerdict": "🔥 FINAL VERDICT: BULLISH MOMENTUM WITH 90% CONFIDENCE - EXPECT BULLISH MOVEMENT"
+}

@@ -1,0 +1,68 @@
+{
+  "title": "🚀 PROFESSIONAL CHART ANALYSIS - USD/BRL",
+  "filename": "Screenshot 2025-07-23 173205.png",
+  "timestamp": "2025-07-23T14:00:08.315Z",
+  "analysis": {
+    "currencyPair": "USD/BRL",
+    "timeframe": "Unknown",
+    "priceData": {
+      "currentPrice": 0.178,
+      "highPrice": 0.178,
+      "lowPrice": 0.178,
+      "allPrices": [
+        0.178
+      ]
+    },
+    "timestamps": [],
+    "textLength": 213,
+    "confidence": 50
+  },
+  "signals": {
+    "status": "SUCCESS",
+    "currencyPair": "USD/BRL",
+    "timeframe": "Unknown",
+    "currentPrice": 0.178,
+    "nextCandleSignals": [
+      {
+        "candle": 1,
+        "timeHorizon": "1 minutes",
+        "direction": "LONG",
+        "confidence": 90,
+        "entry": 0.178,
+        "target": 0.178,
+        "stopLoss": 0.178,
+        "expectedMove": "0.000%"
+      },
+      {
+        "candle": 2,
+        "timeHorizon": "2 minutes",
+        "direction": "SHORT",
+        "confidence": 85,
+        "entry": 0.178,
+        "target": 0.178,
+        "stopLoss": 0.178,
+        "expectedMove": "0.000%"
+      },
+      {
+        "candle": 3,
+        "timeHorizon": "3 minutes",
+        "direction": "SHORT",
+        "confidence": 80,
+        "entry": 0.178,
+        "target": 0.178,
+        "stopLoss": 0.178,
+        "expectedMove": "0.000%"
+      }
+    ],
+    "riskManagement": {
+      "positionSize": "1-2% of account",
+      "maxRisk": "Never risk more than 2% per trade",
+      "riskReward": "1:2 minimum"
+    }
+  },
+  "metadata": {
+    "width": 968,
+    "height": 548,
+    "format": "png"
+  }
+}

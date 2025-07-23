@@ -6,18 +6,19 @@
  */
 
 const sharp = require('sharp');
-const Tesseract = require('tesseract.js');
-const { createCanvas, loadImage } = require('canvas');
+const Jimp = require('jimp');
+const { createWorker } = require('tesseract.js');
+const fs = require('fs').promises;
 
 class AdvancedImageProcessor {
     constructor(config = {}) {
         this.config = {
-            // Image quality settings
-            minWidth: config.minWidth || 800,
-            minHeight: config.minHeight || 600,
+            // Image quality settings (relaxed for trading screenshots)
+            minWidth: config.minWidth || 600,
+            minHeight: config.minHeight || 400,
             maxWidth: config.maxWidth || 4096,
             maxHeight: config.maxHeight || 4096,
-            qualityThreshold: config.qualityThreshold || 0.7,
+            qualityThreshold: config.qualityThreshold || 0.5,
             
             // OCR settings
             ocrLanguage: config.ocrLanguage || 'eng',
@@ -288,7 +289,6 @@ class AdvancedImageProcessor {
             throw new Error(`Image preprocessing failed: ${error.message}`);
         }
     }
-}
 
     /**
      * Detect regions of interest in the trading chart screenshot
@@ -458,12 +458,12 @@ class AdvancedImageProcessor {
             // Get or create OCR worker
             let worker = this.ocrWorkers.get(regionName);
             if (!worker) {
-                worker = await Tesseract.createWorker(this.config.ocrLanguage);
+                worker = await createWorker(this.config.ocrLanguage);
 
                 // Configure OCR for trading-specific content
                 await worker.setParameters({
                     tessedit_char_whitelist: '0123456789.,+-/:%ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz',
-                    tessedit_pageseg_mode: Tesseract.PSM.SPARSE_TEXT
+                    tessedit_pageseg_mode: '6'
                 });
 
                 this.ocrWorkers.set(regionName, worker);
@@ -569,6 +569,158 @@ class AdvancedImageProcessor {
     }
 
     /**
+     * Extract currency pair from text
+     */
+    extractCurrencyPair(allText, textExtractions) {
+        const forexPairs = ['usd/brl', 'eur/usd', 'gbp/usd', 'usd/jpy', 'aud/usd', 'usd/cad', 'eur/gbp', 'eur/jpy'];
+
+        for (const pair of forexPairs) {
+            if (allText.includes(pair) || allText.includes(pair.replace('/', ''))) {
+                return pair.toUpperCase();
+            }
+        }
+
+        return 'Unknown';
+    }
+
+    /**
+     * Extract current price from text
+     */
+    extractCurrentPrice(allText, textExtractions) {
+        const pricePattern = /(\d+\.\d{4,5})/g;
+        const matches = allText.match(pricePattern);
+        return matches ? parseFloat(matches[0]) : null;
+    }
+
+    /**
+     * Extract timeframe from text
+     */
+    extractTimeframe(allText, textExtractions) {
+        const timeframes = ['1m', '3m', '5m', '15m', '30m', '1h', '4h', '1d'];
+
+        for (const tf of timeframes) {
+            if (allText.includes(tf)) {
+                return tf;
+            }
+        }
+
+        return 'Unknown';
+    }
+
+    /**
+     * Extract price levels from text
+     */
+    extractPriceLevels(textExtractions) {
+        const levels = [];
+        const pricePattern = /(\d+\.\d{4,5})/g;
+
+        Object.values(textExtractions).forEach(extraction => {
+            const matches = extraction.text.match(pricePattern);
+            if (matches) {
+                matches.forEach(match => {
+                    const price = parseFloat(match);
+                    if (price > 0 && !levels.includes(price)) {
+                        levels.push(price);
+                    }
+                });
+            }
+        });
+
+        return levels.sort((a, b) => b - a);
+    }
+
+    /**
+     * Extract timestamps from text
+     */
+    extractTimestamps(textExtractions) {
+        const timestamps = [];
+        const timePattern = /(\d{1,2}:\d{2})/g;
+
+        Object.values(textExtractions).forEach(extraction => {
+            const matches = extraction.text.match(timePattern);
+            if (matches) {
+                timestamps.push(...matches);
+            }
+        });
+
+        return [...new Set(timestamps)];
+    }
+
+    /**
+     * Extract indicator values from text
+     */
+    extractIndicatorValues(textExtractions) {
+        return {
+            rsi: null,
+            macd: null,
+            stochastic: null,
+            volume: null
+        };
+    }
+
+    /**
+     * Detect trading platform from text
+     */
+    detectTradingPlatform(allText) {
+        const platforms = ['metatrader', 'mt4', 'mt5', 'tradingview', 'iq option', 'binomo'];
+
+        for (const platform of platforms) {
+            if (allText.includes(platform)) {
+                return platform;
+            }
+        }
+
+        return 'Unknown';
+    }
+
+    /**
+     * Calculate trading data confidence
+     */
+    calculateTradingDataConfidence(tradingData, textExtractions) {
+        let confidence = 0;
+        let factors = 0;
+
+        if (tradingData.currencyPair && tradingData.currencyPair !== 'Unknown') {
+            confidence += 25;
+            factors++;
+        }
+
+        if (tradingData.currentPrice) {
+            confidence += 25;
+            factors++;
+        }
+
+        if (tradingData.timeframe && tradingData.timeframe !== 'Unknown') {
+            confidence += 20;
+            factors++;
+        }
+
+        if (tradingData.pricelevels.length > 0) {
+            confidence += 15;
+            factors++;
+        }
+
+        if (tradingData.timestamps.length > 0) {
+            confidence += 15;
+            factors++;
+        }
+
+        return factors > 0 ? confidence : 0;
+    }
+
+    /**
+     * Extract chart data (placeholder for visual analysis)
+     */
+    async extractChartData(imageBuffer, regions) {
+        return {
+            candlesticks: [],
+            indicators: {},
+            patterns: [],
+            confidence: 50
+        };
+    }
+
+    /**
      * Calculate overall confidence score
      */
     calculateOverallConfidence(textExtractions, chartData) {
@@ -612,4 +764,4 @@ class AdvancedImageProcessor {
     }
 }
 
-module.exports = { AdvancedImageProcessor };
+module.exports = AdvancedImageProcessor;
