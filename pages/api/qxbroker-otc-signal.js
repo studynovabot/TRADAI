@@ -5,9 +5,9 @@
  * with multi-timeframe analysis, OCR, and pattern matching
  */
 
-const { QXBrokerOTCSignalGenerator } = require('../../src/core/QXBrokerOTCSignalGenerator');
-const fs = require('fs-extra');
-const path = require('path');
+// Import the serverless OTC signal generator (compatible with QXBroker)
+const { ServerlessOTCGenerator } = require('../../src/core/ServerlessOTCGenerator');
+const { strictModeConfig } = require('../../src/config/strict-mode');
 
 // Global signal generator instance (singleton pattern)
 let globalSignalGenerator = null;
@@ -48,31 +48,22 @@ async function ensureSignalGeneratorInitialized() {
 }
 
 /**
- * Initialize the QXBroker OTC signal generator
+ * Initialize the Serverless OTC signal generator (QXBroker compatible)
  */
 async function initializeSignalGenerator() {
     try {
-        console.log('🚀 Initializing QXBroker OTC Signal Generator...');
-        
-        // Load credentials from environment variables
-        const qxBrokerEmail = process.env.QXBROKER_EMAIL;
-        const qxBrokerPassword = process.env.QXBROKER_PASSWORD;
-        
-        if (!qxBrokerEmail || !qxBrokerPassword) {
-            console.warn('⚠️ QXBroker credentials not found in environment variables');
-        }
-        
-        globalSignalGenerator = new QXBrokerOTCSignalGenerator({
-            qxBrokerEmail,
-            qxBrokerPassword,
-            headless: process.env.NODE_ENV === 'production',
+        console.log('🚀 Initializing Serverless OTC Signal Generator (QXBroker mode)...');
+
+        globalSignalGenerator = new ServerlessOTCGenerator({
             minConfidence: 75,
-            maxProcessingTime: CONFIG.maxProcessingTime
+            maxProcessingTime: CONFIG.maxProcessingTime,
+            strictMode: true,
+            platform: 'qxbroker'
         });
 
         await globalSignalGenerator.initialize();
 
-        console.log('✅ QXBroker OTC Signal Generator initialized');
+        console.log('✅ Serverless OTC Signal Generator initialized');
         return globalSignalGenerator;
 
     } catch (error) {
@@ -200,6 +191,26 @@ export default async function handler(req, res) {
 
         const processingTime = Date.now() - startTime;
 
+        // STRICT MODE: Validate signal before returning
+        try {
+            const validatedSignal = strictModeConfig.enforceStrictSignalGeneration(signal);
+            console.log('✅ Signal passed strict mode validation');
+        } catch (strictError) {
+            console.log(`❌ Signal failed strict mode validation: ${strictError.message}`);
+            return res.status(422).json({
+                success: false,
+                requestId,
+                processingTime,
+                error: 'STRICT_MODE_VIOLATION',
+                message: strictError.message,
+                strictMode: true,
+                asset: asset,
+                timeframes: timeframes,
+                tradeDuration: tradeDuration,
+                timestamp: new Date().toISOString()
+            });
+        }
+
         // Log completion
         console.log(`✅ === API REQUEST COMPLETED ===`);
         console.log(`🆔 Request ID: ${requestId}`);
@@ -212,6 +223,7 @@ export default async function handler(req, res) {
             success: true,
             requestId,
             processingTime,
+            strictMode: true,
             ...signal
         });
 

@@ -92,69 +92,11 @@ class ChartDataExtractor {
   
   async extractChartData(screenshotPath, options = {}) {
     console.log(`Extracting chart data from ${screenshotPath}...`);
-    
-    // Generate simulated candles and indicators
-    const candles = this.generateSimulatedCandles(30);
-    const indicators = this.generateSimulatedIndicators();
-    
-    return {
-      candles,
-      indicators,
-      timestamp: Date.now(),
-      screenshotPath,
-      platform: options.platform || 'quotex',
-      metadata: {
-        source: 'chart-extraction',
-        extractionMethod: 'simulation',
-        timestamp: Date.now(),
-        candleCount: candles.length,
-        indicatorCount: Object.keys(indicators).length,
-        quality: 85
-      }
-    };
+
+    // STRICT MODE: No synthetic data generation allowed
+    throw new Error('Chart data extraction not implemented. Real screenshot analysis required.');
   }
-  
-  generateSimulatedCandles(count) {
-    const candles = [];
-    const now = Date.now();
-    let price = 1.2500 + (Math.random() * 0.01);
-    
-    for (let i = 0; i < count; i++) {
-      const open = price;
-      const high = open + (Math.random() * 0.0020);
-      const low = open - (Math.random() * 0.0020);
-      const close = low + (Math.random() * (high - low));
-      
-      candles.push({
-        timestamp: now - ((count - i) * 60 * 1000),
-        open,
-        high,
-        low,
-        close,
-        volume: Math.floor(Math.random() * 100) + 50
-      });
-      
-      price = close;
-    }
-    
-    return candles;
-  }
-  
-  generateSimulatedIndicators() {
-    return {
-      rsi: Array(30).fill(0).map(() => Math.floor(Math.random() * 100)),
-      macd: {
-        line: Array(30).fill(0).map(() => (Math.random() * 0.002) - 0.001),
-        signal: Array(30).fill(0).map(() => (Math.random() * 0.002) - 0.001),
-        histogram: Array(30).fill(0).map(() => (Math.random() * 0.001) - 0.0005)
-      },
-      ema: {
-        ema9: Array(30).fill(0).map(() => 1.25 + (Math.random() * 0.01)),
-        ema21: Array(30).fill(0).map(() => 1.25 + (Math.random() * 0.01)),
-        ema50: Array(30).fill(0).map(() => 1.25 + (Math.random() * 0.01))
-      }
-    };
-  }
+
 }
 
 // Try to load other dependencies with fallbacks
@@ -164,113 +106,40 @@ try {
   const { OTCPatternMatcher: OPM } = require('./OTCPatternMatcher');
   OTCPatternMatcher = OPM;
 } catch (error) {
-  console.warn('OTCPatternMatcher module not available, using fallback');
-  OTCPatternMatcher = class MockOTCPatternMatcher {
-    async initialize() { return true; }
-    async findMatchingPatterns() {
-      return {
-        name: 'Bullish Engulfing',
-        quality: 85,
-        matches: 3,
-        reasons: ['Bullish engulfing pattern detected on 5M timeframe']
-      };
-    }
-  };
+  console.error('OTCPatternMatcher module not available - STRICT MODE: No fallbacks allowed');
+  throw new Error('OTCPatternMatcher module is required for real data analysis');
 }
 
 try {
   const { HistoricalDataMatcher: HDM } = require('./HistoricalDataMatcher');
   HistoricalDataMatcher = HDM;
 } catch (error) {
-  console.warn('HistoricalDataMatcher module not available, using fallback');
-  HistoricalDataMatcher = class MockHistoricalDataMatcher {
-    async initialize() { return true; }
-    async getHistoricalData() {
-      return Array(50).fill(0).map((_, i) => ({
-        timestamp: Date.now() - (i * 60 * 1000),
-        open: 1.25 + (Math.random() * 0.01),
-        high: 1.25 + (Math.random() * 0.02),
-        low: 1.25 - (Math.random() * 0.01),
-        close: 1.25 + (Math.random() * 0.01),
-        volume: Math.floor(Math.random() * 100) + 50
-      }));
-    }
-    async validateWithHistoricalData() {
-      return {
-        accuracy: 78,
-        samples: 12,
-        winRate: '75%',
-        reasons: ['Similar pattern found in historical data with 78% accuracy']
-      };
-    }
-  };
+  console.error('HistoricalDataMatcher module not available - STRICT MODE: No fallbacks allowed');
+  throw new Error('HistoricalDataMatcher module is required for real data analysis');
 }
 
 try {
   const { MultiTimeframeAnalyzer: MTA } = require('./MultiTimeframeAnalyzer');
   MultiTimeframeAnalyzer = MTA;
 } catch (error) {
-  console.warn('MultiTimeframeAnalyzer module not available, using fallback');
-  MultiTimeframeAnalyzer = class MockMultiTimeframeAnalyzer {
-    async initialize() { return true; }
-    async analyze() {
-      return {
-        trend: 'BULLISH',
-        alignment: 80,
-        strength: 'STRONG',
-        reasons: [
-          'Strong bullish trend on 1H timeframe',
-          'Bullish momentum confirmed on 15M timeframe',
-          'Price above EMA 50 on all timeframes'
-        ]
-      };
-    }
-  };
+  console.error('MultiTimeframeAnalyzer module not available - STRICT MODE: No fallbacks allowed');
+  throw new Error('MultiTimeframeAnalyzer module is required for real data analysis');
 }
 
 try {
   const { TechnicalAnalyzer: TA } = require('./TechnicalAnalyzer');
   TechnicalAnalyzer = TA;
 } catch (error) {
-  console.warn('TechnicalAnalyzer module not available, using fallback');
-  TechnicalAnalyzer = class MockTechnicalAnalyzer {
-    calculateAllIndicators() {
-      return {
-        rsi: Array(30).fill(0).map(() => Math.floor(Math.random() * 100)),
-        macd: {
-          line: Array(30).fill(0).map(() => (Math.random() * 0.002) - 0.001),
-          signal: Array(30).fill(0).map(() => (Math.random() * 0.002) - 0.001),
-          histogram: Array(30).fill(0).map(() => (Math.random() * 0.001) - 0.0005)
-        },
-        ema: {
-          ema9: Array(30).fill(0).map(() => 1.25 + (Math.random() * 0.01)),
-          ema21: Array(30).fill(0).map(() => 1.25 + (Math.random() * 0.01)),
-          ema50: Array(30).fill(0).map(() => 1.25 + (Math.random() * 0.01))
-        }
-      };
-    }
-  };
+  console.error('TechnicalAnalyzer module not available - STRICT MODE: No fallbacks allowed');
+  throw new Error('TechnicalAnalyzer module is required for real data analysis');
 }
 
 try {
   const { SignalConsensusEngine: SCE } = require('./SignalConsensusEngine');
   SignalConsensusEngine = SCE;
 } catch (error) {
-  console.warn('SignalConsensusEngine module not available, using fallback');
-  SignalConsensusEngine = class MockSignalConsensusEngine {
-    async initialize() { return true; }
-    async generateConsensus() {
-      return {
-        direction: Math.random() > 0.5 ? 'UP' : 'DOWN',
-        confidence: 80,
-        reasons: [
-          'Strong technical indicator alignment',
-          'Historical pattern validation successful',
-          'Multi-timeframe analysis confirms direction'
-        ]
-      };
-    }
-  };
+  console.error('SignalConsensusEngine module not available - STRICT MODE: No fallbacks allowed');
+  throw new Error('SignalConsensusEngine module is required for real data analysis');
 }
 
 // Import utilities
@@ -329,195 +198,12 @@ class QXBrokerOTCSignalGenerator {
         this.chartExtractor = new ChartDataExtractor({
             enhanceImage: this.config.ocrEnhancement
         });
-        // Initialize OTCPatternMatcher with proper interface
-        this.patternMatcher = {
-            initialize: async () => {
-                console.log('OTC Pattern Matcher initialized');
-                return true;
-            },
-            findMatchingPatterns: async (candles, asset, timeframe) => {
-                console.log(`Finding patterns for ${asset} on ${timeframe} timeframe...`);
-                
-                // Generate a simulated pattern match
-                const patterns = [
-                    { name: 'Bullish Engulfing', type: 'BULLISH' },
-                    { name: 'Bearish Engulfing', type: 'BEARISH' },
-                    { name: 'Morning Star', type: 'BULLISH' },
-                    { name: 'Evening Star', type: 'BEARISH' }
-                ];
-                
-                const randomPattern = patterns[Math.floor(Math.random() * patterns.length)];
-                const quality = Math.floor(Math.random() * 30) + 70; // 70-100
-                
-                return {
-                    name: randomPattern.name,
-                    type: randomPattern.type,
-                    quality,
-                    matches: Math.floor(Math.random() * 5) + 1,
-                    reasons: [
-                        `${randomPattern.name} pattern detected on ${timeframe} timeframe`,
-                        `Pattern quality: ${quality}%`,
-                        `${randomPattern.type} signal with moderate confidence`
-                    ],
-                    timeframe
-                };
-            }
-        };
-        
-        // Create HistoricalDataMatcher with proper interface
-        this.historicalMatcher = {
-            initialize: async () => {
-                console.log('Historical Data Matcher initialized');
-                return true;
-            },
-            getHistoricalData: async (pair, timeframe) => {
-                console.log(`Getting historical data for ${pair} on ${timeframe} timeframe...`);
-                
-                // Generate simulated historical data
-                const candles = [];
-                const now = Date.now();
-                let price = 1.2500 + (Math.random() * 0.01);
-                
-                for (let i = 0; i < 100; i++) {
-                    const open = price;
-                    const high = open + (Math.random() * 0.0020);
-                    const low = open - (Math.random() * 0.0020);
-                    const close = low + (Math.random() * (high - low));
-                    
-                    candles.push({
-                        timestamp: now - ((100 - i) * 60 * 1000),
-                        open,
-                        high,
-                        low,
-                        close,
-                        volume: Math.floor(Math.random() * 100) + 50
-                    });
-                    
-                    price = close;
-                }
-                
-                return candles;
-            },
-            validateWithHistoricalData: async (pattern, pair, timeframe) => {
-                console.log(`Validating pattern against historical data for ${pair} on ${timeframe} timeframe...`);
-                
-                // Generate simulated validation result
-                const accuracy = Math.floor(Math.random() * 20) + 70; // 70-90
-                const samples = Math.floor(Math.random() * 10) + 5; // 5-15
-                const winRate = `${Math.floor(Math.random() * 30) + 65}%`; // 65-95%
-                
-                return {
-                    accuracy,
-                    samples,
-                    winRate,
-                    reasons: [
-                        `Similar pattern found in historical data with ${accuracy}% accuracy`,
-                        `Based on ${samples} historical samples`,
-                        `Historical win rate: ${winRate}`
-                    ]
-                };
-            }
-        };
-        
-        // Fix for MultiTimeframeAnalyzer initialization
-        this.multiTimeframeAnalyzer = {
-            initialize: async () => {
-                console.log('Multi-Timeframe Analyzer initialized');
-                return true;
-            },
-            analyze: async (timeframeData) => {
-                console.log(`Analyzing data across multiple timeframes...`);
-                
-                // Generate a simulated analysis result
-                const trends = ['BULLISH', 'BEARISH', 'NEUTRAL'];
-                const trend = trends[Math.floor(Math.random() * trends.length)];
-                const alignment = Math.floor(Math.random() * 30) + 70; // 70-100
-                
-                let strength = 'MODERATE';
-                if (alignment >= 85) strength = 'STRONG';
-                else if (alignment < 75) strength = 'WEAK';
-                
-                return {
-                    trend,
-                    alignment,
-                    strength,
-                    reasons: [
-                        `${strength.toLowerCase()} ${trend.toLowerCase()} trend detected across multiple timeframes`,
-                        `${alignment}% alignment between timeframes indicates ${strength.toLowerCase()} directional consensus`,
-                        `Short-term momentum aligns with ${trend.toLowerCase()} bias`
-                    ]
-                };
-            }
-        };
-        
-        // Create TechnicalAnalyzer with proper interface
-        this.technicalAnalyzer = {
-            initialize: async () => {
-                console.log('Technical Analyzer initialized');
-                return true;
-            },
-            calculateAllIndicators: (candles) => {
-                console.log(`Calculating technical indicators for ${candles.length} candles...`);
-                
-                return {
-                    rsi: Array(candles.length).fill(0).map(() => Math.floor(Math.random() * 100)),
-                    macd: {
-                        line: Array(candles.length).fill(0).map(() => (Math.random() * 0.002) - 0.001),
-                        signal: Array(candles.length).fill(0).map(() => (Math.random() * 0.002) - 0.001),
-                        histogram: Array(candles.length).fill(0).map(() => (Math.random() * 0.001) - 0.0005)
-                    },
-                    ema: {
-                        ema9: Array(candles.length).fill(0).map(() => 1.25 + (Math.random() * 0.01)),
-                        ema21: Array(candles.length).fill(0).map(() => 1.25 + (Math.random() * 0.01)),
-                        ema50: Array(candles.length).fill(0).map(() => 1.25 + (Math.random() * 0.01))
-                    },
-                    bollingerBands: {
-                        upper: Array(candles.length).fill(0).map(() => 1.26 + (Math.random() * 0.01)),
-                        middle: Array(candles.length).fill(0).map(() => 1.25 + (Math.random() * 0.01)),
-                        lower: Array(candles.length).fill(0).map(() => 1.24 + (Math.random() * 0.01))
-                    },
-                    stochastic: {
-                        k: Array(candles.length).fill(0).map(() => Math.floor(Math.random() * 100)),
-                        d: Array(candles.length).fill(0).map(() => Math.floor(Math.random() * 100))
-                    }
-                };
-            }
-        };
-        
-        // Create SignalConsensusEngine with proper interface
-        this.consensusEngine = {
-            initialize: async () => {
-                console.log('Signal Consensus Engine initialized');
-                return true;
-            },
-            generateConsensus: async (data) => {
-                console.log(`Generating consensus for ${data.asset} on ${data.timeframe} timeframe...`);
-                
-                // Generate a simulated consensus
-                const directions = ['UP', 'DOWN'];
-                const direction = directions[Math.floor(Math.random() * directions.length)];
-                const confidence = Math.floor(Math.random() * 20) + 75; // 75-95
-                
-                return {
-                    direction,
-                    confidence,
-                    reasons: [
-                        `${direction === 'UP' ? 'Bullish' : 'Bearish'} signal with ${confidence}% confidence`,
-                        'Technical indicators show strong directional bias',
-                        'Pattern recognition confirms signal direction',
-                        'Historical validation supports the prediction'
-                    ],
-                    components: {
-                        multiTimeframe: { direction, confidence: confidence - 5 },
-                        pattern: { direction, confidence: confidence + 5 },
-                        historical: { direction, confidence }
-                    },
-                    asset: data.asset,
-                    timeframe: data.timeframe,
-                    timestamp: new Date().toISOString()
-                };
-            }
-        };
+        // STRICT MODE: Use real OTCPatternMatcher - no fallbacks allowed
+        this.patternMatcher = new OTCPatternMatcher();
+        this.historicalMatcher = new HistoricalDataMatcher();
+        this.multiTimeframeAnalyzer = new MultiTimeframeAnalyzer();
+        this.technicalAnalyzer = new TechnicalAnalyzer();
+        this.consensusEngine = new SignalConsensusEngine();
         
         // State tracking
         this.isInitialized = false;
@@ -1055,7 +741,7 @@ class QXBrokerOTCSignalGenerator {
      */
     async generateOTCSignal(asset = this.config.defaultAsset, options = {}) {
         const startTime = Date.now();
-        const signalId = `OTC_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        const signalId = `OTC_${Date.now()}_${Buffer.from(Date.now().toString()).toString('base64').substr(0, 8)}`;
         
         try {
             this.logger.info(`🚀 Starting OTC signal generation workflow for ${asset}...`);

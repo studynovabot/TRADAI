@@ -1,0 +1,228 @@
+{
+  "timestamp": "2025-07-23T06:43:03.935Z",
+  "forex": {
+    "realDataValidation": {
+      "passed": true,
+      "tests": [
+        {
+          "testCase": {
+            "pair": "EUR/USD",
+            "trade_mode": "scalping",
+            "risk": "1"
+          },
+          "hasRealData": true,
+          "responseTime": 6923,
+          "data": {
+            "trade_type": "SELL",
+            "entry": 1.17321,
+            "confidence": 85,
+            "dataSource": "real",
+            "strictMode": true
+          },
+          "passed": true
+        },
+        {
+          "testCase": {
+            "pair": "GBP/USD",
+            "trade_mode": "sniper",
+            "risk": "2"
+          },
+          "hasRealData": true,
+          "responseTime": 2197,
+          "data": {
+            "trade_type": "SELL",
+            "entry": 1.35239,
+            "confidence": 74,
+            "dataSource": "real",
+            "strictMode": true
+          },
+          "passed": true
+        },
+        {
+          "testCase": {
+            "pair": "USD/JPY",
+            "trade_mode": "swing",
+            "risk": "1"
+          },
+          "hasRealData": true,
+          "responseTime": 16576,
+          "data": {
+            "trade_type": "BUY",
+            "entry": 146.994,
+            "confidence": 89,
+            "dataSource": "real",
+            "strictMode": true
+          },
+          "passed": true
+        }
+      ],
+      "passRate": "3/3",
+      "summary": "All forex signals use real market data"
+    },
+    "technicalAnalysis": {
+      "passed": true,
+      "tests": [
+        {
+          "testCase": {
+            "pair": "EUR/USD",
+            "trade_mode": "scalping",
+            "risk": "1"
+          },
+          "hasQualityAnalysis": true,
+          "data": {
+            "reason": "Medium: MACD bear + EMA 20/50 bear + RSI<50 + near support...",
+            "rr_ratio": 2.2,
+            "stop_loss": 1.17427,
+            "take_profit": 1.17107,
+            "entry": 1.17327
+          },
+          "passed": true
+        }
+      ],
+      "summary": "Forex signals include comprehensive technical analysis"
+    },
+    "strictModeCompliance": {
+      "passed": false,
+      "tests": [
+        {
+          "testCase": {
+            "pair": "INVALID/PAIR",
+            "trade_mode": "scalping",
+            "risk": "1"
+          },
+          "issue": "Accepted invalid parameters",
+          "passed": false
+        },
+        {
+          "testCase": {
+            "pair": "EUR/USD",
+            "trade_mode": "invalid_mode",
+            "risk": "1"
+          },
+          "result": "Properly rejected with error",
+          "passed": true
+        }
+      ],
+      "summary": "Forex strict mode validation needs improvement"
+    },
+    "performanceMetrics": {
+      "passed": true,
+      "tests": [
+        {
+          "avgResponseTime": 6198,
+          "maxResponseTime": 7074,
+          "responseTimes": [
+            6592,
+            7074,
+            4928
+          ],
+          "passed": true
+        }
+      ],
+      "summary": "Forex performance meets production requirements"
+    }
+  },
+  "otc": {
+    "realDataValidation": {
+      "passed": true,
+      "tests": [
+        {
+          "testCase": {
+            "currencyPair": "USD/PKR",
+            "timeframe": "1m",
+            "tradeDuration": "1"
+          },
+          "hasRealData": true,
+          "responseTime": 1952,
+          "data": {
+            "signal": "PUT",
+            "confidence": 86,
+            "qualityGrade": "A",
+            "dataSource": "real"
+          },
+          "passed": true
+        },
+        {
+          "testCase": {
+            "currencyPair": "USD/DZD",
+            "timeframe": "5m",
+            "tradeDuration": "5"
+          },
+          "hasRealData": true,
+          "responseTime": 858,
+          "data": {
+            "signal": "PUT",
+            "confidence": 83,
+            "qualityGrade": "B+",
+            "dataSource": "real"
+          },
+          "passed": true
+        }
+      ],
+      "passRate": "2/2",
+      "summary": "OTC signals use real market data analysis"
+    },
+    "signalGeneration": {
+      "passed": true,
+      "tests": [
+        {
+          "testCase": {
+            "currencyPair": "USD/PKR",
+            "timeframe": "5m",
+            "tradeDuration": "5"
+          },
+          "hasQualitySignal": true,
+          "data": {
+            "signal": "PUT",
+            "confidence": 86,
+            "analysis": "RSI(100.0) indicates overbought conditions + SMA20 below SMA50 indicates downtrend + MACD above sign...",
+            "qualityGrade": "A",
+            "technicalIndicators": {
+              "rsi": 100,
+              "macd": {
+                "macd": 0.034692924140813375,
+                "signal": 0.018074063071363784,
+                "histogram": 0.01661886106944959
+              },
+              "trend": "neutral",
+              "volatility": 0.019932466599826483
+            }
+          },
+          "passed": true
+        }
+      ],
+      "summary": "OTC signals include comprehensive analysis"
+    },
+    "strictModeCompliance": {
+      "passed": true,
+      "tests": [
+        {
+          "testCase": {
+            "currencyPair": "USD/PKR"
+          },
+          "result": "Properly rejected with error",
+          "passed": true
+        }
+      ],
+      "summary": "OTC strict mode properly validates inputs"
+    },
+    "performanceMetrics": {
+      "passed": false,
+      "tests": [
+        {
+          "error": "Request failed with status code 429",
+          "passed": false
+        }
+      ],
+      "summary": "OTC performance test failed due to error"
+    }
+  },
+  "overall": {
+    "productionReady": false,
+    "criticalIssues": [
+      "Forex signal generator not meeting production standards",
+      "OTC signal generator not meeting production standards"
+    ],
+    "recommendations": []
+  }
+}

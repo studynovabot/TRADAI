@@ -288,29 +288,12 @@ class CandleSniperEngine {
                     
                     confidence = Math.min(85, Math.max(50, confidence));
                     
-                    return {
-                        prediction: direction,
-                        confidence: Math.round(confidence),
-                        reason: reasons.slice(0, 3).join(' + ') || 'Technical analysis',
-                        risk: confidence > 75 ? 'Low' : confidence > 65 ? 'Medium' : 'High',
-                        volatility: marketData.context?.volatility || 'Normal',
-                        timestamp: Date.now(),
-                        model_version: 'fallback_v1.0',
-                        fallback_mode: true
-                    };
-                    
+                    // STRICT MODE: No fallback predictions allowed
+                    throw new Error('AI prediction failed - no fallback allowed in strict mode');
+
                 } catch (error) {
-                    console.error('[Candle Sniper] Fallback AI error:', error);
-                    return {
-                        prediction: 'NEUTRAL',
-                        confidence: 50,
-                        reason: 'Analysis unavailable',
-                        risk: 'High',
-                        volatility: 'Normal',
-                        timestamp: Date.now(),
-                        model_version: 'emergency_v1.0',
-                        emergency_mode: true
-                    };
+                    console.error('[Candle Sniper] AI prediction error:', error);
+                    throw new Error(`AI prediction failed: ${error.message}`);
                 }
             }
         };

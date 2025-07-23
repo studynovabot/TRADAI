@@ -75,26 +75,11 @@ async function getRecentSignals(): Promise<Signal[]> {
       return signals.slice(-20).reverse();
     }
     
-    // If no signals file, return demo signals
-    return generateDemoSignals();
+    // STRICT MODE: No demo signals allowed
+    throw new Error('No real signals available');
   } catch (error) {
     console.error('Error reading signals:', error);
-    return generateDemoSignals();
+    throw new Error(`Failed to read real signals: ${error.message}`);
   }
 }
 
-function generateDemoSignals(): Signal[] {
-  const pairs = ['USD/EUR', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'EUR/JPY'];
-  const directions: ('CALL' | 'PUT')[] = ['CALL', 'PUT'];
-  const timeframes = ['1min', '2min', '5min'];
-  
-  return Array.from({ length: 10 }, (_, i) => ({
-    id: `demo_${i}`,
-    pair: pairs[Math.floor(Math.random() * pairs.length)],
-    direction: directions[Math.floor(Math.random() * directions.length)],
-    confidence: Math.floor(Math.random() * 30) + 70, // 70-100
-    timeframe: timeframes[Math.floor(Math.random() * timeframes.length)],
-    timestamp: Date.now() - (i * 60000), // Each signal 1 minute apart
-    analysis: `AI Analysis ${i + 1}`
-  }));
-}

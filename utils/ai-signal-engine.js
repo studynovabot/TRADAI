@@ -69,7 +69,7 @@ class AISignalEngine {
             
         } catch (error) {
             console.error('[AI Signal Engine] 💥 Initialization failed:', error);
-            this.createEmergencyFallback();
+            throw new Error(`AI Signal Engine initialization failed: ${error.message}`);
         }
     }
 
@@ -263,8 +263,8 @@ class AISignalEngine {
         console.log('[AI Signal Engine] 🤖 Getting AI prediction...');
         
         if (!this.aiModel || !this.aiModel.isModelLoaded) {
-            console.warn('[AI Signal Engine] AI model not available');
-            return this.createFallbackPrediction(marketData);
+            console.error('[AI Signal Engine] AI model not available - strict mode');
+            throw new Error('AI model not loaded and fallbacks not allowed');
         }
         
         try {
@@ -297,7 +297,7 @@ class AISignalEngine {
             
         } catch (error) {
             console.error('[AI Signal Engine] AI prediction failed:', error);
-            return this.createFallbackPrediction(marketData);
+            throw new Error(`AI prediction failed: ${error.message}`);
         }
     }
     
@@ -852,34 +852,18 @@ class AISignalEngine {
         }
     }
 
+    // STRICT MODE: No fallback predictions allowed
     createFallbackPrediction(marketData) {
-        return {
-            direction: Math.random() > 0.5 ? 'up' : 'down',
-            confidence: 60 + Math.random() * 15,
-            explanation: ['Fallback prediction'],
-            source: 'fallback'
-        };
+        throw new Error('Fallback predictions not allowed in strict mode');
     }
 
     createFallbackAnalyzer() {
-        return {
-            indicators: {
-                calculateRSI: () => 50,
-                calculateEMA: () => 1.0,
-                calculateMACD: () => ({ macd: 0 }),
-                calculateATR: () => 0.001
-            },
-            patterns: {
-                detectPatterns: () => []
-            }
-        };
+        throw new Error('Fallback analyzers not allowed in strict mode');
     }
 
     createEmergencyFallback() {
-        console.log('[AI Signal Engine] 🆘 Creating emergency fallback');
-        this.isInitialized = true;
-        this.aiModel = { predict: () => this.createFallbackPrediction() };
-        this.realTimeAnalyzer = this.createFallbackAnalyzer();
+        console.error('[AI Signal Engine] 🚨 Emergency fallback requested but not allowed in strict mode');
+        throw new Error('Emergency fallback not allowed in strict mode');
     }
 
     // Public API methods

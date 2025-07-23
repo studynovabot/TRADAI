@@ -160,15 +160,9 @@ class HistoricalDataMatcher {
 
         } catch (error) {
             console.error(`❌ Error fetching historical data for ${pair}: ${error.message}`);
-            
-            // Try fallback data
-            const fallbackData = await this.getFallbackData(pair);
-            if (fallbackData) {
-                console.log(`✅ Using fallback data for ${pair}`);
-                return fallbackData;
-            }
-            
-            throw error;
+
+            // STRICT MODE: No fallback data allowed
+            throw new Error(`Failed to fetch real historical data for ${pair}: ${error.message}`);
         }
     }
 
@@ -206,14 +200,15 @@ class HistoricalDataMatcher {
                 const cutoffTime = Date.now() - (periodDays * 24 * 60 * 60 * 1000);
                 const filteredData = data.filter(item => item.timestamp >= cutoffTime);
                 
-                // If filtered data is too small, return more data
+                // If filtered data is too small, return what we have or throw error
                 if (filteredData.length < 50) {
-                    const fallbackData = data.slice(-100); // Last 100 candles as fallback
-                    console.log(`⚠️ Filtered data too small (${filteredData.length}), using fallback: ${fallbackData.length} candles`);
-                    return fallbackData;
+                    if (filteredData.length === 0) {
+                        throw new Error(`No data available for the specified period: ${period}`);
+                    }
+                    console.log(`⚠️ Limited data available: ${filteredData.length} candles for period ${period}`);
                 }
                 
-                console.log(`✅ Filtered to ${filteredData.length} candles for period ${period}`);
+                console.log(`✅ Returning ${filteredData.length} candles for period ${period}`);
                 return filteredData;
             }
             
@@ -521,29 +516,8 @@ class HistoricalDataMatcher {
             
             const { timeframe = '5m', lookback = 100 } = options;
             
-            if (!historicalData || historicalData.length < 30) { // Reduced minimum data requirement
-                console.log('⚠️ Limited historical data available:', historicalData?.length || 0, 'candles');
-                
-                // Even with limited data, try to generate a signal based on recent price action
-                if (historicalData && historicalData.length >= 10) {
-                    const recentCandles = historicalData.slice(-10);
-                    const priceDirection = this.analyzePriceDirection(recentCandles);
-                    
-                    return {
-                        confidence: 60, // Moderate confidence
-                        direction: priceDirection.direction,
-                        patterns: [],
-                        analysis: `Limited data analysis: ${priceDirection.reason}`,
-                        dataPoints: recentCandles.length
-                    };
-                }
-                
-                return {
-                    confidence: 0,
-                    direction: 'NO_SIGNAL',
-                    patterns: [],
-                    analysis: 'Insufficient data for pattern analysis'
-                };
+            if (!historicalData || historicalData.length < 50) { // Strict minimum data requirement
+                throw new Error(`Insufficient historical data for reliable pattern analysis. Required: 50+ candles, Available: ${historicalData?.length || 0}`);
             }
             
             // Use the most recent data for analysis
@@ -553,21 +527,12 @@ class HistoricalDataMatcher {
             // Find similar patterns in historical data
             const matches = await this.findMatchingPatterns(currentPattern, 'EURUSD=X', timeframe);
             
-            if (!matches || matches.length === 0) {
-                // If no pattern matches, analyze recent price action instead
-                const priceDirection = this.analyzePriceDirection(currentPattern);
-                
-                return {
-                    confidence: 65,
-                    direction: priceDirection.direction,
-                    patterns: [],
-                    analysis: `No pattern matches. Using price action: ${priceDirection.reason}`,
-                    dataPoints: currentPattern.length
-                };
+            if (!matches || !matches.matches || matches.matches.length === 0) {
+                throw new Error('No similar patterns found in historical data for reliable signal generation');
             }
             
             // Analyze outcomes of similar patterns
-            const outcomes = matches.map(match => match.outcome);
+            const outcomes = matches.matches.map(match => match.outcome);
             const upCount = outcomes.filter(o => o.direction === 'UP').length;
             const downCount = outcomes.filter(o => o.direction === 'DOWN').length;
             const totalCount = outcomes.length;
@@ -583,10 +548,8 @@ class HistoricalDataMatcher {
                 direction = 'DOWN';
                 confidence = Math.min(90, (downCount / totalCount) * 100);
             } else {
-                // In case of a tie, analyze recent price action to break the tie
-                const priceDirection = this.analyzePriceDirection(currentPattern);
-                direction = priceDirection.direction;
-                confidence = 60; // Moderate confidence for tie-breaker
+                // In case of a tie, require more data for reliable signal
+                throw new Error('Pattern analysis inconclusive - equal UP/DOWN signals found. More historical data needed for reliable prediction.');
             }
             
             // Don't apply conservative adjustment for serverless mode anymore
@@ -598,7 +561,7 @@ class HistoricalDataMatcher {
             const patternAnalysis = {
                 confidence: Math.round(confidence),
                 direction,
-                patterns: matches.slice(0, 3).map(match => ({
+                patterns: matches.matches.slice(0, 3).map(match => ({
                     similarity: Math.round(match.similarity * 100),
                     outcome: match.outcome.direction,
                     strength: Math.round(match.outcome.strength * 100) / 100
@@ -613,33 +576,9 @@ class HistoricalDataMatcher {
             
         } catch (error) {
             console.error('❌ Pattern analysis failed:', error);
-            
-            // Even on error, try to generate a signal based on simple price action
-            try {
-                if (historicalData && historicalData.length >= 10) {
-                    const recentCandles = historicalData.slice(-10);
-                    const priceDirection = this.analyzePriceDirection(recentCandles);
-                    
-                    return {
-                        confidence: 60,
-                        direction: priceDirection.direction,
-                        patterns: [],
-                        analysis: `Error recovery: ${priceDirection.reason}`,
-                        dataPoints: recentCandles.length,
-                        error: error.message
-                    };
-                }
-            } catch (fallbackError) {
-                console.error('❌ Fallback analysis also failed:', fallbackError);
-            }
-            
-            return {
-                confidence: 0,
-                direction: 'ERROR',
-                patterns: [],
-                analysis: `Pattern analysis failed: ${error.message}`,
-                error: error.message
-            };
+
+            // STRICT MODE: No fallback analysis allowed
+            throw new Error(`Pattern analysis failed: ${error.message}`);
         }
     }
     
@@ -739,57 +678,11 @@ class HistoricalDataMatcher {
     }
 
     /**
-     * Get fallback data from local files
+     * REMOVED: Fallback data methods not allowed in strict mode
+     * All data must come from legitimate financial APIs
      */
-    async getFallbackData(pair) {
-        try {
-            const fallbackFile = path.join(this.config.dataDir, 'fallback', `${pair.replace('/', '_')}.json`);
-            
-            if (await fs.pathExists(fallbackFile)) {
-                return await fs.readJson(fallbackFile);
-            }
-            
-            // Generate synthetic data as last resort
-            return this.generateSyntheticData(pair);
-            
-        } catch (error) {
-            console.warn(`⚠️ Fallback data failed: ${error.message}`);
-            return null;
-        }
-    }
 
-    /**
-     * Generate synthetic historical data for testing
-     */
-    generateSyntheticData(pair) {
-        console.log(`🔧 Generating synthetic data for ${pair}`);
-        
-        const data = [];
-        const basePrice = pair.includes('JPY') ? 110 : 1.1;
-        let currentPrice = basePrice;
-        
-        // Generate 1000 candles
-        for (let i = 0; i < 1000; i++) {
-            const volatility = pair.includes('JPY') ? 0.5 : 0.001;
-            const open = currentPrice;
-            const close = open + (Math.random() - 0.5) * volatility;
-            const high = Math.max(open, close) + Math.random() * volatility * 0.5;
-            const low = Math.min(open, close) - Math.random() * volatility * 0.5;
-            
-            data.push({
-                timestamp: Date.now() - (1000 - i) * 60000, // 1 minute intervals
-                open: parseFloat(open.toFixed(5)),
-                high: parseFloat(high.toFixed(5)),
-                low: parseFloat(low.toFixed(5)),
-                close: parseFloat(close.toFixed(5)),
-                volume: Math.random() * 1000
-            });
-            
-            currentPrice = close;
-        }
-        
-        return data;
-    }
+
 
     /**
      * Health check

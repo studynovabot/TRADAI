@@ -194,112 +194,19 @@ export function ForexSignalGenerator() {
       // Complete the progress animation even on error
       await completeProgressAnimation();
       
-      // Show error message instead of generating fallback
-      setError(`API Error: ${error instanceof Error ? error.message : 'Unknown error occurred'}. Please try again.`);
-      
-      // Only generate fallback in development mode or if explicitly needed
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('🔄 Generating fallback signal for development');
-        generateFallbackSignal();
-      }
+      // STRICT MODE: No fallback signals allowed
+      handleSignalGenerationFailure(error instanceof Error ? error.message : 'Unknown error occurred');
     } finally {
       setIsGenerating(false);
     }
   };
   
-  // Generate a fallback signal on the client side if all API endpoints fail
-  const generateFallbackSignal = () => {
-    const now = new Date();
-    const isBuy = now.getMinutes() % 2 === 0;
-    const tradeType = isBuy ? 'BUY' : 'SELL';
-    
-    // Generate base price based on currency pair
-    let basePrice = 1.0;
-    if (selectedPair.includes('USD')) {
-      if (selectedPair.startsWith('EUR')) basePrice = 1.05;
-      else if (selectedPair.startsWith('GBP')) basePrice = 1.25;
-      else if (selectedPair.startsWith('AUD')) basePrice = 0.65;
-      else if (selectedPair.startsWith('NZD')) basePrice = 0.60;
-      else if (selectedPair.includes('JPY')) basePrice = 150;
-    }
-    
-    // Calculate SL/TP based on mode
-    let slPips, tpPips, confidence, timeframe;
-    
-    switch (tradeMode) {
-      case 'sniper':
-        slPips = 3 + Math.floor(Math.random() * 3); // 3-5 pips
-        tpPips = 6 + Math.floor(Math.random() * 3); // 6-8 pips
-        confidence = 70 + Math.floor(Math.random() * 10); // 70-80%
-        timeframe = '1M';
-        break;
-        
-      case 'scalping':
-        slPips = 8 + Math.floor(Math.random() * 5); // 8-12 pips
-        tpPips = 15 + Math.floor(Math.random() * 11); // 15-25 pips
-        confidence = 80 + Math.floor(Math.random() * 6); // 80-85%
-        timeframe = '5M';
-        break;
-        
-      case 'swing':
-        slPips = 20 + Math.floor(Math.random() * 11); // 20-30 pips
-        tpPips = 50 + Math.floor(Math.random() * 51); // 50-100 pips
-        confidence = 85 + Math.floor(Math.random() * 11); // 85-95%
-        timeframe = '1H';
-        break;
-        
-      default:
-        slPips = 10;
-        tpPips = 20;
-        confidence = 80;
-        timeframe = '5M';
-    }
-    
-    // Convert pips to price for major pairs
-    const pipValue = selectedPair.includes('JPY') ? 0.01 : 0.0001;
-    const decimals = selectedPair.includes('JPY') ? 3 : 5;
-    
-    // Calculate entry, SL, TP
-    let entry = parseFloat(basePrice.toFixed(decimals));
-    let stopLoss, takeProfit;
-    
-    if (tradeType === 'BUY') {
-      stopLoss = parseFloat((entry - (slPips * pipValue)).toFixed(decimals));
-      takeProfit = parseFloat((entry + (tpPips * pipValue)).toFixed(decimals));
-    } else { // SELL
-      stopLoss = parseFloat((entry + (slPips * pipValue)).toFixed(decimals));
-      takeProfit = parseFloat((entry - (tpPips * pipValue)).toFixed(decimals));
-    }
-    
-    // Calculate RR ratio
-    const rrRatio = parseFloat((tpPips / slPips).toFixed(2));
-    
-    // Generate reason
-    const reasons = [
-      `Strong ${tradeType === 'BUY' ? 'bullish' : 'bearish'} momentum detected on ${selectedPair}`,
-      `Multiple timeframe confirmation for ${tradeType} signal on ${selectedPair}`,
-      `${tradeType === 'BUY' ? 'RSI indicates oversold conditions' : 'RSI indicates overbought conditions'}`,
-      `MACD ${tradeType === 'BUY' ? 'bullish' : 'bearish'} crossover with increasing histogram momentum`,
-      `Price broke ${tradeType === 'BUY' ? 'above key resistance' : 'below key support'} with strong volume`
-    ];
-    
-    const reason = `[FALLBACK DEMO] ${reasons[Math.floor(Math.random() * reasons.length)]}`;
-    
-    setCurrentSignal({
-      pair: selectedPair,
-      trade_type: tradeType,
-      entry,
-      stop_loss: stopLoss,
-      take_profit: takeProfit,
-      rr_ratio: rrRatio,
-      confidence,
-      timeframe,
-      trade_mode: tradeMode,
-      reason,
-      risk_per_trade: risk + '%',
-      execution_platform: 'MT5'
-    });
+  // STRICT MODE: No fallback signal generation allowed
+  const handleSignalGenerationFailure = (error: string) => {
+    setError(`Signal generation failed: ${error}. Please try again with real market data.`);
+    setIsGenerating(false);
   };
+
 
   // Simulate the analysis progress animation
   const startProgressAnimation = () => {

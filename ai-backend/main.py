@@ -622,29 +622,8 @@ def get_signal_strength(confidence: float) -> str:
     else:
         return "weak"
 
-# Mock model for development/testing
-class MockTradingModel:
-    """Mock trading model for development and testing"""
-    
-    def predict(self, features: Dict[str, float]) -> tuple:
-        """Generate mock prediction based on simple rules"""
-        
-        # Simple rule-based logic for demonstration
-        score = 0
-        
-        # RSI influence
-        rsi = features.get('rsi', 50)
-        if rsi < 30:
-            score += 30
-        elif rsi > 70:
-            score -= 30
-        
-        # EMA influence
-        ema_ratio = features.get('ema9_ema21_ratio', 1.0)
-        if ema_ratio > 1.002:
-            score += 20
-        elif ema_ratio < 0.998:
-            score -= 20
+# REMOVED: Mock trading model not allowed in strict mode
+# All predictions must come from real trained ML models
         
         # Pattern influence
         bullish_patterns = features.get('bullish_patterns', 0)

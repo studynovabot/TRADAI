@@ -308,18 +308,9 @@ class MultiSourceDataFetcher {
   }
 
   /**
-   * Generate demo data as fallback
+   * REMOVED: Demo data generation not allowed in strict mode
+   * All data must come from legitimate financial APIs
    */
-  generateDemoData(symbol, timeframe, limit) {
-    console.log(`🎲 Generating demo data for ${symbol} ${timeframe}`);
-    
-    const data = [];
-    const now = Date.now();
-    const timeframeMs = this.getTimeframeMinutes(timeframe) * 60 * 1000;
-    
-    // Base price based on symbol type
-    let basePrice = this.getBasePriceForSymbol(symbol);
-    const volatility = this.getVolatilityForSymbol(symbol);
     
     for (let i = limit - 1; i >= 0; i--) {
       const timestamp = now - (i * timeframeMs);

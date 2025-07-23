@@ -5,10 +5,29 @@
  * Implements the complete workflow as specified in the ultra-detailed prompt
  */
 
-// Use serverless-compatible version for Vercel deployment
-const { ServerlessOTCSignalGenerator } = require('../../src/core/ServerlessOTCSignalGenerator');
-const fs = require('fs-extra');
-const path = require('path');
+// Use new serverless-compatible version for Vercel deployment
+const { ServerlessOTCGenerator } = require('../../src/core/ServerlessOTCGenerator');
+const { strictModeConfig } = require('../../src/config/strict-mode');
+
+// Create a simple data quality validator for strict mode
+class DataQualityValidator {
+    validateSignalData(signal) {
+        const errors = [];
+
+        if (!signal.metadata || !signal.metadata.dataSource) {
+            errors.push('Signal missing data source metadata');
+        }
+
+        if (!signal.confidence || signal.confidence < 75) {
+            errors.push('Signal confidence below minimum threshold');
+        }
+
+        return {
+            isValid: errors.length === 0,
+            errors
+        };
+    }
+}
 
 // Global signal generator instance (singleton pattern)
 let globalSignalGenerator = null;
@@ -60,11 +79,11 @@ async function ensureSignalGeneratorInitialized() {
 async function initializeSignalGenerator() {
     try {
         console.log('🚀 Initializing Serverless OTC Signal Generator...');
-        
-        globalSignalGenerator = new ServerlessOTCSignalGenerator({
+
+        globalSignalGenerator = new ServerlessOTCGenerator({
             minConfidence: 75,
             maxProcessingTime: CONFIG.maxProcessingTime,
-            serverlessMode: true
+            strictMode: true
         });
 
         await globalSignalGenerator.initialize();
@@ -129,7 +148,7 @@ async function handler(req, res) {
     }
 
     const startTime = Date.now();
-    const requestId = `API_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const requestId = `API_${Date.now()}_${Buffer.from(Date.now().toString()).toString('base64').substr(0, 8)}`;
 
     try {
         console.log(`\n🌐 === OTC SIGNAL API REQUEST ===`);
@@ -185,15 +204,23 @@ async function handler(req, res) {
             });
         }
 
+        // Initialize strict mode components
+        console.log('🔒 Initializing strict mode validation...');
+        const dataValidator = new DataQualityValidator();
+        console.log(`🔒 Strict Mode Status: ${strictModeConfig.isStrictModeEnabled()}`);
+
         // Initialize signal generator
         console.log('🔧 Ensuring signal generator is initialized...');
         const signalGenerator = await ensureSignalGeneratorInitialized();
 
         // Generate signal using real market data
         console.log('🎯 Generating OTC signal with real market data...');
-        
+
+        let signal; // Declare signal variable in proper scope
+        let processingTime;
+
         try {
-            const signal = await signalGenerator.generateSignal({
+            signal = await signalGenerator.generateSignal({
                 currencyPair,
                 timeframe,
                 tradeDuration,
@@ -201,77 +228,78 @@ async function handler(req, res) {
                 useRealData: true // Ensure we're using real market data
             });
 
-            const processingTime = Date.now() - startTime;
+            processingTime = Date.now() - startTime;
 
-            // Verify that we're using real market data
-            if (signal.metadata && signal.metadata.source === 'simulated') {
-                console.log(`⚠️ Warning: Signal was generated using simulated data`);
-                
-                // Try again with browser automation
-                console.log(`🔄 Retrying with browser automation...`);
-                
-                try {
-                    // Force browser automation
-                    const realSignal = await signalGenerator.generateSignal({
-                        currencyPair,
-                        timeframe,
-                        tradeDuration,
-                        platform,
-                        useRealData: true,
-                        forceBrowserAutomation: true
-                    });
-                    
-                    const newProcessingTime = Date.now() - startTime;
-                    
-                    console.log(`✅ === API REQUEST COMPLETED WITH REAL DATA ===`);
-                    console.log(`🆔 Request ID: ${requestId}`);
-                    console.log(`🎯 Signal: ${realSignal.signal}`);
-                    console.log(`📊 Confidence: ${realSignal.confidence}`);
-                    console.log(`⏱️ Processing Time: ${newProcessingTime}ms`);
-                    
-                    return res.status(200).json({
-                        success: true,
-                        requestId,
-                        processingTime: newProcessingTime,
-                        ...realSignal,
-                        dataSource: 'real-time-browser-automation'
-                    });
-                    
-                } catch (automationError) {
-                    console.log(`⚠️ Browser automation failed: ${automationError.message}`);
-                    // Continue with the original signal
+            // STRICT MODE: Comprehensive signal validation
+            try {
+                // Validate signal quality and data sources
+                const validatedSignal = strictModeConfig.enforceStrictSignalGeneration(signal);
+
+                // Additional strict mode checks
+                if (!signal.metadata || !signal.metadata.dataSource) {
+                    throw strictModeConfig.createStrictModeError('Signal missing data source metadata');
                 }
+
+                if (signal.confidence < strictModeConfig.getConfig().minDataQuality * 100) {
+                    throw strictModeConfig.createStrictModeError(`Signal confidence too low: ${signal.confidence}%`);
+                }
+
+                console.log('✅ Signal passed comprehensive strict mode validation');
+            } catch (strictError) {
+                console.log(`❌ Signal failed strict mode validation: ${strictError.message}`);
+                return res.status(422).json({
+                    success: false,
+                    requestId,
+                    processingTime,
+                    error: 'STRICT_MODE_VIOLATION',
+                    message: strictError.message,
+                    strictMode: true,
+                    currency_pair: currencyPair,
+                    timeframe: timeframe,
+                    trade_duration: tradeDuration,
+                    timestamp: new Date().toISOString()
+                });
             }
 
-            // Ensure we have a valid signal response
-            if (!signal || signal.signal === 'NO_SIGNAL' || signal.signal === 'ERROR') {
-                console.log(`⚠️ Signal generator returned NO_SIGNAL or ERROR, generating fallback signal`);
-                
-                // Generate a fallback signal to ensure we always return something
-                const fallbackSignal = {
-                    signal: Math.random() > 0.5 ? 'UP' : 'DOWN',
-                    confidence: '65%',
-                    confidenceNumeric: 65,
-                    riskScore: 'MEDIUM',
-                    reason: ['Fallback signal generated due to insufficient market data analysis'],
+            // STRICT MODE: Reject any simulated data
+            if (signal.metadata && signal.metadata.source === 'simulated') {
+                const processingTime = Date.now() - startTime;
+                console.log(`❌ Signal was generated using simulated data - rejecting in strict mode`);
+                console.log(`🆔 Request ID: ${requestId}`);
+                console.log(`⏱️ Processing Time: ${processingTime}ms`);
+
+                return res.status(422).json({
+                    success: false,
+                    requestId,
+                    processingTime,
+                    error: 'SIMULATED_DATA_REJECTED',
+                    message: 'Signal generated using simulated data. Only real market data is accepted.',
                     currency_pair: currencyPair,
                     timeframe: timeframe,
                     trade_duration: tradeDuration,
                     timestamp: new Date().toISOString(),
-                    dataSource: 'fallback'
-                };
-                
-                console.log(`✅ === API REQUEST COMPLETED WITH FALLBACK ===`);
+                    dataSource: 'simulated'
+                });
+            }
+
+            // Ensure we have a valid signal response - STRICT MODE: NO FALLBACKS
+            if (!signal || signal.signal === 'NO_SIGNAL' || signal.signal === 'ERROR') {
+                const processingTime = Date.now() - startTime;
+                console.log(`❌ Signal generator returned NO_SIGNAL or ERROR - failing gracefully`);
                 console.log(`🆔 Request ID: ${requestId}`);
-                console.log(`🎯 Signal: ${fallbackSignal.signal}`);
-                console.log(`📊 Confidence: ${fallbackSignal.confidence}`);
                 console.log(`⏱️ Processing Time: ${processingTime}ms`);
-                
-                return res.status(200).json({
-                    success: true,
+
+                return res.status(422).json({
+                    success: false,
                     requestId,
                     processingTime,
-                    ...fallbackSignal
+                    error: 'NO_REAL_DATA_AVAILABLE',
+                    message: 'Unable to generate signal with real market data. Please try again later.',
+                    currency_pair: currencyPair,
+                    timeframe: timeframe,
+                    trade_duration: tradeDuration,
+                    timestamp: new Date().toISOString(),
+                    dataSource: 'none'
                 });
             }
             
@@ -279,36 +307,21 @@ async function handler(req, res) {
             signal.dataSource = signal.metadata ? signal.metadata.source : 'unknown';
             
         } catch (error) {
+            processingTime = Date.now() - startTime;
             console.error(`❌ Error generating signal: ${error.message}`);
-            
-            // Generate a fallback signal in case of error
-            const fallbackSignal = {
-                signal: Math.random() > 0.5 ? 'UP' : 'DOWN',
-                confidence: '60%',
-                confidenceNumeric: 60,
-                riskScore: 'HIGH',
-                reason: [`Error generating signal: ${error.message}`],
-                currency_pair: currencyPair,
-                timeframe: timeframe,
-                trade_duration: tradeDuration,
-                timestamp: new Date().toISOString(),
-                dataSource: 'error-fallback'
-            };
-            
-            const processingTime = Date.now() - startTime;
-            
-            console.log(`✅ === API REQUEST COMPLETED WITH ERROR FALLBACK ===`);
             console.log(`🆔 Request ID: ${requestId}`);
-            console.log(`🎯 Signal: ${fallbackSignal.signal}`);
-            console.log(`📊 Confidence: ${fallbackSignal.confidence}`);
             console.log(`⏱️ Processing Time: ${processingTime}ms`);
-            
-            return res.status(200).json({
-                success: true,
+
+            // STRICT MODE: Return error instead of fallback signal
+            return res.status(500).json({
+                success: false,
+                error: 'Signal generation failed',
+                message: error.message,
                 requestId,
                 processingTime,
-                ...fallbackSignal,
-                error: error.message
+                signal: 'ERROR',
+                confidence: '0%',
+                riskScore: 'HIGH'
             });
         }
 
