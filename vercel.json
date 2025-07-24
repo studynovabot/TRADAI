@@ -14,12 +14,23 @@
     "pages/api/forex-signal-generator.ts": {
       "maxDuration": 300
     },
+    "pages/api/professional-chart-analysis.js": {
+      "maxDuration": 300
+    },
     "pages/api/vercel-health.js": {
       "maxDuration": 10
     }
   },
   "regions": ["iad1"],
   "routes": [
+    {
+      "src": "/api/professional-chart-analysis",
+      "dest": "/api/professional-chart-analysis"
+    },
+    {
+      "src": "/otc-generator",
+      "dest": "/otc-generator"
+    },
     {
       "src": "/api/forex-signal-generator",
       "dest": "/api/forex-signal-generator"
