@@ -1,0 +1,19 @@
+{
+  "healthCheck": {
+    "passed": false,
+    "error": "fetch is not a function"
+  },
+  "standardSignalGeneration": {
+    "passed": false,
+    "error": "fetch is not a function"
+  },
+  "multiTimeframeAnalysis": {
+    "passed": false,
+    "error": "fetch is not a function"
+  },
+  "errorHandling": {
+    "passed": false,
+    "error": "fetch is not a function"
+  },
+  "overallStatus": "PARTIAL"
+}

@@ -37,6 +37,34 @@ interface Signal {
   };
   metadata?: any;
   error?: string;
+  // Multi-timeframe analysis results
+  multiTimeframeAnalysis?: {
+    confluenceScore: number;
+    agreement: number;
+    strength: string;
+    timeframes: {
+      [key: string]: {
+        signal: string;
+        confidence: number;
+        indicators: any;
+        patterns: any;
+      };
+    };
+    finalRecommendation: {
+      direction: string;
+      action: string;
+      confidence: number;
+      riskLevel: string;
+    };
+  };
+}
+
+interface UploadedFile {
+  file: File;
+  timeframe: string;
+  preview: string;
+  uploaded: boolean;
+  error?: string;
 }
 
 interface HealthStatus {
@@ -59,6 +87,12 @@ const OTCSignalGenerator: React.FC = () => {
   const [healthStatus, setHealthStatus] = useState<HealthStatus | null>(null);
   const [signalHistory, setSignalHistory] = useState<Signal[]>([]);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Multi-timeframe upload state
+  const [analysisMode, setAnalysisMode] = useState<'standard' | 'screenshot'>('standard');
+  const [uploadedFiles, setUploadedFiles] = useState<{[key: string]: UploadedFile}>({});
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{[key: string]: number}>({});
 
   // Configuration
   const currencyPairs = [
@@ -93,6 +127,16 @@ const OTCSignalGenerator: React.FC = () => {
     { value: 'quotex', label: 'Quotex' },
     { value: 'pocketOption', label: 'Pocket Option' }
   ];
+
+  // Multi-timeframe analysis configuration
+  const requiredTimeframes = [
+    { key: '1m', label: '1-Minute Chart', description: 'Short-term momentum analysis' },
+    { key: '3m', label: '3-Minute Chart', description: 'Medium-term trend confirmation' },
+    { key: '5m', label: '5-Minute Chart', description: 'Primary timeframe analysis' }
+  ];
+
+  const allowedFileTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/bmp', 'image/gif'];
+  const maxFileSize = 10 * 1024 * 1024; // 10MB
 
   // Load health status on component mount
   useEffect(() => {
@@ -135,7 +179,141 @@ const OTCSignalGenerator: React.FC = () => {
   };
 
   /**
-   * Generate trading signal
+   * Handle file upload for specific timeframe
+   */
+  const handleFileUpload = async (timeframe: string, file: File) => {
+    // Validate file type
+    if (!allowedFileTypes.includes(file.type)) {
+      alert(`Invalid file type. Please upload: ${allowedFileTypes.join(', ')}`);
+      return;
+    }
+
+    // Validate file size
+    if (file.size > maxFileSize) {
+      alert(`File too large. Maximum size is ${maxFileSize / (1024 * 1024)}MB`);
+      return;
+    }
+
+    try {
+      // Create preview
+      const preview = URL.createObjectURL(file);
+
+      // Update uploaded files state
+      setUploadedFiles(prev => ({
+        ...prev,
+        [timeframe]: {
+          file,
+          timeframe,
+          preview,
+          uploaded: true
+        }
+      }));
+
+      console.log(`📸 File uploaded for ${timeframe}:`, file.name);
+    } catch (error) {
+      console.error(`Error uploading file for ${timeframe}:`, error);
+      setUploadedFiles(prev => ({
+        ...prev,
+        [timeframe]: {
+          ...prev[timeframe],
+          error: error.message
+        }
+      }));
+    }
+  };
+
+  /**
+   * Remove uploaded file for specific timeframe
+   */
+  const removeFile = (timeframe: string) => {
+    const file = uploadedFiles[timeframe];
+    if (file?.preview) {
+      URL.revokeObjectURL(file.preview);
+    }
+
+    setUploadedFiles(prev => {
+      const newFiles = { ...prev };
+      delete newFiles[timeframe];
+      return newFiles;
+    });
+  };
+
+  /**
+   * Check if all required timeframes are uploaded
+   */
+  const areAllTimeframesUploaded = () => {
+    return requiredTimeframes.every(tf => uploadedFiles[tf.key]?.uploaded);
+  };
+
+  /**
+   * Generate multi-timeframe analysis from screenshots
+   */
+  const generateMultiTimeframeAnalysis = async () => {
+    if (!areAllTimeframesUploaded()) {
+      alert('Please upload screenshots for all three timeframes (1m, 3m, 5m) before analysis.');
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setSignal(null);
+
+    try {
+      console.log('🎯 Starting multi-timeframe analysis...', { currencyPair, platform });
+
+      // Prepare form data with all screenshots
+      const formData = new FormData();
+      formData.append('currencyPair', currencyPair);
+      formData.append('platform', platform);
+      formData.append('analysisType', 'multi-timeframe');
+
+      // Add each timeframe screenshot
+      requiredTimeframes.forEach(tf => {
+        const uploadedFile = uploadedFiles[tf.key];
+        if (uploadedFile?.file) {
+          formData.append(`screenshot_${tf.key}`, uploadedFile.file);
+        }
+      });
+
+      const response = await fetch('/api/multi-timeframe-analysis', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      console.log('📊 Multi-timeframe analysis result:', result);
+
+      setSignal(result);
+
+      // Add to history if successful
+      if (result.success && result.signal !== 'ERROR') {
+        setSignalHistory(prev => [result, ...prev].slice(0, 50));
+      }
+
+    } catch (error) {
+      console.error('❌ Multi-timeframe analysis failed:', error);
+      setSignal({
+        success: false,
+        requestId: 'ERROR',
+        currency_pair: currencyPair,
+        timeframe: 'Multi-TF',
+        trade_duration: tradeDuration,
+        signal: 'ERROR',
+        confidence: '0%',
+        confidenceNumeric: 0,
+        riskScore: 'HIGH',
+        reason: [`Analysis error: ${error.message}`],
+        timestamp: new Date().toISOString(),
+        processingTime: 0,
+        error: error.message
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  /**
+   * Generate trading signal (standard mode)
    */
   const generateSignal = async () => {
     setIsGenerating(true);
@@ -158,11 +336,11 @@ const OTCSignalGenerator: React.FC = () => {
       });
 
       const result = await response.json();
-      
+
       console.log('📊 Signal result:', result);
-      
+
       setSignal(result);
-      
+
       // Add to history if successful
       if (result.success && result.signal !== 'ERROR') {
         setSignalHistory(prev => [result, ...prev].slice(0, 50));
@@ -275,8 +453,37 @@ const OTCSignalGenerator: React.FC = () => {
               🎯 Signal Generation
             </h2>
 
-            {/* Input Form */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {/* Analysis Mode Toggle */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-3">Analysis Mode</label>
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => setAnalysisMode('standard')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    analysisMode === 'standard'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  📊 Standard Analysis
+                </button>
+                <button
+                  onClick={() => setAnalysisMode('screenshot')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    analysisMode === 'screenshot'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  📸 Multi-Timeframe Screenshots
+                </button>
+              </div>
+            </div>
+
+            {analysisMode === 'standard' ? (
+              <>
+                {/* Standard Input Form */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               {/* Currency Pair */}
               <div>
                 <label className="block text-sm font-medium mb-2">Currency Pair</label>
@@ -338,27 +545,168 @@ const OTCSignalGenerator: React.FC = () => {
               </div>
             </div>
 
-            {/* Generate Button */}
-            <motion.button
-              onClick={generateSignal}
-              disabled={isGenerating}
-              className={`w-full py-4 px-6 rounded-lg font-bold text-lg transition-all duration-300 ${
-                isGenerating
-                  ? 'bg-gray-600 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transform hover:scale-105'
-              }`}
-              whileHover={!isGenerating ? { scale: 1.02 } : {}}
-              whileTap={!isGenerating ? { scale: 0.98 } : {}}
-            >
-              {isGenerating ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                  Generating Signal...
+                {/* Generate Button */}
+                <motion.button
+                  onClick={generateSignal}
+                  disabled={isGenerating}
+                  className={`w-full py-4 px-6 rounded-lg font-bold text-lg transition-all duration-300 ${
+                    isGenerating
+                      ? 'bg-gray-600 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transform hover:scale-105'
+                  }`}
+                  whileHover={!isGenerating ? { scale: 1.02 } : {}}
+                  whileTap={!isGenerating ? { scale: 0.98 } : {}}
+                >
+                  {isGenerating ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                      Generating Signal...
+                    </div>
+                  ) : (
+                    '🚀 Generate Signal'
+                  )}
+                </motion.button>
+              </>
+            ) : (
+              <>
+                {/* Multi-Timeframe Screenshot Upload */}
+                <div className="space-y-6 mb-6">
+                  <div className="text-center p-4 bg-purple-900/30 rounded-lg border border-purple-500/30">
+                    <h3 className="text-lg font-semibold text-purple-300 mb-2">
+                      📸 Multi-Timeframe Chart Analysis
+                    </h3>
+                    <p className="text-sm text-gray-400">
+                      Upload screenshots from three different timeframes for comprehensive confluence analysis
+                    </p>
+                  </div>
+
+                  {/* Currency Pair and Platform for Screenshot Mode */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Currency Pair</label>
+                      <select
+                        value={currencyPair}
+                        onChange={(e) => setCurrencyPair(e.target.value)}
+                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        disabled={isAnalyzing}
+                      >
+                        {currencyPairs.map(pair => (
+                          <option key={pair} value={pair}>{pair}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Platform</label>
+                      <select
+                        value={platform}
+                        onChange={(e) => setPlatform(e.target.value)}
+                        className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        disabled={isAnalyzing}
+                      >
+                        {platforms.map(p => (
+                          <option key={p.value} value={p.value}>{p.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Upload Areas for Each Timeframe */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {requiredTimeframes.map((tf) => (
+                      <div key={tf.key} className="bg-gray-700 rounded-lg p-4 border-2 border-dashed border-gray-600">
+                        <div className="text-center">
+                          <h4 className="font-semibold text-lg mb-1">{tf.label}</h4>
+                          <p className="text-xs text-gray-400 mb-3">{tf.description}</p>
+
+                          {uploadedFiles[tf.key] ? (
+                            <div className="space-y-3">
+                              <img
+                                src={uploadedFiles[tf.key].preview}
+                                alt={`${tf.label} preview`}
+                                className="w-full h-32 object-cover rounded border"
+                              />
+                              <div className="flex space-x-2">
+                                <button
+                                  onClick={() => removeFile(tf.key)}
+                                  className="flex-1 py-1 px-2 bg-red-600 hover:bg-red-700 rounded text-xs font-medium transition-colors"
+                                  disabled={isAnalyzing}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                              <div className="text-xs text-green-400 flex items-center justify-center">
+                                <span className="mr-1">✓</span>
+                                Uploaded
+                              </div>
+                            </div>
+                          ) : (
+                            <div>
+                              <input
+                                type="file"
+                                accept={allowedFileTypes.join(',')}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleFileUpload(tf.key, file);
+                                }}
+                                className="hidden"
+                                id={`upload-${tf.key}`}
+                                disabled={isAnalyzing}
+                              />
+                              <label
+                                htmlFor={`upload-${tf.key}`}
+                                className="cursor-pointer block w-full py-8 px-4 border-2 border-dashed border-gray-500 rounded-lg hover:border-purple-400 hover:bg-gray-600/50 transition-all"
+                              >
+                                <div className="text-center">
+                                  <div className="text-3xl mb-2">📸</div>
+                                  <div className="text-sm font-medium">Click to upload</div>
+                                  <div className="text-xs text-gray-400 mt-1">
+                                    JPG, PNG, BMP, GIF<br/>
+                                    Max 10MB
+                                  </div>
+                                </div>
+                              </label>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Analysis Progress */}
+                  {areAllTimeframesUploaded() && (
+                    <div className="text-center p-3 bg-green-900/30 rounded-lg border border-green-500/30">
+                      <div className="text-green-300 font-medium">
+                        ✅ All timeframes uploaded - Ready for analysis
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ) : (
-                '🚀 Generate Signal'
-              )}
-            </motion.button>
+
+                {/* Multi-Timeframe Analysis Button */}
+                <motion.button
+                  onClick={generateMultiTimeframeAnalysis}
+                  disabled={isAnalyzing || !areAllTimeframesUploaded()}
+                  className={`w-full py-4 px-6 rounded-lg font-bold text-lg transition-all duration-300 ${
+                    isAnalyzing || !areAllTimeframesUploaded()
+                      ? 'bg-gray-600 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 transform hover:scale-105'
+                  }`}
+                  whileHover={!isAnalyzing && areAllTimeframesUploaded() ? { scale: 1.02 } : {}}
+                  whileTap={!isAnalyzing && areAllTimeframesUploaded() ? { scale: 0.98 } : {}}
+                >
+                  {isAnalyzing ? (
+                    <div className="flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                      Analyzing Screenshots... (60s)
+                    </div>
+                  ) : !areAllTimeframesUploaded() ? (
+                    '📸 Upload All Timeframes First'
+                  ) : (
+                    '🔍 Analyze Multi-Timeframe Confluence'
+                  )}
+                </motion.button>
+              </>
+            )}
 
             {/* Signal Display */}
             <AnimatePresence>
@@ -453,6 +801,99 @@ const OTCSignalGenerator: React.FC = () => {
                             <span className="text-gray-400">Volume: </span>
                             <span>{signal.marketContext.volume?.toFixed(0)}</span>
                           </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Multi-Timeframe Confluence Analysis */}
+                    {signal.multiTimeframeAnalysis && (
+                      <div className="mb-4">
+                        <p className="text-gray-400 text-sm mb-3">Multi-Timeframe Confluence Analysis:</p>
+
+                        {/* Confluence Summary */}
+                        <div className="bg-gray-800 rounded-lg p-4 mb-4">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-purple-400">
+                                {signal.multiTimeframeAnalysis.confluenceScore.toFixed(1)}%
+                              </div>
+                              <div className="text-xs text-gray-400">Confluence Score</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-blue-400">
+                                {signal.multiTimeframeAnalysis.agreement.toFixed(1)}%
+                              </div>
+                              <div className="text-xs text-gray-400">Agreement</div>
+                            </div>
+                            <div className="text-center">
+                              <div className={`text-lg font-bold ${
+                                signal.multiTimeframeAnalysis.strength === 'strong' ? 'text-green-400' :
+                                signal.multiTimeframeAnalysis.strength === 'moderate' ? 'text-yellow-400' :
+                                'text-red-400'
+                              }`}>
+                                {signal.multiTimeframeAnalysis.strength.toUpperCase()}
+                              </div>
+                              <div className="text-xs text-gray-400">Signal Strength</div>
+                            </div>
+                            <div className="text-center">
+                              <div className={`text-lg font-bold ${getSignalColor(signal.multiTimeframeAnalysis.finalRecommendation.direction)}`}>
+                                {signal.multiTimeframeAnalysis.finalRecommendation.direction}
+                              </div>
+                              <div className="text-xs text-gray-400">Final Direction</div>
+                            </div>
+                          </div>
+
+                          {/* Final Recommendation */}
+                          <div className="border-t border-gray-700 pt-3">
+                            <div className="text-sm">
+                              <span className="text-gray-400">Recommendation: </span>
+                              <span className="font-semibold">{signal.multiTimeframeAnalysis.finalRecommendation.action}</span>
+                              <span className="text-gray-400 ml-2">
+                                (Confidence: {signal.multiTimeframeAnalysis.finalRecommendation.confidence.toFixed(1)}%)
+                              </span>
+                            </div>
+                            <div className="text-sm mt-1">
+                              <span className="text-gray-400">Risk Level: </span>
+                              <span className={`font-semibold ${getRiskColor(signal.multiTimeframeAnalysis.finalRecommendation.riskLevel)}`}>
+                                {signal.multiTimeframeAnalysis.finalRecommendation.riskLevel}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Individual Timeframe Results */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          {Object.entries(signal.multiTimeframeAnalysis.timeframes).map(([timeframe, data]) => (
+                            <div key={timeframe} className="bg-gray-800 rounded p-3">
+                              <div className="text-center mb-2">
+                                <div className="font-semibold text-sm">{timeframe.toUpperCase()} Timeframe</div>
+                                <div className={`text-lg font-bold ${getSignalColor(data.signal)}`}>
+                                  {data.signal}
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                  {data.confidence.toFixed(1)}% confidence
+                                </div>
+                              </div>
+
+                              {/* Key indicators for this timeframe */}
+                              {data.indicators && (
+                                <div className="text-xs space-y-1">
+                                  {data.indicators.trend && (
+                                    <div>
+                                      <span className="text-gray-400">Trend: </span>
+                                      <span>{data.indicators.trend}</span>
+                                    </div>
+                                  )}
+                                  {data.indicators.momentum && (
+                                    <div>
+                                      <span className="text-gray-400">Momentum: </span>
+                                      <span>{data.indicators.momentum}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     )}

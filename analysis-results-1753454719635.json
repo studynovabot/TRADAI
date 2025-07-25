@@ -1,0 +1,509 @@
+{
+  "individualAnalyses": [
+    {
+      "tradingPair": "USD/BDT",
+      "timeframe": "1m",
+      "currentPrice": null,
+      "timestamp": "2025-07-25T14:45:01.568Z",
+      "screenshotPath": "C:\\Users\\thaku\\Pictures\\trading ss\\usdbdt\\Screenshot 2025-07-25 195510.png",
+      "trend": {
+        "direction": "sideways",
+        "signal": "NEUTRAL",
+        "confidence": 0.12785663948454645,
+        "description": "Sideways movement detected. Market appears to be consolidating with no clear directional bias. Bearish color dominance suggests downward pressure.",
+        "slope": 0.24633474079286918
+      },
+      "candlesticks": {
+        "patterns": [],
+        "signal": "NEUTRAL",
+        "confidence": 0,
+        "description": "No significant candlestick patterns detected in current timeframe."
+      },
+      "indicators": {
+        "stochastic": null,
+        "movingAverages": null,
+        "signal": "NEUTRAL",
+        "confidence": 0.3,
+        "description": "Technical indicators show neutral conditions."
+      },
+      "supportResistance": {
+        "support": [],
+        "resistance": [
+          {
+            "level": 156,
+            "strength": 0.5688282138794084,
+            "distance": null
+          }
+        ],
+        "signal": "NEUTRAL",
+        "confidence": 0,
+        "description": ""
+      },
+      "signals": [
+        {
+          "direction": "NEUTRAL",
+          "type": "WAIT",
+          "confidence": 0.6,
+          "confluenceCount": 0,
+          "reasoning": "Mixed signals detected. Market conditions suggest waiting for clearer directional bias.",
+          "nextCandles": [
+            {
+              "candle": 1,
+              "prediction": "Neutral/Mixed",
+              "confidence": 60
+            },
+            {
+              "candle": 2,
+              "prediction": "Neutral/Mixed",
+              "confidence": 60
+            },
+            {
+              "candle": 3,
+              "prediction": "Neutral/Mixed",
+              "confidence": 60
+            }
+          ],
+          "entryRecommendation": "Wait for stronger confluence before entering position."
+        }
+      ],
+      "confidence": 3.6755753251070358,
+      "dataQuality": {
+        "ocrConfidence": 9,
+        "visionConfidence": 0.038938312767588995,
+        "indicatorConfidence": 0.3
+      },
+      "rawData": {
+        "ocr": {
+          "detectedPrices": [],
+          "tradingPair": null,
+          "timeframe": null,
+          "confidence": 9,
+          "regions": {
+            "current_price_right": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "current_price_right"
+            },
+            "current_price_center": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "current_price_center"
+            },
+            "price_overlay": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "price_overlay"
+            },
+            "chart_price_display": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "chart_price_display"
+            },
+            "top_price_bar": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "top_price_bar"
+            },
+            "price_levels_right": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "price_levels_right"
+            }
+          }
+        },
+        "visual": {
+          "candlesticks": [],
+          "supportResistance": {
+            "support": [],
+            "resistance": [
+              {
+                "level": 156,
+                "strength": 0.5688282138794084
+              }
+            ]
+          },
+          "trend": {
+            "direction": "sideways",
+            "confidence": 0.0014533023055626501,
+            "slope": 0.24633474079286918,
+            "pricePoints": 7
+          },
+          "colors": {
+            "sentiment": "bearish",
+            "confidence": 0.12785663948454645,
+            "greenRatio": 0.000906070673512534,
+            "redRatio": 0.01369173462196718,
+            "totalPixels": 29799
+          },
+          "confidence": 0.038938312767588995
+        },
+        "technical": {
+          "stochastic": null,
+          "ema": null,
+          "sma": null,
+          "rawText": "",
+          "confidence": 0.3
+        }
+      },
+      "processingTime": 11943
+    },
+    {
+      "tradingPair": "USD/BDT",
+      "timeframe": "1m",
+      "currentPrice": null,
+      "timestamp": "2025-07-25T14:45:11.235Z",
+      "screenshotPath": "C:\\Users\\thaku\\Pictures\\trading ss\\usdbdt\\Screenshot 2025-07-25 195630.png",
+      "trend": {
+        "direction": "sideways",
+        "signal": "NEUTRAL",
+        "confidence": 0.14507982780244738,
+        "description": "Sideways movement detected. Market appears to be consolidating with no clear directional bias. Bearish color dominance suggests downward pressure.",
+        "slope": 0.07770019390774453
+      },
+      "candlesticks": {
+        "patterns": [
+          {
+            "type": "engulfing_bearish",
+            "signal": "BEARISH",
+            "confidence": 0.7,
+            "description": "Bearish engulfing pattern - strong reversal signal"
+          }
+        ],
+        "signal": "BEARISH",
+        "confidence": 0.7,
+        "description": "Bearish engulfing pattern - strong reversal signal"
+      },
+      "indicators": {
+        "stochastic": null,
+        "movingAverages": null,
+        "signal": "NEUTRAL",
+        "confidence": 0.3,
+        "description": "Technical indicators show neutral conditions."
+      },
+      "supportResistance": {
+        "support": [],
+        "resistance": [],
+        "signal": "NEUTRAL",
+        "confidence": 0,
+        "description": ""
+      },
+      "signals": [
+        {
+          "direction": "NEUTRAL",
+          "type": "WAIT",
+          "confidence": 0.6,
+          "confluenceCount": 0,
+          "reasoning": "Mixed signals detected. Market conditions suggest waiting for clearer directional bias.",
+          "nextCandles": [
+            {
+              "candle": 1,
+              "prediction": "Neutral/Mixed",
+              "confidence": 60
+            },
+            {
+              "candle": 2,
+              "prediction": "Neutral/Mixed",
+              "confidence": 60
+            },
+            {
+              "candle": 3,
+              "prediction": "Neutral/Mixed",
+              "confidence": 60
+            }
+          ],
+          "entryRecommendation": "Wait for stronger confluence before entering position."
+        }
+      ],
+      "confidence": 4.961483579520968,
+      "dataQuality": {
+        "ocrConfidence": 12,
+        "visionConfidence": 0.2537089488024193,
+        "indicatorConfidence": 0.3
+      },
+      "rawData": {
+        "ocr": {
+          "detectedPrices": [],
+          "tradingPair": null,
+          "timeframe": null,
+          "confidence": 12,
+          "regions": {
+            "current_price_right": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "current_price_right"
+            },
+            "current_price_center": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "current_price_center"
+            },
+            "price_overlay": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "price_overlay"
+            },
+            "chart_price_display": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "chart_price_display"
+            },
+            "top_price_bar": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "top_price_bar"
+            },
+            "price_levels_right": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "price_levels_right"
+            }
+          }
+        },
+        "visual": {
+          "candlesticks": [
+            {
+              "type": "engulfing_bearish",
+              "confidence": 0.7,
+              "position": "recent"
+            }
+          ],
+          "supportResistance": {
+            "support": [],
+            "resistance": []
+          },
+          "trend": {
+            "direction": "sideways",
+            "confidence": 0.0004625011542127651,
+            "slope": 0.07770019390774453,
+            "pricePoints": 7
+          },
+          "colors": {
+            "sentiment": "bearish",
+            "confidence": 0.14507982780244738,
+            "greenRatio": 0.000169485780143046,
+            "redRatio": 0.014677468560387784,
+            "totalPixels": 29501
+          },
+          "confidence": 0.2537089488024193
+        },
+        "technical": {
+          "stochastic": null,
+          "ema": null,
+          "sma": null,
+          "rawText": "LE    LEI\nPP",
+          "confidence": 0.3
+        }
+      },
+      "processingTime": 9665
+    },
+    {
+      "tradingPair": "USD/BDT",
+      "timeframe": "1d",
+      "currentPrice": null,
+      "timestamp": "2025-07-25T14:45:19.621Z",
+      "screenshotPath": "C:\\Users\\thaku\\Pictures\\trading ss\\usdbdt\\Screenshot 2025-07-25 195701.png",
+      "trend": {
+        "direction": "sideways",
+        "signal": "NEUTRAL",
+        "confidence": 0.14963191234377676,
+        "description": "Sideways movement detected. Market appears to be consolidating with no clear directional bias. Bearish color dominance suggests downward pressure.",
+        "slope": -0.04886719486889271
+      },
+      "candlesticks": {
+        "patterns": [
+          {
+            "type": "doji",
+            "signal": "NEUTRAL",
+            "confidence": 0.8,
+            "description": "Doji pattern identified - market indecision, potential reversal"
+          },
+          {
+            "type": "engulfing_bearish",
+            "signal": "BEARISH",
+            "confidence": 0.7,
+            "description": "Bearish engulfing pattern - strong reversal signal"
+          }
+        ],
+        "signal": "BEARISH",
+        "confidence": 0.75,
+        "description": "Doji pattern identified - market indecision, potential reversal. Bearish engulfing pattern - strong reversal signal"
+      },
+      "indicators": {
+        "stochastic": null,
+        "movingAverages": null,
+        "signal": "NEUTRAL",
+        "confidence": 0.3,
+        "description": "Technical indicators show neutral conditions."
+      },
+      "supportResistance": {
+        "support": [],
+        "resistance": [],
+        "signal": "NEUTRAL",
+        "confidence": 0,
+        "description": ""
+      },
+      "signals": [
+        {
+          "direction": "NEUTRAL",
+          "type": "WAIT",
+          "confidence": 0.6,
+          "confluenceCount": 0,
+          "reasoning": "Mixed signals detected. Market conditions suggest waiting for clearer directional bias.",
+          "nextCandles": [
+            {
+              "candle": 1,
+              "prediction": "Neutral/Mixed",
+              "confidence": 60
+            },
+            {
+              "candle": 2,
+              "prediction": "Neutral/Mixed",
+              "confidence": 60
+            },
+            {
+              "candle": 3,
+              "prediction": "Neutral/Mixed",
+              "confidence": 60
+            }
+          ],
+          "entryRecommendation": "Wait for stronger confluence before entering position."
+        }
+      ],
+      "confidence": 4.568002788947794,
+      "dataQuality": {
+        "ocrConfidence": 11,
+        "visionConfidence": 0.2700069723694847,
+        "indicatorConfidence": 0.3
+      },
+      "rawData": {
+        "ocr": {
+          "detectedPrices": [],
+          "tradingPair": null,
+          "timeframe": "1d",
+          "confidence": 11,
+          "regions": {
+            "current_price_right": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "current_price_right"
+            },
+            "current_price_center": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "current_price_center"
+            },
+            "price_overlay": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "price_overlay"
+            },
+            "chart_price_display": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "chart_price_display"
+            },
+            "top_price_bar": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "top_price_bar"
+            },
+            "price_levels_right": {
+              "text": "",
+              "confidence": 0,
+              "prices": [],
+              "allNumbers": [],
+              "region": "price_levels_right"
+            }
+          }
+        },
+        "visual": {
+          "candlesticks": [
+            {
+              "type": "doji",
+              "confidence": 0.8,
+              "position": "recent"
+            },
+            {
+              "type": "engulfing_bearish",
+              "confidence": 0.7,
+              "position": "recent"
+            }
+          ],
+          "supportResistance": {
+            "support": [],
+            "resistance": []
+          },
+          "trend": {
+            "direction": "sideways",
+            "confidence": 0.0002934966658792355,
+            "slope": -0.04886719486889271,
+            "pricePoints": 9
+          },
+          "colors": {
+            "sentiment": "bearish",
+            "confidence": 0.14963191234377676,
+            "greenRatio": 0.0006505735319294641,
+            "redRatio": 0.01561376476630714,
+            "totalPixels": 29205
+          },
+          "confidence": 0.2700069723694847
+        },
+        "technical": {
+          "stochastic": null,
+          "ema": null,
+          "sma": null,
+          "rawText": "",
+          "confidence": 0.3
+        }
+      },
+      "processingTime": 8381
+    }
+  ],
+  "confluenceAnalysis": {
+    "confluenceSignal": "NEUTRAL",
+    "confidence": 0.5,
+    "description": "Mixed signals across timeframes. No clear directional confluence.",
+    "timeframeBreakdown": {
+      "callSignals": 0,
+      "putSignals": 0,
+      "totalAnalyzed": 3
+    },
+    "recommendation": "Wait for clearer signals before entering any position.",
+    "detailedAnalysis": []
+  },
+  "timestamp": 1753454719623
+}
