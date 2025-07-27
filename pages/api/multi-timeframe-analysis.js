@@ -156,12 +156,23 @@ async function handler(req, res) {
     // Validate uploaded files
     const validation = validateTimeframes(req.files || []);
     if (!validation.isValid) {
+      console.log(`❌ Validation failed: Missing timeframes: ${validation.missingTimeframes.join(', ')}`);
+      console.log(`📁 Uploaded timeframes: ${validation.uploadedTimeframes.join(', ')}`);
+
       return res.status(400).json({
+        success: false,
         error: 'Missing required timeframes',
         message: `Please upload screenshots for all timeframes: ${validation.missingTimeframes.join(', ')}`,
         missingTimeframes: validation.missingTimeframes,
         uploadedTimeframes: validation.uploadedTimeframes,
-        requestId
+        requestId,
+        signal: 'ERROR',
+        confidence: '0%',
+        confidenceNumeric: 0,
+        riskScore: 'HIGH',
+        reason: [`Missing required timeframes: ${validation.missingTimeframes.join(', ')}`],
+        timestamp: new Date().toISOString(),
+        processingTime: Date.now() - startTime
       });
     }
 
@@ -187,10 +198,33 @@ async function handler(req, res) {
 
     // Perform multi-timeframe analysis
     console.log('🎯 Starting comprehensive multi-timeframe analysis...');
+    console.log(`📂 Screenshot paths: ${screenshotPaths.join(', ')}`);
+    console.log(`💱 Manual currency pair: ${currencyPair || 'Not specified'}`);
+
     const analysisResult = await analysisService.analyzeMultipleScreenshots(
       screenshotPaths,
-      currencyPair || 'EUR/USD OTC'
+      currencyPair || null // Let the system auto-detect if not specified
     );
+
+    console.log('📊 Analysis result received:', {
+      screenshots: analysisResult.screenshots,
+      individualAnalyses: analysisResult.individualAnalyses?.length || 0,
+      confluenceAnalysis: !!analysisResult.confluenceAnalysis,
+      finalRecommendation: !!analysisResult.finalRecommendation,
+      autoDetectedPair: analysisResult.autoDetectedPair,
+      tradingPair: analysisResult.tradingPair,
+      error: analysisResult.error
+    });
+
+    // Check if analysis failed
+    if (analysisResult.error) {
+      throw new Error(`Analysis failed: ${analysisResult.error}`);
+    }
+
+    // Check if we have valid results
+    if (!analysisResult.individualAnalyses || analysisResult.individualAnalyses.length === 0) {
+      throw new Error('No individual analyses were completed');
+    }
 
     const processingTime = Date.now() - startTime;
 
@@ -210,11 +244,22 @@ async function handler(req, res) {
 
   } catch (error) {
     const processingTime = Date.now() - startTime;
-    
+
     console.error(`\n❌ === MULTI-TIMEFRAME ANALYSIS FAILED ===`);
     console.error(`🆔 Request ID: ${requestId}`);
     console.error(`❌ Error: ${error.message}`);
+    console.error(`📚 Error Stack: ${error.stack}`);
     console.error(`⏱️ Failed after: ${processingTime}ms`);
+
+    // Log additional debugging information
+    console.error(`📁 Files received: ${req.files ? req.files.length : 0}`);
+    if (req.files) {
+      req.files.forEach((file, index) => {
+        console.error(`   File ${index + 1}: ${file.fieldname} - ${file.originalname} (${file.size} bytes)`);
+      });
+    }
+    console.error(`💱 Currency Pair: ${req.body?.currencyPair || 'undefined'}`);
+    console.error(`🏢 Platform: ${req.body?.platform || 'undefined'}`);
 
     // Clean up temporary files on error
     await cleanupTempFiles(requestId);
@@ -281,10 +326,13 @@ function transformAnalysisToSignal(analysisResult, requestId, processingTime, cu
     });
   }
 
+  // Use auto-detected pair if available, otherwise fall back to provided pair
+  const finalCurrencyPair = analysisResult.autoDetectedPair || currencyPair || 'Unknown';
+
   return {
     success: true,
     requestId,
-    currency_pair: currencyPair,
+    currency_pair: finalCurrencyPair,
     timeframe: 'Multi-TF',
     trade_duration: '3 minutes',
     signal,
@@ -293,6 +341,7 @@ function transformAnalysisToSignal(analysisResult, requestId, processingTime, cu
     riskScore: multiTimeframeAnalysis.finalRecommendation.riskLevel,
     reason: [
       `Multi-timeframe confluence analysis completed`,
+      analysisResult.autoDetectedPair ? `Auto-detected trading pair: ${analysisResult.autoDetectedPair}` : 'Trading pair: Manual selection',
       `Confluence score: ${multiTimeframeAnalysis.confluenceScore.toFixed(1)}%`,
       `Signal strength: ${multiTimeframeAnalysis.strength}`,
       `Final recommendation: ${multiTimeframeAnalysis.finalRecommendation.action}`
@@ -303,7 +352,9 @@ function transformAnalysisToSignal(analysisResult, requestId, processingTime, cu
     metadata: {
       source: 'screenshot_analysis',
       analysisType: 'multi_timeframe_confluence',
-      screenshotsProcessed: analysisResult.screenshots || 0
+      screenshotsProcessed: analysisResult.screenshots || 0,
+      autoDetectedPair: analysisResult.autoDetectedPair,
+      originalPairInput: currencyPair
     }
   };
 }

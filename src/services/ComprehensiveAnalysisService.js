@@ -118,6 +118,7 @@ class ComprehensiveAnalysisService {
                 enginesUsed: ocrResults.engines.length,
                 pricesExtracted: ocrResults.extractedData.prices.length,
                 indicatorsFound: ocrResults.extractedData.indicators.length,
+                tradingPairsFound: ocrResults.extractedData.tradingPairs || [],
                 confidence: ocrResults.confidence.overall
             };
             result.quality.ocrConfidence = ocrResults.confidence.overall;
@@ -188,18 +189,21 @@ class ComprehensiveAnalysisService {
     /**
      * Analyze multiple screenshots for multi-timeframe confluence
      */
-    async analyzeMultipleScreenshots(screenshotPaths, tradingPair = 'USD/INR') {
+    async analyzeMultipleScreenshots(screenshotPaths, tradingPair = null) {
         console.log('🔄 Multi-Timeframe Confluence Analysis');
         console.log('═══════════════════════════════════════════════════════════════\n');
-        
+
+        let detectedTradingPair = tradingPair;
+
         const multiAnalysis = {
-            tradingPair,
+            tradingPair: detectedTradingPair,
             timestamp: moment().toISOString(),
             screenshots: screenshotPaths.length,
             individualAnalyses: [],
             confluenceAnalysis: {},
             finalRecommendation: {},
-            processingTime: 0
+            processingTime: 0,
+            autoDetectedPair: null
         };
         
         const startTime = Date.now();
@@ -208,10 +212,21 @@ class ComprehensiveAnalysisService {
             // Analyze each screenshot
             for (let i = 0; i < screenshotPaths.length; i++) {
                 console.log(`📈 Analyzing screenshot ${i + 1}/${screenshotPaths.length}: ${path.basename(screenshotPaths[i])}`);
-                
-                const analysis = await this.analyzeScreenshot(screenshotPaths[i], tradingPair);
+
+                const analysis = await this.analyzeScreenshot(screenshotPaths[i], detectedTradingPair || 'AUTO_DETECT');
                 multiAnalysis.individualAnalyses.push(analysis);
-                
+
+                // Auto-detect trading pair from first screenshot if not specified
+                if (!detectedTradingPair && analysis.phases?.multiEngineOCR?.completed) {
+                    const ocrData = analysis.phases.multiEngineOCR;
+                    if (ocrData.tradingPairsFound && ocrData.tradingPairsFound.length > 0) {
+                        detectedTradingPair = ocrData.tradingPairsFound[0].pair;
+                        multiAnalysis.autoDetectedPair = detectedTradingPair;
+                        multiAnalysis.tradingPair = detectedTradingPair;
+                        console.log(`🎯 Auto-detected trading pair: ${detectedTradingPair}`);
+                    }
+                }
+
                 console.log(`✅ Screenshot ${i + 1} completed: ${analysis.tradingSignal.direction} (${analysis.tradingSignal.confidence.toFixed(1)}%)\n`);
             }
             

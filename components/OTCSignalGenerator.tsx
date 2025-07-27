@@ -262,9 +262,9 @@ const OTCSignalGenerator: React.FC = () => {
 
       // Prepare form data with all screenshots
       const formData = new FormData();
-      formData.append('currencyPair', currencyPair);
       formData.append('platform', platform);
       formData.append('analysisType', 'multi-timeframe');
+      // Note: currencyPair will be auto-detected from screenshots
 
       // Add each timeframe screenshot
       requiredTimeframes.forEach(tf => {
@@ -744,8 +744,13 @@ const OTCSignalGenerator: React.FC = () => {
                     {/* Signal Details */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                       <div>
-                        <p className="text-gray-400 text-sm">Pair</p>
+                        <p className="text-gray-400 text-sm">
+                          Pair {signal.metadata?.autoDetectedPair ? '(Auto-detected)' : ''}
+                        </p>
                         <p className="font-semibold">{signal.currency_pair}</p>
+                        {signal.metadata?.autoDetectedPair && (
+                          <p className="text-xs text-green-400">✓ Detected from chart</p>
+                        )}
                       </div>
                       <div>
                         <p className="text-gray-400 text-sm">Duration</p>
