@@ -6,6 +6,7 @@
 const GeminiVisionAnalysisService = require('./GeminiVisionAnalysisService');
 const ApiKeyRotationManager = require('./ApiKeyRotationManager');
 const TokenOptimizationEngine = require('./TokenOptimizationEngine');
+const PerformanceMonitoringService = require('./PerformanceMonitoringService');
 const fs = require('fs');
 const path = require('path');
 
@@ -105,6 +106,18 @@ class EnhancedChartAnalysisEngine {
             maxImageHeight: 768
         });
 
+        // Performance Monitoring Service
+        this.performanceMonitor = new PerformanceMonitoringService({
+            enableDailyUsageTracking: true,
+            enableAccuracyTracking: true,
+            enableApiKeyHealthMonitoring: true,
+            enablePerformanceMetrics: true,
+            dailyRequestLimit: 1500,
+            dailyTokenLimit: 50000,
+            accuracyWarningThreshold: 70,
+            performanceWarningThreshold: 45000
+        });
+
         // Gemini Vision Service (will be initialized with rotating keys)
         this.visionService = null;
     }
@@ -197,9 +210,19 @@ class EnhancedChartAnalysisEngine {
                 
                 // Update performance statistics
                 this.updatePerformanceStats(true, Date.now() - startTime, enhancedResult.confidence);
-                
+
+                // Record analysis in performance monitor
+                this.performanceMonitor.recordAnalysisRequest({
+                    success: true,
+                    processingTime: Date.now() - startTime,
+                    tokenUsage: analysisResult.usage,
+                    confidence: enhancedResult.confidence,
+                    predictions: enhancedResult.analysis?.predictions,
+                    apiKeyIndex: analysisResult.apiKeyIndex
+                });
+
                 console.log(`✅ Enhanced analysis completed in ${Date.now() - startTime}ms`);
-                
+
                 return {
                     success: true,
                     analysisId,
@@ -219,7 +242,15 @@ class EnhancedChartAnalysisEngine {
         } catch (error) {
             this.activeRequests--;
             this.updatePerformanceStats(false, Date.now() - startTime, 0);
-            
+
+            // Record error in performance monitor
+            this.performanceMonitor.recordAnalysisRequest({
+                success: false,
+                processingTime: Date.now() - startTime,
+                error: error.message,
+                apiKeyIndex: null
+            });
+
             console.error('❌ Enhanced chart analysis failed:', error);
             return {
                 success: false,
@@ -602,7 +633,9 @@ class EnhancedChartAnalysisEngine {
                     (this.performanceStats.successfulAnalyses / this.performanceStats.totalAnalyses * 100).toFixed(2) + '%' : '0%'
             },
             keyManager: this.keyManager?.getStats(),
-            tokenOptimizer: this.tokenOptimizer?.getOptimizationStats()
+            tokenOptimizer: this.tokenOptimizer?.getOptimizationStats(),
+            monitoring: this.performanceMonitor?.getMonitoringStats(),
+            health: this.performanceMonitor?.getHealthStatus()
         };
     }
 
@@ -622,6 +655,10 @@ class EnhancedChartAnalysisEngine {
 
         if (this.visionService) {
             this.visionService.cleanup();
+        }
+
+        if (this.performanceMonitor) {
+            this.performanceMonitor.cleanup();
         }
 
         this.processingQueue = [];

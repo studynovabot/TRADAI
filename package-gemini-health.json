@@ -1,0 +1,38 @@
+{
+  "name": "gemini-api-health-checker",
+  "version": "1.0.0",
+  "description": "Comprehensive health checker for Google Gemini API keys with failover testing and production-ready reporting",
+  "main": "gemini-api-health-checker.js",
+  "scripts": {
+    "test": "node test-gemini-health-checker.js",
+    "health-check": "node gemini-api-health-checker.js",
+    "health-check-quick": "node gemini-api-health-checker.js --timeout 10 --wait 0.5",
+    "health-check-detailed": "node gemini-api-health-checker.js --timeout 60 --wait 2 --output detailed-report.json"
+  },
+  "bin": {
+    "gemini-health": "./gemini-api-health-checker.js"
+  },
+  "keywords": [
+    "gemini",
+    "api",
+    "health-check",
+    "google",
+    "ai",
+    "testing",
+    "failover",
+    "monitoring"
+  ],
+  "author": "AI Coder Assistant",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/gemini-api-health-checker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/gemini-api-health-checker/issues"
+  },
+  "homepage": "https://github.com/your-username/gemini-api-health-checker#readme"
+}
