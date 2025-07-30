@@ -117,7 +117,7 @@ Provide only the JSON response with no additional text.`;
 
         try {
             const response = await axios.post(`${this.groqBaseUrl}/chat/completions`, {
-                model: 'mixtral-8x7b-32768',
+                model: 'llama-3.1-70b-versatile',
                 messages: [
                     {
                         role: 'system',
