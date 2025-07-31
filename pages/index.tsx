@@ -113,8 +113,21 @@ export default function Home() {
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('File input changed:', e.target.files);
     if (e.target.files && e.target.files[0]) {
+      console.log('File selected:', e.target.files[0].name);
       handleFileSelect(e.target.files[0]);
+    }
+  };
+
+  const triggerFileInput = () => {
+    console.log('Triggering file input...');
+    const fileInput = document.getElementById('file-upload') as HTMLInputElement;
+    if (fileInput) {
+      console.log('File input found, clicking...');
+      fileInput.click();
+    } else {
+      console.error('File input not found!');
     }
   };
 
@@ -226,7 +239,7 @@ export default function Home() {
             <CardContent>
               {!selectedFile ? (
                 <div
-                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer ${
                     dragActive
                       ? 'border-blue-400 bg-blue-50'
                       : 'border-gray-300 hover:border-gray-400'
@@ -235,6 +248,7 @@ export default function Home() {
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
+                  onClick={triggerFileInput}
                 >
                   <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-lg font-medium text-gray-900 mb-2">
@@ -250,11 +264,13 @@ export default function Home() {
                     className="hidden"
                     id="file-upload"
                   />
-                  <label htmlFor="file-upload">
-                    <Button variant="outline" className="cursor-pointer">
-                      <FileImage className="h-4 w-4 mr-2" />
-                      Browse Files
-                    </Button>
+                  <label
+                    htmlFor="file-upload"
+                    onClick={triggerFileInput}
+                    className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 cursor-pointer"
+                  >
+                    <FileImage className="h-4 w-4 mr-2" />
+                    Browse Files
                   </label>
                   <p className="text-xs text-gray-400 mt-4">
                     Supports PNG, JPG, JPEG • Max 5MB
