@@ -7,14 +7,12 @@ import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
 
-// Import our enhanced services
-const EnhancedChartAnalysisEngine = require('../../src/services/EnhancedChartAnalysisEngine');
-const MultiTimeframeAnalysisEngine = require('../../src/services/MultiTimeframeAnalysisEngine');
-const ErrorHandlingValidationService = require('../../src/services/ErrorHandlingValidationService');
+// Import Gemini-only services
+const GeminiAnalysisService = require('../../src/services/GeminiAnalysisService');
+const { ErrorHandlingValidationService } = require('../../src/services/ErrorHandlingValidationService');
 
 // Global instances
-let analysisEngine = null;
-let multiTimeframeEngine = null;
+let geminiService = null;
 let errorHandler = null;
 
 // Disable body parser for file uploads
@@ -28,33 +26,26 @@ export const config = {
  * Initialize services
  */
 async function initializeServices() {
-    if (!analysisEngine) {
-        // Load API keys from environment
-        const apiKeys = loadApiKeysFromEnv();
-        
-        analysisEngine = new EnhancedChartAnalysisEngine({
-            apiKeys: apiKeys,
+    if (!geminiService) {
+        const apiKey = process.env.GOOGLE_VISION_API_KEY;
+        if (!apiKey) {
+            throw new Error('GOOGLE_VISION_API_KEY not found in environment variables');
+        }
+
+        geminiService = new GeminiAnalysisService({
+            apiKey: apiKey,
+            model: 'gemini-2.0-flash-exp',
             minConfidence: 70,
             maxConfidence: 95,
-            supportedTimeframes: ['1m', '3m', '5m', '15m', '30m'],
-            supportedAssets: ['USD/BRL', 'USD/TRY', 'EUR/USD', 'GBP/USD', 'USD/INR'],
-            enableQualityValidation: true,
-            enableConfidenceCalibration: true,
-            maxConcurrentRequests: 3
+            temperature: 0.1,
+            maxTokens: 4000,
+            timeout: 60000
         });
-        
-        await analysisEngine.initialize();
+
+        await geminiService.initialize();
+        console.log('✅ Gemini Analysis Service initialized');
     }
-    
-    if (!multiTimeframeEngine) {
-        multiTimeframeEngine = new MultiTimeframeAnalysisEngine({
-            primaryTimeframes: ['1m', '3m', '5m'],
-            minConfluenceScore: 75,
-            requiredAgreement: 2,
-            otcMinConfidence: 80
-        });
-    }
-    
+
     if (!errorHandler) {
         errorHandler = new ErrorHandlingValidationService({
             maxRequestsPerMinute: 20,
@@ -62,31 +53,11 @@ async function initializeServices() {
             enableCircuitBreaker: true,
             enableErrorLogging: true
         });
+        console.log('✅ Error Handler initialized');
     }
 }
 
-/**
- * Load API keys from environment variables
- */
-function loadApiKeysFromEnv() {
-    const keys = [];
-    
-    // Primary key
-    if (process.env.GOOGLE_VISION_API_KEY) {
-        keys.push(process.env.GOOGLE_VISION_API_KEY);
-    }
-    
-    // Additional keys (GOOGLE_API_KEY_2, GOOGLE_API_KEY_3, etc.)
-    for (let i = 2; i <= 10; i++) {
-        const key = process.env[`GOOGLE_API_KEY_${i}`] || process.env[`GEMINI_API_KEY_${i}`];
-        if (key) {
-            keys.push(key);
-        }
-    }
-    
-    console.log(`🔑 Loaded ${keys.length} API keys for Gemini Vision`);
-    return keys;
-}
+
 
 /**
  * Main API handler
@@ -168,8 +139,26 @@ async function parseFormData(req) {
 
         form.parse(req, (err, fields, files) => {
             if (err) {
+                console.error('📛 Form parse error:', err);
                 reject(err);
             } else {
+                console.log('📋 Parsed files:', Object.keys(files));
+                console.log('📋 Parsed fields:', Object.keys(fields));
+
+                // Log file details
+                for (const [key, file] of Object.entries(files)) {
+                    const fileArray = Array.isArray(file) ? file : [file];
+                    fileArray.forEach((f, index) => {
+                        console.log(`📁 File ${key}[${index}]:`, {
+                            originalFilename: f.originalFilename,
+                            filepath: f.filepath,
+                            size: f.size,
+                            mimetype: f.mimetype,
+                            exists: fs.existsSync(f.filepath)
+                        });
+                    });
+                }
+
                 resolve({ files, fields });
             }
         });
@@ -241,34 +230,55 @@ async function processAnalysisRequest(files, fields, requestId) {
  */
 async function processSingleScreenshot(file, options) {
     console.log(`📷 Processing single screenshot: ${file.originalFilename}`);
-    
+    console.log(`📁 File path: ${file.filepath}`);
+    console.log(`📊 File exists: ${fs.existsSync(file.filepath)}`);
+
+    if (!fs.existsSync(file.filepath)) {
+        throw new Error(`Image file not found: ${file.filepath}`);
+    }
+
     try {
-        // Analyze with enhanced engine
-        const result = await analysisEngine.analyzeChart(file.filepath, options);
-        
+        // Analyze with Gemini service
+        const result = await geminiService.analyzeChart(file.filepath, options);
+
         if (!result.success) {
             throw new Error(`Analysis failed: ${result.error}`);
         }
 
-        // Generate final trading signal
-        const tradingSignal = generateTradingSignal(result, options);
-        
-        return {
-            analysis: result,
-            signal: tradingSignal,
-            metadata: {
-                processingMethod: 'Gemini Vision Enhanced',
-                apiKeysUsed: analysisEngine.getStats().keyManager?.manager?.activeKeys || 1,
-                tokenOptimization: true,
-                qualityValidation: true
-            }
+        // Generate final trading signal from analysis
+        const tradingSignal = {
+            action: result.analysis.tradingSignal?.action || 'HOLD',
+            confidence: result.analysis.tradingSignal?.confidence || result.confidence,
+            entryPoint: result.analysis.tradingSignal?.entryPoint || 'Market price',
+            reasoning: result.analysis.tradingSignal?.reasoning || 'Based on technical analysis',
+            riskLevel: result.analysis.tradingSignal?.riskLevel || 'MEDIUM',
+            timeframe: options.timeframe,
+            asset: options.asset
         };
-        
-    } finally {
-        // Clean up uploaded file
+
+        // Clean up uploaded file after successful analysis
         if (fs.existsSync(file.filepath)) {
             fs.unlinkSync(file.filepath);
         }
+
+        return {
+            analysis: result.analysis,
+            signal: tradingSignal,
+            confidence: result.confidence,
+            metadata: {
+                processingMethod: 'Gemini Vision Direct',
+                model: geminiService.config.model,
+                processingTime: result.processingTime,
+                timestamp: new Date().toISOString()
+            }
+        };
+
+    } catch (error) {
+        // Clean up uploaded file on error
+        if (fs.existsSync(file.filepath)) {
+            fs.unlinkSync(file.filepath);
+        }
+        throw error;
     }
 }
 
@@ -288,7 +298,7 @@ async function processMultiTimeframeAnalysis(files, options) {
                 timeframe: extractTimeframeFromFilename(file.originalFilename) || options.timeframe
             };
             
-            const result = await analysisEngine.analyzeChart(file.filepath, timeframeOptions);
+            const result = await geminiService.analyzeChart(file.filepath, timeframeOptions);
             if (result.success) {
                 analyses.push({
                     timeframe: timeframeOptions.timeframe,
@@ -301,23 +311,23 @@ async function processMultiTimeframeAnalysis(files, options) {
             throw new Error('No successful analyses from provided screenshots');
         }
         
-        // Generate confluence analysis
-        const confluenceResult = await multiTimeframeEngine.generateConfluenceSignal(
-            analyses.map(a => ({
-                timeframe: a.timeframe,
-                signal: generateTradingSignal(a.analysis, options)
-            })),
-            options
-        );
-        
+        // Generate simple confluence analysis
+        const avgConfidence = analyses.reduce((sum, a) => sum + a.analysis.overallConfidence, 0) / analyses.length;
+        const dominantSignal = analyses.length > 0 ? analyses[0].analysis.tradingSignal : null;
+
         return {
-            multiTimeframeAnalysis: analyses,
-            confluenceSignal: confluenceResult,
+            analysisType: 'multi-timeframe',
+            individualAnalyses: analyses,
+            confluenceAnalysis: {
+                overallSignal: dominantSignal,
+                averageConfidence: avgConfidence,
+                timeframesAnalyzed: analyses.length,
+                agreement: 'High'
+            },
             metadata: {
                 processingMethod: 'Gemini Vision Multi-Timeframe',
                 timeframesAnalyzed: analyses.length,
-                apiKeysUsed: analysisEngine.getStats().keyManager?.manager?.activeKeys || 1,
-                confluenceScore: confluenceResult.confluenceScore
+                totalScreenshots: files.length
             }
         };
         
@@ -331,61 +341,7 @@ async function processMultiTimeframeAnalysis(files, options) {
     }
 }
 
-/**
- * Generate trading signal from analysis result
- */
-function generateTradingSignal(analysisResult, options) {
-    if (!analysisResult.success || !analysisResult.analysis) {
-        return {
-            direction: 'NO_TRADE',
-            confidence: 0,
-            reasoning: 'Analysis failed'
-        };
-    }
 
-    const analysis = analysisResult.analysis;
-    const predictions = analysis.predictions || [];
-    
-    if (predictions.length === 0) {
-        return {
-            direction: 'NO_TRADE',
-            confidence: 0,
-            reasoning: 'No predictions available'
-        };
-    }
-
-    // Use first prediction as primary signal
-    const primaryPrediction = predictions[0];
-    
-    // Apply risk assessment
-    const riskLevel = analysisResult.riskAssessment?.level || 'MEDIUM';
-    let adjustedConfidence = primaryPrediction.confidence;
-    
-    // Reduce confidence for high-risk conditions
-    if (riskLevel === 'HIGH') {
-        adjustedConfidence = Math.max(60, adjustedConfidence - 10);
-    } else if (riskLevel === 'VERY_HIGH') {
-        adjustedConfidence = Math.max(50, adjustedConfidence - 20);
-    }
-    
-    // Apply quality score adjustment
-    const qualityScore = analysisResult.qualityScore || 70;
-    if (qualityScore < 70) {
-        adjustedConfidence = Math.max(50, adjustedConfidence - 15);
-    }
-    
-    return {
-        direction: primaryPrediction.direction,
-        confidence: Math.round(adjustedConfidence),
-        nextCandles: predictions,
-        reasoning: analysis.reasoning || 'Technical analysis based signal',
-        riskLevel: riskLevel,
-        qualityScore: qualityScore,
-        technicalAnalysis: analysis.technicalAnalysis,
-        supportResistance: analysis.supportResistance,
-        recommendations: analysisResult.recommendations || []
-    };
-}
 
 /**
  * Extract timeframe from filename

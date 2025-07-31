@@ -1,0 +1,56 @@
+{
+  "timestamp": "2025-07-30T17:29:30.615Z",
+  "screenshot": "C:\\Users\\thaku\\Pictures\\trading ss\\1m\\usdinr.png",
+  "asset": "USD/INR",
+  "timeframe": "1m",
+  "model": "gemini-1.5-flash",
+  "processingTime": 24824,
+  "analysis": {
+    "analysis": {
+      "trend": "downtrend",
+      "currentPrice": "90.8520",
+      "supportLevels": [
+        "90.8450",
+        "90.8350 (projected)"
+      ],
+      "resistanceLevels": [
+        "90.8600",
+        "90.8700"
+      ],
+      "technicalIndicators": {
+        "ema": "The 5-period EMA (yellow) is below the 3-period EMA (red), confirming the downtrend.  Both EMAs are sloping downwards.",
+        "sma": "Not explicitly visible, but the overall chart movement suggests a downward SMA trend.",
+        "stochastic": "oversold",
+        "rsi": "Not visible on the provided chart"
+      },
+      "candlestickPatterns": "The recent candles show a series of bearish candles, suggesting continued selling pressure. No significant candlestick patterns are clearly identifiable in the short timeframe.",
+      "predictions": [
+        {
+          "candle": 1,
+          "direction": "DOWN",
+          "confidence": 85,
+          "reasoning": "Continued bearish momentum and oversold stochastic suggest further downward movement in the short term.  The price is below both EMAs."
+        },
+        {
+          "candle": 2,
+          "direction": "DOWN",
+          "confidence": 80,
+          "reasoning": "If the first candle continues the downtrend, the second candle is likely to follow suit due to the momentum. However, a slight bounce is possible near the support level."
+        },
+        {
+          "candle": 3,
+          "direction": "UP",
+          "confidence": 75,
+          "reasoning": "The stochastic oscillator is in oversold territory, suggesting a potential bounce.  However, the overall downtrend might still prevail, limiting the upside."
+        }
+      ],
+      "tradingSignal": {
+        "action": "HOLD",
+        "confidence": 70,
+        "entryPoint": "Not applicable for HOLD signal",
+        "reasoning": "While the stochastic suggests a potential bounce, the overall downtrend and lack of clear bullish signals make a BUY signal risky.  A SELL signal is also not recommended due to the oversold condition.  Waiting for a clearer confirmation of a trend reversal is advisable."
+      }
+    }
+  },
+  "rawResponse": "```json\n{\n  \"analysis\": {\n    \"trend\": \"downtrend\",\n    \"currentPrice\": \"90.8520\",\n    \"supportLevels\": [\"90.8450\", \"90.8350 (projected)\"],\n    \"resistanceLevels\": [\"90.8600\", \"90.8700\"],\n    \"technicalIndicators\": {\n      \"ema\": \"The 5-period EMA (yellow) is below the 3-period EMA (red), confirming the downtrend.  Both EMAs are sloping downwards.\",\n      \"sma\": \"Not explicitly visible, but the overall chart movement suggests a downward SMA trend.\",\n      \"stochastic\": \"oversold\",\n      \"rsi\": \"Not visible on the provided chart\"\n    },\n    \"candlestickPatterns\": \"The recent candles show a series of bearish candles, suggesting continued selling pressure. No significant candlestick patterns are clearly identifiable in the short timeframe.\",\n    \"predictions\": [\n      {\n        \"candle\": 1,\n        \"direction\": \"DOWN\",\n        \"confidence\": 85,\n        \"reasoning\": \"Continued bearish momentum and oversold stochastic suggest further downward movement in the short term.  The price is below both EMAs.\"\n      },\n      {\n        \"candle\": 2,\n        \"direction\": \"DOWN\",\n        \"confidence\": 80,\n        \"reasoning\": \"If the first candle continues the downtrend, the second candle is likely to follow suit due to the momentum. However, a slight bounce is possible near the support level.\"\n      },\n      {\n        \"candle\": 3,\n        \"direction\": \"UP\",\n        \"confidence\": 75,\n        \"reasoning\": \"The stochastic oscillator is in oversold territory, suggesting a potential bounce.  However, the overall downtrend might still prevail, limiting the upside.\"\n      }\n    ],\n    \"tradingSignal\": {\n      \"action\": \"HOLD\",\n      \"confidence\": 70,\n      \"entryPoint\": \"Not applicable for HOLD signal\",\n      \"reasoning\": \"While the stochastic suggests a potential bounce, the overall downtrend and lack of clear bullish signals make a BUY signal risky.  A SELL signal is also not recommended due to the oversold condition.  Waiting for a clearer confirmation of a trend reversal is advisable.\"\n    }\n  }\n}\n```\n\n**Disclaimer:** This analysis is based solely on the provided chart and is for informational purposes only.  It is not financial advice.  Trading involves significant risk, and past performance is not indicative of future results.  Always conduct your own thorough research and consider your risk tolerance before making any trading decisions.  The confidence levels are subjective estimations based on the analyst's interpretation of the chart.\n"
+}

@@ -1,0 +1,56 @@
+{
+  "timestamp": "2025-07-30T17:30:08.078Z",
+  "screenshot": "C:\\Users\\thaku\\Pictures\\trading ss\\3m\\usdbdt.png",
+  "asset": "USD/BDT",
+  "timeframe": "3m",
+  "model": "gemini-1.5-flash",
+  "processingTime": 20825,
+  "analysis": {
+    "analysis": {
+      "trend": "downtrend",
+      "currentPrice": "126.434",
+      "supportLevels": [
+        "126.300",
+        "126.200"
+      ],
+      "resistanceLevels": [
+        "126.500",
+        "126.700"
+      ],
+      "technicalIndicators": {
+        "ema": "The EMA (yellow line) shows a clear downtrend, following the price action downwards.  It's currently below the price, suggesting bearish momentum.",
+        "sma": "The SMA (red line) also indicates a downtrend, mirroring the EMA's bearish signal. It's positioned above the price, further reinforcing the bearish sentiment.",
+        "stochastic": "oversold",
+        "rsi": "Not visible on the provided chart"
+      },
+      "candlestickPatterns": "The recent price action shows a series of bearish candles (red), indicating selling pressure.  No significant candlestick patterns are clearly identifiable from this limited timeframe.",
+      "predictions": [
+        {
+          "candle": 1,
+          "direction": "DOWN",
+          "confidence": 80,
+          "reasoning": "Continued bearish momentum from the current downtrend and oversold stochastic suggest a further price drop in the short term."
+        },
+        {
+          "candle": 2,
+          "direction": "DOWN",
+          "confidence": 75,
+          "reasoning": "If the first candle continues the downtrend, the second candle is likely to follow suit, although the strength might weaken slightly."
+        },
+        {
+          "candle": 3,
+          "direction": "UP",
+          "confidence": 70,
+          "reasoning": "The stochastic oscillator being oversold suggests a potential bounce or temporary reversal.  However, the overall downtrend might still prevail."
+        }
+      ],
+      "tradingSignal": {
+        "action": "HOLD",
+        "confidence": 75,
+        "entryPoint": "Not applicable for HOLD signal",
+        "reasoning": "While the stochastic is oversold, indicating potential for a bounce, the overall trend is bearish.  The risk of further downward movement outweighs the potential for a short-term upward move.  Waiting for a clearer confirmation of a trend reversal is advisable before entering a trade."
+      }
+    }
+  },
+  "rawResponse": "```json\n{\n  \"analysis\": {\n    \"trend\": \"downtrend\",\n    \"currentPrice\": \"126.434\",\n    \"supportLevels\": [\"126.300\", \"126.200\"],\n    \"resistanceLevels\": [\"126.500\", \"126.700\"],\n    \"technicalIndicators\": {\n      \"ema\": \"The EMA (yellow line) shows a clear downtrend, following the price action downwards.  It's currently below the price, suggesting bearish momentum.\",\n      \"sma\": \"The SMA (red line) also indicates a downtrend, mirroring the EMA's bearish signal. It's positioned above the price, further reinforcing the bearish sentiment.\",\n      \"stochastic\": \"oversold\",\n      \"rsi\": \"Not visible on the provided chart\"\n    },\n    \"candlestickPatterns\": \"The recent price action shows a series of bearish candles (red), indicating selling pressure.  No significant candlestick patterns are clearly identifiable from this limited timeframe.\",\n    \"predictions\": [\n      {\n        \"candle\": 1,\n        \"direction\": \"DOWN\",\n        \"confidence\": 80,\n        \"reasoning\": \"Continued bearish momentum from the current downtrend and oversold stochastic suggest a further price drop in the short term.\"\n      },\n      {\n        \"candle\": 2,\n        \"direction\": \"DOWN\",\n        \"confidence\": 75,\n        \"reasoning\": \"If the first candle continues the downtrend, the second candle is likely to follow suit, although the strength might weaken slightly.\"\n      },\n      {\n        \"candle\": 3,\n        \"direction\": \"UP\",\n        \"confidence\": 70,\n        \"reasoning\": \"The stochastic oscillator being oversold suggests a potential bounce or temporary reversal.  However, the overall downtrend might still prevail.\"\n      }\n    ],\n    \"tradingSignal\": {\n      \"action\": \"HOLD\",\n      \"confidence\": 75,\n      \"entryPoint\": \"Not applicable for HOLD signal\",\n      \"reasoning\": \"While the stochastic is oversold, indicating potential for a bounce, the overall trend is bearish.  The risk of further downward movement outweighs the potential for a short-term upward move.  Waiting for a clearer confirmation of a trend reversal is advisable before entering a trade.\"\n    }\n  }\n}\n```\n"
+}
