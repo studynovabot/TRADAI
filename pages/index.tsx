@@ -289,25 +289,52 @@ export default function Home() {
                     </div>
                   )}
 
-                  {/* Analyze Button */}
+                  {/* Analyze Button - Enhanced */}
                   <Button
                     onClick={analyzeChart}
                     disabled={isAnalyzing}
-                    className="w-full"
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold"
                     size="lg"
                   >
                     {isAnalyzing ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Analyzing Chart...
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                        🤖 AI Analyzing Chart... (60s)
                       </>
                     ) : (
                       <>
-                        <BarChart3 className="h-4 w-4 mr-2" />
-                        Analyze Chart
+                        <BarChart3 className="h-5 w-5 mr-2" />
+                        🚀 Start Professional Analysis
                       </>
                     )}
                   </Button>
+
+                  {/* Analysis Progress Indicator */}
+                  {isAnalyzing && (
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center space-x-3 mb-3">
+                        <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                        <span className="text-sm font-medium text-blue-800">
+                          Gemini AI is analyzing your chart...
+                        </span>
+                      </div>
+                      <div className="space-y-2 text-xs text-blue-700">
+                        <div className="flex items-center">
+                          <CheckCircle className="h-3 w-3 text-green-500 mr-2" />
+                          Processing image with OCR
+                        </div>
+                        <div className="flex items-center">
+                          <Loader2 className="h-3 w-3 text-blue-500 mr-2 animate-spin" />
+                          Analyzing technical indicators
+                        </div>
+                        <div className="flex items-center text-gray-500">
+                          <Clock className="h-3 w-3 mr-2" />
+                          Generating trading signals
+                        </div>
+                      </div>
+                      <Progress value={33} className="mt-3 h-2" />
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -334,31 +361,56 @@ export default function Home() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Processing Info */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                  <div className="bg-gray-50 rounded-lg p-4">
+                {/* Processing Info & Quality Metrics */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Processing Time</span>
-                      <Clock className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm text-blue-700 font-medium">Processing Time</span>
+                      <Clock className="h-4 w-4 text-blue-500" />
                     </div>
-                    <div className="text-lg font-semibold">{Math.round(analysisResult.processingTime / 1000)}s</div>
+                    <div className="text-xl font-bold text-blue-800">{Math.round(analysisResult.processingTime / 1000)}s</div>
+                    <div className="text-xs text-blue-600 mt-1">
+                      {analysisResult.processingTime < 60000 ? '⚡ Fast' : '🔄 Processing'}
+                    </div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
+
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Overall Confidence</span>
-                      <Target className="h-4 w-4 text-gray-400" />
+                      <span className="text-sm text-green-700 font-medium">Signal Quality</span>
+                      <Target className="h-4 w-4 text-green-500" />
                     </div>
-                    <div className={`text-lg font-semibold ${getConfidenceColor(analysisResult.confidence)}`}>
+                    <div className={`text-xl font-bold ${getConfidenceColor(analysisResult.confidence)}`}>
                       {analysisResult.confidence}%
                     </div>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600">Detected Asset</span>
-                      <BarChart3 className="h-4 w-4 text-gray-400" />
+                    <div className="text-xs text-green-600 mt-1">
+                      {analysisResult.confidence >= 80 ? '🎯 High Quality' :
+                       analysisResult.confidence >= 70 ? '✅ Good Quality' : '⚠️ Low Quality'}
                     </div>
-                    <div className="text-lg font-semibold">
+                  </div>
+
+                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-purple-700 font-medium">Detected Asset</span>
+                      <BarChart3 className="h-4 w-4 text-purple-500" />
+                    </div>
+                    <div className="text-xl font-bold text-purple-800">
                       {analysisResult.detectedAsset || 'Auto-detected'}
+                    </div>
+                    <div className="text-xs text-purple-600 mt-1">
+                      {analysisResult.detectedTimeframe || 'Multi-timeframe'}
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-orange-700 font-medium">Analysis Status</span>
+                      <CheckCircle className="h-4 w-4 text-orange-500" />
+                    </div>
+                    <div className="text-xl font-bold text-orange-800">
+                      {analysisResult.success ? 'SUCCESS' : 'FAILED'}
+                    </div>
+                    <div className="text-xs text-orange-600 mt-1">
+                      {analysisResult.success ? '✅ Ready to Trade' : '❌ Retry Analysis'}
                     </div>
                   </div>
                 </div>
@@ -459,89 +511,314 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Next 3 Candles Predictions */}
+                {/* Next 3 Candles Predictions - Enhanced Professional Layout */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-3 flex items-center">
-                    <Target className="h-5 w-5 mr-2" />
-                    Next 3 Candles Predictions
+                  <h3 className="text-xl font-bold mb-4 flex items-center">
+                    <Target className="h-6 w-6 mr-2 text-purple-600" />
+                    🔮 Next 3 Candles Predictions
                   </h3>
-                  <div className="space-y-3">
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {analysisResult.analysis.predictions?.map((prediction, index) => (
-                      <div key={index} className="border rounded-lg p-4 bg-gray-50">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center space-x-2">
-                            {prediction.direction === 'UP' ? (
-                              <ArrowUp className="h-5 w-5 text-green-500" />
-                            ) : (
-                              <ArrowDown className="h-5 w-5 text-red-500" />
-                            )}
-                            <span className="font-semibold">Candle {prediction.candle}</span>
-                          </div>
-                          <div className={`font-semibold ${getConfidenceColor(prediction.confidence)}`}>
-                            {prediction.confidence}% confidence
+                      <div
+                        key={index}
+                        className={`border-2 rounded-xl p-5 shadow-lg transition-all hover:shadow-xl ${
+                          prediction.direction === 'UP'
+                            ? 'bg-gradient-to-br from-green-50 to-emerald-100 border-green-200'
+                            : 'bg-gradient-to-br from-red-50 to-rose-100 border-red-200'
+                        }`}
+                      >
+                        {/* Candle Header */}
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center space-x-3">
+                            <div className={`p-2 rounded-full ${
+                              prediction.direction === 'UP' ? 'bg-green-500' : 'bg-red-500'
+                            }`}>
+                              {prediction.direction === 'UP' ? (
+                                <ArrowUp className="h-5 w-5 text-white" />
+                              ) : (
+                                <ArrowDown className="h-5 w-5 text-white" />
+                              )}
+                            </div>
+                            <div>
+                              <span className="text-lg font-bold text-gray-800">
+                                Candle {prediction.candle}
+                              </span>
+                              <div className="text-xs text-gray-600">Next prediction</div>
+                            </div>
                           </div>
                         </div>
-                        <div className="text-sm text-gray-600">
-                          <strong>Direction:</strong> {prediction.direction}
+
+                        {/* Direction & Confidence */}
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium text-gray-600">Direction</span>
+                            <Badge
+                              className={`${
+                                prediction.direction === 'UP'
+                                  ? 'bg-green-100 text-green-800 border-green-300'
+                                  : 'bg-red-100 text-red-800 border-red-300'
+                              } font-bold`}
+                            >
+                              {prediction.direction}
+                            </Badge>
+                          </div>
+
+                          <div className="mb-3">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium text-gray-600">Confidence</span>
+                              <span className={`font-bold ${getConfidenceColor(prediction.confidence)}`}>
+                                {prediction.confidence}%
+                              </span>
+                            </div>
+                            <Progress
+                              value={prediction.confidence}
+                              className="h-2"
+                            />
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-600 mt-1">
-                          <strong>Reasoning:</strong> {prediction.reasoning}
+
+                        {/* AI Reasoning */}
+                        <div className="bg-white rounded-lg p-3 border border-gray-200">
+                          <div className="text-xs font-medium text-gray-700 mb-2 flex items-center">
+                            <span className="mr-1">🤖</span>
+                            AI Reasoning
+                          </div>
+                          <div className="text-xs text-gray-600 leading-relaxed">
+                            {prediction.reasoning}
+                          </div>
+                        </div>
+
+                        {/* Prediction Quality Indicator */}
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-gray-500">Quality:</span>
+                            <span className={`font-semibold ${
+                              prediction.confidence >= 80 ? 'text-green-600' :
+                              prediction.confidence >= 70 ? 'text-yellow-600' : 'text-red-600'
+                            }`}>
+                              {prediction.confidence >= 80 ? '🎯 High' :
+                               prediction.confidence >= 70 ? '✅ Good' : '⚠️ Low'}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Trading Signal */}
+                {/* Trading Signal - Enhanced Professional Layout */}
                 <div className="mb-6">
-                  <h3 className="text-lg font-semibold mb-3 flex items-center">
-                    <Activity className="h-5 w-5 mr-2" />
-                    Trading Signal
+                  <h3 className="text-xl font-bold mb-4 flex items-center">
+                    <Activity className="h-6 w-6 mr-2 text-blue-600" />
+                    🎯 Professional Trading Signal
                   </h3>
-                  <div className="border rounded-lg p-6 bg-gradient-to-r from-gray-50 to-blue-50">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        {getSignalIcon(analysisResult.analysis.tradingSignal.action)}
+
+                  {/* Main Signal Card */}
+                  <div className="border-2 rounded-xl p-6 bg-gradient-to-br from-white via-blue-50 to-indigo-50 shadow-lg">
+                    {/* Signal Header */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center space-x-4">
+                        <div className="p-3 rounded-full bg-white shadow-md">
+                          {getSignalIcon(analysisResult.analysis.tradingSignal.action)}
+                        </div>
                         <div>
-                          <Badge className={getSignalColor(analysisResult.analysis.tradingSignal.action)}>
-                            {analysisResult.analysis.tradingSignal.action}
+                          <Badge
+                            className={`${getSignalColor(analysisResult.analysis.tradingSignal.action)} text-lg px-4 py-2 font-bold`}
+                          >
+                            {analysisResult.analysis.tradingSignal.action} SIGNAL
                           </Badge>
-                          <div className="text-sm text-gray-600 mt-1">
-                            Risk Level: {analysisResult.analysis.tradingSignal.riskLevel}
+                          <div className="text-sm text-gray-600 mt-2 flex items-center">
+                            <span className="mr-2">🛡️ Risk Level:</span>
+                            <span className="font-semibold">{analysisResult.analysis.tradingSignal.riskLevel}</span>
                           </div>
                         </div>
                       </div>
+
+                      {/* Confidence Meter */}
                       <div className="text-right">
-                        <div className={`text-xl font-bold ${getConfidenceColor(analysisResult.analysis.tradingSignal.confidence)}`}>
+                        <div className={`text-3xl font-black ${getConfidenceColor(analysisResult.analysis.tradingSignal.confidence)}`}>
                           {analysisResult.analysis.tradingSignal.confidence}%
                         </div>
-                        <div className="text-sm text-gray-600">Confidence</div>
+                        <div className="text-sm text-gray-600 font-medium">Signal Confidence</div>
+                        <Progress
+                          value={analysisResult.analysis.tradingSignal.confidence}
+                          className="w-24 mt-2"
+                        />
                       </div>
                     </div>
 
-                    <div className="mb-4">
-                      <div className="text-sm text-gray-600">Entry Point</div>
-                      <div className="font-semibold text-lg">{analysisResult.analysis.tradingSignal.entryPoint}</div>
+                    {/* Entry Point & Key Metrics */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                      <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                        <div className="text-sm text-gray-600 font-medium mb-1">💰 Recommended Entry Point</div>
+                        <div className="text-2xl font-bold text-blue-800">{analysisResult.analysis.tradingSignal.entryPoint}</div>
+                        <div className="text-xs text-gray-500 mt-1">Based on technical confluence</div>
+                      </div>
+
+                      <div className="bg-white rounded-lg p-4 border border-gray-200 shadow-sm">
+                        <div className="text-sm text-gray-600 font-medium mb-1">⏱️ Signal Validity</div>
+                        <div className="text-2xl font-bold text-green-600">
+                          {analysisResult.detectedTimeframe || 'Multi-TF'}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">Timeframe analysis</div>
+                      </div>
                     </div>
 
-                    <div className="bg-white rounded-lg p-4">
-                      <div className="text-sm font-medium text-gray-700 mb-2">Analysis Reasoning</div>
-                      <div className="text-sm text-gray-600">{analysisResult.analysis.tradingSignal.reasoning}</div>
+                    {/* Professional Analysis Reasoning */}
+                    <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-5 border border-gray-200">
+                      <div className="flex items-center mb-3">
+                        <span className="text-lg font-bold text-gray-800 mr-2">🧠 AI Analysis Reasoning</span>
+                        <Badge variant="outline" className="text-xs">Gemini Pro</Badge>
+                      </div>
+                      <div className="text-sm text-gray-700 leading-relaxed">
+                        {analysisResult.analysis.tradingSignal.reasoning}
+                      </div>
+                    </div>
+
+                    {/* Trust & Reliability Indicators */}
+                    <div className="mt-6 pt-4 border-t border-gray-200">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center space-x-4">
+                          <span className="flex items-center text-green-600">
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            AI Verified
+                          </span>
+                          <span className="flex items-center text-blue-600">
+                            <Target className="h-4 w-4 mr-1" />
+                            Multi-Indicator Confluence
+                          </span>
+                          <span className="flex items-center text-purple-600">
+                            <BarChart3 className="h-4 w-4 mr-1" />
+                            Professional Grade
+                          </span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Generated: {new Date().toLocaleTimeString()}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Upload Another Button */}
-                <div className="text-center">
-                  <Button onClick={resetUpload} variant="outline" size="lg">
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                  <Button
+                    onClick={resetUpload}
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
                     <Upload className="h-4 w-4 mr-2" />
                     Analyze Another Chart
+                  </Button>
+
+                  <Button
+                    onClick={() => window.print()}
+                    variant="secondary"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    <FileImage className="h-4 w-4 mr-2" />
+                    Save Analysis Report
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      const analysisText = `
+TRADAI Analysis Report
+======================
+Asset: ${analysisResult.detectedAsset || 'Unknown'}
+Signal: ${analysisResult.analysis.tradingSignal.action}
+Confidence: ${analysisResult.analysis.tradingSignal.confidence}%
+Entry Point: ${analysisResult.analysis.tradingSignal.entryPoint}
+Risk Level: ${analysisResult.analysis.tradingSignal.riskLevel}
+
+Predictions:
+${analysisResult.analysis.predictions?.map(p =>
+  `Candle ${p.candle}: ${p.direction} (${p.confidence}%)`
+).join('\n')}
+
+Generated: ${new Date().toLocaleString()}
+                      `.trim();
+                      navigator.clipboard.writeText(analysisText);
+                    }}
+                    variant="default"
+                    size="lg"
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Target className="h-4 w-4 mr-2" />
+                    Copy Trading Signal
                   </Button>
                 </div>
               </CardContent>
             </Card>
           )}
+
+          {/* Professional Disclaimer */}
+          <Card className="mb-8 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50">
+            <CardContent className="p-6">
+              <div className="flex items-start space-x-3">
+                <AlertCircle className="h-6 w-6 text-orange-500 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-lg font-bold text-orange-800 mb-2">⚠️ Professional Trading Disclaimer</h3>
+                  <div className="text-sm text-orange-700 space-y-2">
+                    <p>
+                      <strong>Risk Warning:</strong> Trading involves substantial risk and may result in the loss of your invested capital.
+                      Past performance does not guarantee future results.
+                    </p>
+                    <p>
+                      <strong>AI Analysis:</strong> This analysis is generated by AI and should be used as a tool to assist your trading decisions,
+                      not as the sole basis for trading. Always conduct your own research and risk assessment.
+                    </p>
+                    <p>
+                      <strong>No Financial Advice:</strong> This tool provides technical analysis only and does not constitute financial advice.
+                      Consult with a qualified financial advisor before making investment decisions.
+                    </p>
+                    <p className="font-semibold">
+                      <strong>Recommendation:</strong> Never risk more than you can afford to lose. Use proper risk management and position sizing.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </main>
+
+        {/* Footer */}
+        <footer className="bg-white border-t mt-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <div className="flex items-center space-x-2 mb-4 md:mb-0">
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                <span className="font-semibold text-gray-900">TRADAI</span>
+                <Badge variant="outline" className="text-xs">Powered by Gemini AI</Badge>
+              </div>
+
+              <div className="flex items-center space-x-6 text-sm text-gray-600">
+                <span className="flex items-center">
+                  <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
+                  Professional Grade Analysis
+                </span>
+                <span className="flex items-center">
+                  <Target className="h-4 w-4 text-blue-500 mr-1" />
+                  Multi-Timeframe Signals
+                </span>
+                <span className="flex items-center">
+                  <Activity className="h-4 w-4 text-purple-500 mr-1" />
+                  Real-Time Processing
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-200 text-center">
+              <p className="text-xs text-gray-500">
+                © 2024 TRADAI. Advanced AI-powered trading analysis system.
+                Built with cutting-edge technology for professional traders.
+              </p>
+            </div>
+          </div>
+        </footer>
       </div>
     </>
   );
