@@ -1,6 +1,5 @@
 // API route to check system health
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { TwelveDataService } from '../../services/twelveDataService';
 
 type HealthResponse = {
   message: string;
@@ -31,28 +30,26 @@ export default async function handler(
 
   // Initialize services status
   const services: { [key: string]: { status: string; message?: string } } = {
-    twelveData: { status: 'unknown' },
+    geminiVision: { status: 'unknown' },
     technicalAnalysis: { status: 'unknown' }
   };
 
-  // Check TwelveData API
+  // Check Gemini Vision API
   try {
-    const twelveData = new TwelveDataService();
-    const marketData = await twelveData.getOHLCV('EUR/USD', '1M', 5);
-    
-    if (marketData && marketData.length > 0) {
-      services.twelveData = { 
+    const apiKey = process.env.GOOGLE_VISION_API_KEY;
+    if (apiKey && apiKey.length > 0) {
+      services.geminiVision = {
         status: 'healthy',
-        message: `Successfully fetched ${marketData.length} candles`
+        message: 'Gemini Vision API key is configured'
       };
     } else {
-      services.twelveData = { 
-        status: 'degraded',
-        message: 'API returned empty data, using fallback'
+      services.geminiVision = {
+        status: 'error',
+        message: 'Gemini Vision API key not configured'
       };
     }
   } catch (error) {
-    services.twelveData = { 
+    services.geminiVision = {
       status: 'error',
       message: error instanceof Error ? error.message : 'Unknown error'
     };

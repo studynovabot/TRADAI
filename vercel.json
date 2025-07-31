@@ -28,6 +28,9 @@
     },
     "pages/api/otc-signal-generator/health.js": {
       "maxDuration": 30
+    },
+    "pages/api/gemini-vision-signal.js": {
+      "maxDuration": 300
     }
   },
   "regions": ["iad1"],
@@ -63,6 +66,10 @@
     {
       "src": "/otc-signal-generator",
       "dest": "/otc-signal-generator"
+    },
+    {
+      "src": "/api/gemini-vision-signal",
+      "dest": "/api/gemini-vision-signal"
     }
   ]
 }
