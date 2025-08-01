@@ -4,30 +4,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../co
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
-import {
-  Upload,
-  Image,
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  Clock,
-  Target,
-  AlertCircle,
-  CheckCircle,
-  FileImage,
-  ArrowUp,
-  ArrowDown,
-  Minus,
-  Loader2,
-  Copy,
-  Info,
-  Gauge,
-  RefreshCw,
-  Download,
-  Settings,
-  Settings
-} from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+
+// Create typed icon components
+const Icons = {
+  Upload: (LucideIcons as any).Upload,
+  Image: (LucideIcons as any).Image,
+  BarChart3: (LucideIcons as any).BarChart3,
+  TrendingUp: (LucideIcons as any).TrendingUp,
+  TrendingDown: (LucideIcons as any).TrendingDown,
+  Activity: (LucideIcons as any).Activity,
+  Clock: (LucideIcons as any).Clock,
+  Target: (LucideIcons as any).Target,
+  AlertCircle: (LucideIcons as any).AlertCircle,
+  CheckCircle: (LucideIcons as any).CheckCircle,
+  FileImage: (LucideIcons as any).FileImage,
+  ArrowUp: (LucideIcons as any).ArrowUp,
+  ArrowDown: (LucideIcons as any).ArrowDown,
+  Minus: (LucideIcons as any).Minus,
+  Loader2: (LucideIcons as any).Loader2,
+  Copy: (LucideIcons as any).Copy,
+  Info: (LucideIcons as any).Info,
+  Gauge: (LucideIcons as any).Gauge,
+  RefreshCw: (LucideIcons as any).RefreshCw,
+  Download: (LucideIcons as any).Download,
+  Settings: (LucideIcons as any).Settings
+};
 
 interface AnalysisResult {
   success: boolean;
@@ -285,10 +287,10 @@ Troubleshooting steps:
 
   const getSignalIcon = (signal: string) => {
     switch (signal) {
-      case 'BUY': return <ArrowUp className="h-5 w-5 text-green-500" />;
-      case 'SELL': return <ArrowDown className="h-5 w-5 text-red-500" />;
-      case 'HOLD': return <Minus className="h-5 w-5 text-yellow-500" />;
-      default: return <Activity className="h-5 w-5" />;
+      case 'BUY': return <Icons.ArrowUp className="h-5 w-5 text-green-500" />;
+      case 'SELL': return <Icons.ArrowDown className="h-5 w-5 text-red-500" />;
+      case 'HOLD': return <Icons.Minus className="h-5 w-5 text-yellow-500" />;
+      default: return <Icons.Activity className="h-5 w-5" />;
     }
   };
 
@@ -360,7 +362,7 @@ Troubleshooting steps:
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               <div className="flex items-center">
-                <BarChart3 className="h-8 w-8 text-blue-600 mr-3" />
+                <Icons.BarChart3 className="h-8 w-8 text-blue-600 mr-3" />
                 <h1 className="text-2xl font-bold text-gray-900">TRADAI</h1>
                 <Badge variant="outline" className="ml-3">Gemini AI</Badge>
               </div>
@@ -368,17 +370,17 @@ Troubleshooting steps:
               <div className="flex items-center space-x-2">
                 {healthStatus.status === 'OK' ? (
                   <>
-                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <Icons.CheckCircle className="h-5 w-5 text-green-500" />
                     <span className="text-sm text-gray-600">API Ready</span>
                   </>
                 ) : healthError ? (
                   <>
-                    <AlertCircle className="h-5 w-5 text-red-500" />
+                    <Icons.AlertCircle className="h-5 w-5 text-red-500" />
                     <span className="text-sm text-red-600">API Error</span>
                   </>
                 ) : (
                   <>
-                    <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                    <Icons.Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
                     <span className="text-sm text-gray-600">Checking API...</span>
                   </>
                 )}
@@ -396,12 +398,12 @@ Troubleshooting steps:
                 <CardTitle className="flex items-center text-lg">
                   {healthStatus.status === 'OK' ? (
                     <>
-                      <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
+                      <Icons.CheckCircle className="h-5 w-5 mr-2 text-green-500" />
                       <span className="text-green-700">Gemini Vision API Status: Online</span>
                     </>
                   ) : (
                     <>
-                      <AlertCircle className="h-5 w-5 mr-2 text-red-500" />
+                      <Icons.AlertCircle className="h-5 w-5 mr-2 text-red-500" />
                       <span className="text-red-700">Gemini Vision API Status: Error</span>
                     </>
                   )}
@@ -436,7 +438,7 @@ Troubleshooting steps:
                           className="text-xs border-green-300 text-green-700 hover:bg-green-100"
                           onClick={checkApiHealth}
                         >
-                          <Loader2 className="h-3 w-3 mr-1" />
+                          <Icons.Loader2 className="h-3 w-3 mr-1" />
                           Refresh Status
                         </Button>
                       </div>
@@ -452,7 +454,7 @@ Troubleshooting steps:
                           className="text-xs border-red-300 text-red-700 hover:bg-red-100"
                           onClick={checkApiHealth}
                         >
-                          <Loader2 className="h-3 w-3 mr-1" />
+                          <Icons.Loader2 className="h-3 w-3 mr-1" />
                           Retry Connection
                         </Button>
                       </div>
@@ -467,7 +469,7 @@ Troubleshooting steps:
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center">
-                <Upload className="h-5 w-5 mr-2" />
+                <Icons.Upload className="h-5 w-5 mr-2" />
                 Upload Trading Chart Screenshot
               </CardTitle>
               <CardDescription>
@@ -488,7 +490,7 @@ Troubleshooting steps:
                   onDrop={handleDrop}
                   onClick={triggerFileInput}
                 >
-                  <Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <Icons.Image className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-lg font-medium text-gray-900 mb-2">
                     Drop your chart image here
                   </p>
@@ -507,7 +509,7 @@ Troubleshooting steps:
                     onClick={triggerFileInput}
                     className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 cursor-pointer"
                   >
-                    <FileImage className="h-4 w-4 mr-2" />
+                    <Icons.FileImage className="h-4 w-4 mr-2" />
                     Browse Files
                   </label>
                   <p className="text-xs text-gray-400 mt-4">
@@ -519,7 +521,7 @@ Troubleshooting steps:
                   {/* File Preview */}
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <FileImage className="h-8 w-8 text-blue-600" />
+                      <Icons.FileImage className="h-8 w-8 text-blue-600" />
                       <div>
                         <p className="font-medium">{selectedFile.name}</p>
                         <p className="text-sm text-gray-500">
@@ -552,12 +554,12 @@ Troubleshooting steps:
                   >
                     {isAnalyzing ? (
                       <>
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                        <Icons.Loader2 className="h-5 w-5 mr-2 animate-spin" />
                         🤖 AI Analyzing Chart... (60s)
                       </>
                     ) : (
                       <>
-                        <BarChart3 className="h-5 w-5 mr-2" />
+                        <Icons.BarChart3 className="h-5 w-5 mr-2" />
                         🚀 Start Professional Analysis
                       </>
                     )}
@@ -567,22 +569,22 @@ Troubleshooting steps:
                   {isAnalyzing && (
                     <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                       <div className="flex items-center space-x-3 mb-3">
-                        <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                        <Icons.Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
                         <span className="text-sm font-medium text-blue-800">
                           Gemini AI is analyzing your chart...
                         </span>
                       </div>
                       <div className="space-y-2 text-xs text-blue-700">
                         <div className="flex items-center">
-                          <CheckCircle className="h-3 w-3 text-green-500 mr-2" />
+                          <Icons.CheckCircle className="h-3 w-3 text-green-500 mr-2" />
                           Processing image with OCR
                         </div>
                         <div className="flex items-center">
-                          <Loader2 className="h-3 w-3 text-blue-500 mr-2 animate-spin" />
+                          <Icons.Loader2 className="h-3 w-3 text-blue-500 mr-2 animate-spin" />
                           Analyzing technical indicators
                         </div>
                         <div className="flex items-center text-gray-500">
-                          <Clock className="h-3 w-3 mr-2" />
+                          <Icons.Clock className="h-3 w-3 mr-2" />
                           Generating trading signals
                         </div>
                       </div>
@@ -595,7 +597,7 @@ Troubleshooting steps:
               {/* Error Display */}
               {error && (
                 <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
-                  <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                  <Icons.AlertCircle className="h-5 w-5 text-red-500 mr-2" />
                   <p className="text-red-700">{error}</p>
                 </div>
               )}
@@ -607,7 +609,7 @@ Troubleshooting steps:
             <Card className="mb-8">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <TrendingUp className="h-5 w-5 mr-2" />
+                  <Icons.TrendingUp className="h-5 w-5 mr-2" />
                   Analysis Results
                 </CardTitle>
                 <CardDescription>
@@ -620,7 +622,7 @@ Troubleshooting steps:
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-blue-700 font-medium">Processing Time</span>
-                      <Clock className="h-4 w-4 text-blue-500" />
+                      <Icons.Clock className="h-4 w-4 text-blue-500" />
                     </div>
                     <div className="text-xl font-bold text-blue-800">{Math.round(analysisResult.processingTime / 1000)}s</div>
                     <div className="text-xs text-blue-600 mt-1">
@@ -631,7 +633,7 @@ Troubleshooting steps:
                   <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-green-700 font-medium">Signal Quality</span>
-                      <Target className="h-4 w-4 text-green-500" />
+                      <Icons.Target className="h-4 w-4 text-green-500" />
                     </div>
                     <div className={`text-xl font-bold ${getConfidenceColor(analysisResult.confidence)}`}>
                       {analysisResult.confidence}%
@@ -645,7 +647,7 @@ Troubleshooting steps:
                   <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-purple-700 font-medium">Detected Asset</span>
-                      <BarChart3 className="h-4 w-4 text-purple-500" />
+                      <Icons.BarChart3 className="h-4 w-4 text-purple-500" />
                     </div>
                     <div className="text-xl font-bold text-purple-800">
                       {analysisResult.detectedAsset || 'Auto-detected'}
@@ -658,7 +660,7 @@ Troubleshooting steps:
                   <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-orange-700 font-medium">Analysis Status</span>
-                      <CheckCircle className="h-4 w-4 text-orange-500" />
+                      <Icons.CheckCircle className="h-4 w-4 text-orange-500" />
                     </div>
                     <div className="text-xl font-bold text-orange-800">
                       {analysisResult.success ? 'SUCCESS' : 'FAILED'}
@@ -752,7 +754,7 @@ Troubleshooting steps:
                 {analysisResult.analysis.technicalIndicators && (
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold mb-3 flex items-center">
-                      <Activity className="h-5 w-5 mr-2" />
+                      <Icons.Activity className="h-5 w-5 mr-2" />
                       Technical Indicators
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -778,7 +780,7 @@ Troubleshooting steps:
                 <div className="mb-8">
                   <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-t-xl p-6 text-white">
                     <h3 className="text-2xl font-bold mb-2 flex items-center">
-                      <Target className="h-8 w-8 mr-3" />
+                      <Icons.Target className="h-8 w-8 mr-3" />
                       🔮 NEXT 3 CANDLES PREDICTIONS
                     </h3>
                     <p className="text-purple-100">AI-powered directional analysis for immediate trading decisions</p>
@@ -801,9 +803,9 @@ Troubleshooting steps:
                               prediction.direction === 'UP' ? 'bg-green-500' : 'bg-red-500'
                             }`}>
                               {prediction.direction === 'UP' ? (
-                                <ArrowUp className="h-10 w-10 text-white" />
+                                <Icons.ArrowUp className="h-10 w-10 text-white" />
                               ) : (
-                                <ArrowDown className="h-10 w-10 text-white" />
+                                <Icons.ArrowDown className="h-10 w-10 text-white" />
                               )}
                             </div>
                             <div className="text-3xl font-black text-gray-800 mb-1">
@@ -868,7 +870,7 @@ Troubleshooting steps:
                     {/* Overall Prediction Summary */}
                     <div className="mt-8 p-6 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border-2 border-blue-200">
                       <h4 className="text-lg font-bold text-gray-800 mb-3 flex items-center">
-                        <BarChart3 className="h-5 w-5 mr-2 text-blue-600" />
+                        <Icons.BarChart3 className="h-5 w-5 mr-2 text-blue-600" />
                         PREDICTION SUMMARY
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
@@ -899,7 +901,7 @@ Troubleshooting steps:
                 <div className="mb-8">
                   <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-t-xl p-6 text-white">
                     <h3 className="text-2xl font-bold mb-2 flex items-center">
-                      <Activity className="h-8 w-8 mr-3" />
+                      <Icons.Activity className="h-8 w-8 mr-3" />
                       🎯 PROFESSIONAL TRADING SIGNAL
                     </h3>
                     <p className="text-blue-100">AI-generated signal for immediate trading action</p>
@@ -1004,15 +1006,15 @@ Troubleshooting steps:
                     <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-4 border border-green-200">
                       <div className="flex items-center justify-center space-x-8 text-sm">
                         <span className="flex items-center text-green-600 font-semibold">
-                          <CheckCircle className="h-5 w-5 mr-2" />
+                          <Icons.CheckCircle className="h-5 w-5 mr-2" />
                           AI VERIFIED
                         </span>
                         <span className="flex items-center text-blue-600 font-semibold">
-                          <Target className="h-5 w-5 mr-2" />
+                          <Icons.Target className="h-5 w-5 mr-2" />
                           MULTI-INDICATOR
                         </span>
                         <span className="flex items-center text-purple-600 font-semibold">
-                          <BarChart3 className="h-5 w-5 mr-2" />
+                          <Icons.BarChart3 className="h-5 w-5 mr-2" />
                           PROFESSIONAL GRADE
                         </span>
                         <span className="text-gray-500 font-medium">
@@ -1028,7 +1030,7 @@ Troubleshooting steps:
                   <div className="mb-8">
                     <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-t-xl p-6 text-white">
                       <h3 className="text-2xl font-bold mb-2 flex items-center">
-                        <Gauge className="h-8 w-8 mr-3" />
+                        <Icons.Gauge className="h-8 w-8 mr-3" />
                         🎯 SIGNAL QUALITY SCORE
                       </h3>
                       <p className="text-indigo-100">Comprehensive analysis quality assessment</p>
@@ -1181,7 +1183,7 @@ Generated: ${new Date().toLocaleString()}
                                 variant="outline"
                                 className="border-indigo-300 text-indigo-700 hover:bg-indigo-50"
                               >
-                                <Copy className="h-4 w-4 mr-2" />
+                                <Icons.Copy className="h-4 w-4 mr-2" />
                                 Copy Quality Report
                               </Button>
                             </div>
@@ -1197,7 +1199,7 @@ Generated: ${new Date().toLocaleString()}
                   <Card className="border-gray-200">
                     <CardHeader className="pb-3">
                       <CardTitle className="text-lg flex items-center">
-                        <Info className="h-5 w-5 mr-2 text-blue-600" />
+                        <Icons.Info className="h-5 w-5 mr-2 text-blue-600" />
                         Analysis Metadata
                       </CardTitle>
                     </CardHeader>
@@ -1240,7 +1242,7 @@ Generated: ${new Date().toLocaleString()}
                     size="lg"
                     className="w-full sm:w-auto"
                   >
-                    <Upload className="h-4 w-4 mr-2" />
+                    <Icons.Upload className="h-4 w-4 mr-2" />
                     Analyze Another Chart
                   </Button>
 
@@ -1250,7 +1252,7 @@ Generated: ${new Date().toLocaleString()}
                     size="lg"
                     className="w-full sm:w-auto"
                   >
-                    <FileImage className="h-4 w-4 mr-2" />
+                    <Icons.FileImage className="h-4 w-4 mr-2" />
                     Save Analysis Report
                   </Button>
 
@@ -1291,7 +1293,7 @@ Processing Time: ${analysisResult.processingTime ? `${(analysisResult.processing
                     size="lg"
                     className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
                   >
-                    <Target className="h-4 w-4 mr-2" />
+                    <Icons.Target className="h-4 w-4 mr-2" />
                     Copy Trading Signal
                   </Button>
                 </div>
@@ -1303,7 +1305,7 @@ Processing Time: ${analysisResult.processingTime ? `${(analysisResult.processing
           <Card className="mb-8 border-gray-200">
             <CardHeader>
               <CardTitle className="text-lg flex items-center">
-                <Settings className="h-5 w-5 mr-2 text-gray-600" />
+                <Icons.Settings className="h-5 w-5 mr-2 text-gray-600" />
                 🔧 Debug & Troubleshooting
               </CardTitle>
               <CardDescription>
@@ -1342,9 +1344,9 @@ Processing Time: ${analysisResult.processingTime ? `${(analysisResult.processing
                   className="text-xs"
                 >
                   {isCheckingHealth ? (
-                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                    <Icons.Loader2 className="h-3 w-3 mr-1 animate-spin" />
                   ) : (
-                    <RefreshCw className="h-3 w-3 mr-1" />
+                    <Icons.RefreshCw className="h-3 w-3 mr-1" />
                   )}
                   Test Health
                 </Button>
@@ -1374,7 +1376,7 @@ Processing Time: ${analysisResult.processingTime ? `${(analysisResult.processing
                   size="sm"
                   className="text-xs"
                 >
-                  <Download className="h-3 w-3 mr-1" />
+                  <Icons.Download className="h-3 w-3 mr-1" />
                   Export Debug Info
                 </Button>
                 
@@ -1392,7 +1394,7 @@ Processing Time: ${analysisResult.processingTime ? `${(analysisResult.processing
                   size="sm"
                   className="text-xs"
                 >
-                  <Info className="h-3 w-3 mr-1" />
+                  <Icons.Info className="h-3 w-3 mr-1" />
                   Console Debug
                 </Button>
               </div>
@@ -1419,7 +1421,7 @@ Processing Time: ${analysisResult.processingTime ? `${(analysisResult.processing
           <Card className="mb-8 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50">
             <CardContent className="p-6">
               <div className="flex items-start space-x-3">
-                <AlertCircle className="h-6 w-6 text-orange-500 mt-1 flex-shrink-0" />
+                <Icons.AlertCircle className="h-6 w-6 text-orange-500 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="text-lg font-bold text-orange-800 mb-2">⚠️ Professional Trading Disclaimer</h3>
                   <div className="text-sm text-orange-700 space-y-2">
@@ -1450,22 +1452,22 @@ Processing Time: ${analysisResult.processingTime ? `${(analysisResult.processing
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col md:flex-row justify-between items-center">
               <div className="flex items-center space-x-2 mb-4 md:mb-0">
-                <BarChart3 className="h-5 w-5 text-blue-600" />
+                <Icons.BarChart3 className="h-5 w-5 text-blue-600" />
                 <span className="font-semibold text-gray-900">TRADAI</span>
                 <Badge variant="outline" className="text-xs">Powered by Gemini AI</Badge>
               </div>
 
               <div className="flex items-center space-x-6 text-sm text-gray-600">
                 <span className="flex items-center">
-                  <CheckCircle className="h-4 w-4 text-green-500 mr-1" />
+                  <Icons.CheckCircle className="h-4 w-4 text-green-500 mr-1" />
                   Professional Grade Analysis
                 </span>
                 <span className="flex items-center">
-                  <Target className="h-4 w-4 text-blue-500 mr-1" />
+                  <Icons.Target className="h-4 w-4 text-blue-500 mr-1" />
                   Multi-Timeframe Signals
                 </span>
                 <span className="flex items-center">
-                  <Activity className="h-4 w-4 text-purple-500 mr-1" />
+                  <Icons.Activity className="h-4 w-4 text-purple-500 mr-1" />
                   Real-Time Processing
                 </span>
               </div>
