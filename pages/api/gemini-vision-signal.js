@@ -3,10 +3,12 @@
  * Handles chart image upload and analysis using Gemini AI
  */
 
-import { IncomingForm } from 'formidable';
-import fs from 'fs';
-import path from 'path';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+const formidable = require('formidable');
+const fs = require('fs');
+const path = require('path');
+
+// Import Direct Gemini Vision Service (no OCR preprocessing)
+const DirectGeminiVisionService = require('../../services/DirectGeminiVisionService');
 
 // Disable default body parser to handle file uploads
 export const config = {
@@ -15,314 +17,263 @@ export const config = {
   },
 };
 
-class GeminiVisionAnalyzer {
-  constructor() {
-    this.apiKey = process.env.GOOGLE_VISION_API_KEY;
-    this.genAI = null;
-    this.model = null;
-    this.initialized = false;
-  }
-
-  async initialize() {
-    if (this.initialized) return;
-
-    if (!this.apiKey) {
-      throw new Error('GOOGLE_VISION_API_KEY not found in environment variables');
-    }
-
-    this.genAI = new GoogleGenerativeAI(this.apiKey);
-    this.model = this.genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 4000
-      }
-    });
-
-    this.initialized = true;
-  }
-
-  createAnalysisPrompt(detectedAsset = 'Unknown', detectedTimeframe = 'Unknown') {
-    return `You are a professional trading analyst with expertise in technical analysis and chart pattern recognition. Analyze this trading chart.
-
-CRITICAL REQUIREMENTS:
-- Provide REAL analysis of the actual chart content visible in the image
-- NO placeholder data, NO synthetic responses, NO mock analysis
-- Base all analysis on what you can actually see in the chart
-- Provide specific, actionable trading insights
-
-COMPREHENSIVE ANALYSIS REQUIRED:
-
-1. **CHART PATTERN ANALYSIS:**
-   - Identify current trend direction (uptrend/downtrend/sideways)
-   - Locate support and resistance levels with specific price points
-   - Identify chart patterns (triangles, flags, head & shoulders, etc.)
-   - Analyze price action and momentum
-
-2. **TECHNICAL INDICATORS:**
-   - Moving averages (EMA/SMA) - identify if price is above/below key levels
-   - Stochastic oscillator readings (overbought/oversold/neutral)
-   - RSI levels if visible on the chart
-   - Volume analysis (high/normal/low relative volume)
-   - Any other visible indicators
-
-3. **CANDLESTICK PATTERN ANALYSIS:**
-   - Recent candlestick formations and their significance
-   - Reversal patterns (doji, hammer, engulfing, etc.)
-   - Continuation patterns
-   - Current candle formation analysis
-
-4. **DIRECTION PREDICTIONS (CRITICAL):**
-   - Predict direction for NEXT 3 CANDLES with confidence percentages
-   - Each prediction must have 70-95% confidence based on technical analysis
-   - Provide specific reasoning for each prediction
-   - Consider all technical factors in your analysis
-
-5. **TRADING SIGNAL:**
-   - Clear BUY/SELL/HOLD recommendation
-   - Confidence percentage (70-95%)
-   - Entry point suggestion with specific price level
-   - Risk assessment and reasoning
-
-6. **ASSET AND TIMEFRAME DETECTION:**
-   - Try to identify the currency pair or asset from the chart
-   - Determine the timeframe (1m, 3m, 5m, 15m, 1h, etc.) from visible indicators
-
-RESPONSE FORMAT (JSON):
-{
-  "analysis": {
-    "trend": "uptrend/downtrend/sideways",
-    "currentPrice": "visible price level",
-    "supportLevels": ["level1", "level2", "level3"],
-    "resistanceLevels": ["level1", "level2", "level3"],
-    "chartPatterns": "detailed description of patterns found",
-    "technicalIndicators": {
-      "ema": "above/below price analysis with specific levels",
-      "sma": "above/below price analysis with specific levels",
-      "stochastic": "overbought/oversold/neutral with values if visible",
-      "rsi": "value and interpretation if visible",
-      "volume": "high/normal/low analysis",
-      "momentum": "bullish/bearish/neutral"
-    },
-    "candlestickPatterns": "specific patterns identified in recent candles",
-    "predictions": [
-      {
-        "candle": 1,
-        "direction": "UP/DOWN",
-        "confidence": 85,
-        "reasoning": "specific technical reasons for this prediction"
-      },
-      {
-        "candle": 2,
-        "direction": "UP/DOWN",
-        "confidence": 80,
-        "reasoning": "specific technical reasons for this prediction"
-      },
-      {
-        "candle": 3,
-        "direction": "UP/DOWN",
-        "confidence": 75,
-        "reasoning": "specific technical reasons for this prediction"
-      }
-    ],
-    "tradingSignal": {
-      "action": "BUY/SELL/HOLD",
-      "confidence": 85,
-      "entryPoint": "specific price level for entry",
-      "reasoning": "comprehensive analysis summary explaining the signal",
-      "riskLevel": "LOW/MEDIUM/HIGH"
-    },
-    "overallConfidence": 85,
-    "marketCondition": "trending/ranging/volatile",
-    "timeframeBias": "bullish/bearish/neutral"
-  },
-  "detectedAsset": "currency pair or asset name if identifiable",
-  "detectedTimeframe": "timeframe if identifiable from chart"
-}
-
-IMPORTANT: Analyze the ACTUAL chart content. Look at real price movements, actual candlestick formations, visible indicators, and genuine market structure. This analysis will be used for real trading decisions.`;
-  }
-  async analyzeChart(imagePath) {
-    await this.initialize();
-
-    try {
-      // Read and encode image
-      const imageBuffer = fs.readFileSync(imagePath);
-      const imageData = {
-        inlineData: {
-          data: imageBuffer.toString('base64'),
-          mimeType: 'image/png'
-        }
-      };
-
-      // Create prompt
-      const prompt = this.createAnalysisPrompt();
-
-      // Perform analysis with enhanced failover
-      const startTime = Date.now();
-
-      let result;
-      let attempts = 0;
-      const maxAttempts = 3;
-
-      while (attempts < maxAttempts) {
-        try {
-          result = await this.model.generateContent([prompt, imageData]);
-          break; // Success, exit retry loop
-        } catch (error) {
-          attempts++;
-
-          if (error.message.includes('503') && attempts < maxAttempts) {
-            // API overload, wait and retry with exponential backoff
-            const delay = Math.pow(2, attempts) * 1000; // 2s, 4s, 8s
-            console.log(`503 error detected, retrying in ${delay}ms (attempt ${attempts}/${maxAttempts})`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-            continue;
-          }
-
-          throw error; // Re-throw if not retryable or max attempts reached
-        }
-      }
-
-      const response = await result.response;
-      const analysisText = response.text();
-      const processingTime = Date.now() - startTime;
-
-      // Parse JSON response
-      let analysis = null;
-      try {
-        let jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-
-        if (!jsonMatch) {
-          const codeBlockMatch = analysisText.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
-          if (codeBlockMatch) {
-            jsonMatch = [codeBlockMatch[1]];
-          }
-        }
-
-        if (jsonMatch) {
-          analysis = JSON.parse(jsonMatch[0]);
-        } else {
-          throw new Error('No JSON found in response');
-        }
-
-      } catch (parseError) {
-        console.error('JSON parsing failed:', parseError);
-        // Return structured error response
-        return {
-          success: false,
-          error: 'Failed to parse analysis response',
-          rawResponse: analysisText,
-          processingTime: processingTime
-        };
-      }
-
-      // Validate analysis structure
-      if (!analysis || !analysis.analysis) {
-        return {
-          success: false,
-          error: 'Invalid analysis structure',
-          rawResponse: analysisText,
-          processingTime: processingTime
-        };
-      }
-
-      // Calculate overall confidence
-      const overallConfidence = analysis.analysis.overallConfidence ||
-                               analysis.analysis.tradingSignal?.confidence || 75;
-
-      return {
-        success: true,
-        confidence: overallConfidence,
-        processingTime: processingTime,
-        analysis: analysis.analysis,
-        detectedAsset: analysis.detectedAsset,
-        detectedTimeframe: analysis.detectedTimeframe,
-        rawResponse: analysisText
-      };
-
-    } catch (error) {
-      console.error('Chart analysis failed:', error);
-
-      return {
-        success: false,
-        error: error.message.includes('503')
-          ? 'Gemini API is temporarily overloaded. Please try again in a moment.'
-          : `Analysis failed: ${error.message}`,
-        processingTime: Date.now() - Date.now()
-      };
-    }
-  }
-}
-
-
-
 export default async function handler(req, res) {
-  // Set CORS headers for all requests
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  try {
+    console.log('=== GEMINI VISION SIGNAL API CALLED ===');
+    console.log('Method:', req.method);
+    console.log('Headers:', req.headers);
 
-  // Handle preflight OPTIONS request
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    // Set CORS headers for all requests
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Handle preflight OPTIONS request
+    if (req.method === 'OPTIONS') {
+      console.log('Handling OPTIONS request');
+      return res.status(200).end();
+    }
+
+    if (req.method !== 'POST') {
+      console.log('Invalid method:', req.method);
+      return res.status(405).json({
+        success: false,
+        error: 'Method not allowed. Use POST to upload trading chart images.'
+      });
+    }
+  } catch (initialError) {
+    console.error('❌ Initial handler error:', initialError);
+    return res.status(500).json({
+      success: false,
+      error: 'API initialization failed',
+      details: initialError.message
+    });
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  const startTime = Date.now();
+  let tempFilePath = null;
 
   try {
-    // Parse form data
-    const form = new IncomingForm({
+    console.log('🚀 Processing trading chart analysis request...');
+
+    // Check if API key is available
+    const apiKey = process.env.GOOGLE_VISION_API_KEY;
+    console.log('API Key configured:', !!apiKey);
+    console.log('Environment variables available:', Object.keys(process.env).filter(key => key.includes('API') || key.includes('GEMINI') || key.includes('GOOGLE')));
+
+    if (!apiKey) {
+      console.error('❌ GOOGLE_VISION_API_KEY not found in environment variables');
+      console.error('Available env vars:', Object.keys(process.env).slice(0, 10));
+      return res.status(500).json({
+        success: false,
+        error: 'Gemini API configuration error. Please ensure GOOGLE_VISION_API_KEY is set.',
+        code: 'MISSING_API_KEY',
+        debug: {
+          envVarsCount: Object.keys(process.env).length,
+          hasNodeEnv: !!process.env.NODE_ENV,
+          nodeEnv: process.env.NODE_ENV
+        }
+      });
+    }
+
+    // Check content type
+    const contentType = req.headers['content-type'] || '';
+    console.log('📋 Content-Type:', contentType);
+
+    if (!contentType.includes('multipart/form-data')) {
+      console.log('❌ Invalid content type. Expected multipart/form-data for file upload.');
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid request. Please upload a trading chart image using multipart/form-data.',
+        code: 'INVALID_CONTENT_TYPE',
+        expectedContentType: 'multipart/form-data',
+        receivedContentType: contentType
+      });
+    }
+
+    // Parse the uploaded file using formidable
+    console.log('📁 Parsing uploaded file...');
+    const form = formidable({
       uploadDir: '/tmp',
       keepExtensions: true,
-      maxFileSize: 5 * 1024 * 1024, // 5MB limit
+      maxFileSize: 10 * 1024 * 1024, // 10MB limit
+      filter: function ({ name, originalFilename, mimetype }) {
+        // Only allow image files
+        return mimetype && mimetype.includes('image');
+      }
     });
 
     const [fields, files] = await new Promise((resolve, reject) => {
       form.parse(req, (err, fields, files) => {
-        if (err) reject(err);
-        else resolve([fields, files]);
+        if (err) {
+          console.error('❌ File parsing error:', err);
+          reject(err);
+        } else {
+          resolve([fields, files]);
+        }
       });
     });
 
-    // Validate file upload
+    console.log('📋 Parsed fields:', Object.keys(fields));
+    console.log('📁 Parsed files:', Object.keys(files));
+
+    // Get the uploaded image file
     const imageFile = files.image;
     if (!imageFile) {
-      return res.status(400).json({ error: 'No image file provided' });
+      return res.status(400).json({
+        success: false,
+        error: 'No image file uploaded. Please upload a trading chart screenshot.',
+        code: 'NO_IMAGE_FILE'
+      });
     }
 
-    const filePath = Array.isArray(imageFile) ? imageFile[0].filepath : imageFile.filepath;
+    // Handle both single file and array of files
+    const file = Array.isArray(imageFile) ? imageFile[0] : imageFile;
+    tempFilePath = file.filepath;
 
-    // Validate file type
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-    const mimeType = Array.isArray(imageFile) ? imageFile[0].mimetype : imageFile.mimetype;
+    console.log('📊 Processing image file:', {
+      originalName: file.originalFilename,
+      size: file.size,
+      type: file.mimetype,
+      path: tempFilePath
+    });
 
-    if (!allowedTypes.includes(mimeType)) {
-      return res.status(400).json({ error: 'Invalid file type. Please upload PNG, JPG, or JPEG files only.' });
+    // Validate file size and type
+    if (file.size > 10 * 1024 * 1024) {
+      return res.status(400).json({
+        success: false,
+        error: 'File too large. Maximum size is 10MB.',
+        code: 'FILE_TOO_LARGE'
+      });
     }
 
-    // Analyze chart
-    const analyzer = new GeminiVisionAnalyzer();
-    const result = await analyzer.analyzeChart(filePath);
-
-    // Clean up uploaded file
-    try {
-      fs.unlinkSync(filePath);
-    } catch (cleanupError) {
-      console.warn('Failed to clean up uploaded file:', cleanupError);
+    if (!file.mimetype || !file.mimetype.startsWith('image/')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid file type. Please upload an image file (PNG, JPG, etc.).',
+        code: 'INVALID_FILE_TYPE'
+      });
     }
 
-    // Return result
-    res.status(200).json(result);
+    // Verify file exists and is readable
+    if (!fs.existsSync(tempFilePath)) {
+      throw new Error('Uploaded file not found on server');
+    }
+
+    console.log('🤖 Initializing Direct Gemini Vision Service...');
+
+    // Initialize Direct Gemini Vision Service (no OCR preprocessing)
+    const geminiVisionService = new DirectGeminiVisionService({
+      minConfidence: 70,
+      maxConfidence: 95,
+      timeout: 60000
+    });
+
+    // Initialize the service
+    const initResult = await geminiVisionService.initialize();
+    if (!initResult.success) {
+      throw new Error(`Direct Gemini Vision service initialization failed: ${initResult.error}`);
+    }
+
+    console.log('📈 Analyzing trading chart with Direct Gemini Vision...');
+
+    // Extract analysis options from fields or use defaults
+    const analysisOptions = {
+      asset: fields.asset?.[0] || fields.asset || 'Auto-detect',
+      timeframe: fields.timeframe?.[0] || fields.timeframe || 'Auto-detect',
+      platform: fields.platform?.[0] || fields.platform || 'Trading Platform'
+    };
+
+    console.log('⚙️ Analysis options:', analysisOptions);
+
+    // Read the image file into a buffer for direct analysis
+    const imageBuffer = fs.readFileSync(tempFilePath);
+    console.log('📊 Image buffer size:', imageBuffer.length, 'bytes');
+
+    // Analyze the chart image directly using Gemini Vision (no OCR preprocessing)
+    const analysisResult = await geminiVisionService.analyzeChartImage(imageBuffer, analysisOptions);
+
+    const processingTime = Date.now() - startTime;
+    console.log(`⏱️ Total processing time: ${processingTime}ms`);
+
+    if (!analysisResult.success) {
+      throw new Error(`Direct Gemini Vision analysis failed: ${analysisResult.error}`);
+    }
+
+    // Get service statistics
+    const stats = geminiVisionService.getStats();
+
+    console.log('✅ Analysis completed successfully');
+    console.log('📊 Analysis confidence:', analysisResult.confidence);
+
+    // Return comprehensive analysis result
+    const response = {
+      success: true,
+      analysis: analysisResult.analysis,
+      confidence: analysisResult.confidence,
+      processingTime: processingTime,
+      metadata: {
+        ...analysisResult.metadata,
+        originalFilename: file.originalFilename,
+        fileSize: file.size,
+        analysisOptions: analysisOptions,
+        serviceStats: stats
+      },
+      timestamp: new Date().toISOString(),
+      version: '2.0.0'
+    };
+
+    res.status(200).json(response);
 
   } catch (error) {
-    console.error('API handler error:', error);
-    res.status(500).json({
+    const processingTime = Date.now() - startTime;
+    console.error('❌ API HANDLER ERROR ===');
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+
+    // Determine error type and appropriate status code
+    let statusCode = 500;
+    let errorCode = 'INTERNAL_ERROR';
+
+    if (error.message.includes('API key') || error.message.includes('unauthorized')) {
+      statusCode = 401;
+      errorCode = 'API_KEY_ERROR';
+    } else if (error.message.includes('quota') || error.message.includes('limit')) {
+      statusCode = 429;
+      errorCode = 'QUOTA_EXCEEDED';
+    } else if (error.message.includes('file') || error.message.includes('upload')) {
+      statusCode = 400;
+      errorCode = 'FILE_ERROR';
+    }
+
+    res.status(statusCode).json({
       success: false,
-      error: 'Internal server error. Please try again.'
+      error: 'Direct Gemini Vision trading chart analysis failed. Please try again.',
+      details: error.message,
+      code: errorCode,
+      processingTime: processingTime,
+      timestamp: new Date().toISOString(),
+      analysisMethod: 'Direct Gemini Vision (No OCR)',
+      troubleshooting: {
+        steps: [
+          'Ensure you uploaded a valid trading chart image (PNG, JPG)',
+          'Check that the image is clear and contains visible chart data',
+          'Verify the file size is under 10MB',
+          'Ensure the chart shows candlesticks, price levels, and indicators',
+          'Try again in a few moments if this was a temporary issue'
+        ],
+        support: 'If the problem persists, please contact support with the error code and timestamp'
+      }
     });
+  } finally {
+    // Clean up temporary file
+    if (tempFilePath && fs.existsSync(tempFilePath)) {
+      try {
+        fs.unlinkSync(tempFilePath);
+        console.log('🧹 Cleaned up temporary file:', tempFilePath);
+      } catch (cleanupError) {
+        console.warn('⚠️ Failed to clean up temporary file:', cleanupError.message);
+      }
+    }
   }
 }
-
