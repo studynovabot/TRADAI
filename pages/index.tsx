@@ -624,9 +624,9 @@ Troubleshooting steps:
                       <span className="text-sm text-blue-700 font-medium">Processing Time</span>
                       <Icons.Clock className="h-4 w-4 text-blue-500" />
                     </div>
-                    <div className="text-xl font-bold text-blue-800">{Math.round(analysisResult.processingTime / 1000)}s</div>
+                    <div className="text-xl font-bold text-blue-800">{Math.round((analysisResult.processingTime || 0) / 1000)}s</div>
                     <div className="text-xs text-blue-600 mt-1">
-                      {analysisResult.processingTime < 60000 ? '⚡ Fast' : '🔄 Processing'}
+                      {(analysisResult.processingTime || 0) < 60000 ? '⚡ Fast' : '🔄 Processing'}
                     </div>
                   </div>
 
@@ -635,12 +635,12 @@ Troubleshooting steps:
                       <span className="text-sm text-green-700 font-medium">Signal Quality</span>
                       <Icons.Target className="h-4 w-4 text-green-500" />
                     </div>
-                    <div className={`text-xl font-bold ${getConfidenceColor(analysisResult.confidence)}`}>
-                      {analysisResult.confidence}%
+                    <div className={`text-xl font-bold ${getConfidenceColor(analysisResult.analysis.overallConfidence)}`}>
+                      {analysisResult.analysis.overallConfidence}%
                     </div>
                     <div className="text-xs text-green-600 mt-1">
-                      {analysisResult.confidence >= 80 ? '🎯 High Quality' :
-                       analysisResult.confidence >= 70 ? '✅ Good Quality' : '⚠️ Low Quality'}
+                      {analysisResult.analysis.overallConfidence >= 80 ? '🎯 High Quality' :
+                       analysisResult.analysis.overallConfidence >= 70 ? '✅ Good Quality' : '⚠️ Low Quality'}
                     </div>
                   </div>
 
@@ -650,10 +650,10 @@ Troubleshooting steps:
                       <Icons.BarChart3 className="h-4 w-4 text-purple-500" />
                     </div>
                     <div className="text-xl font-bold text-purple-800">
-                      {analysisResult.detectedAsset || 'Auto-detected'}
+                      {analysisResult.analysis.detectedAsset || 'Auto-detected'}
                     </div>
                     <div className="text-xs text-purple-600 mt-1">
-                      {analysisResult.detectedTimeframe || 'Multi-timeframe'}
+                      {analysisResult.analysis.detectedTimeframe || 'Multi-timeframe'}
                     </div>
                   </div>
 
@@ -676,20 +676,20 @@ Troubleshooting steps:
                   <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl p-8 text-white text-center shadow-2xl">
                     <h3 className="text-2xl font-bold mb-4">🎯 SIGNAL QUALITY SCORE</h3>
                     <div className="text-8xl font-black mb-4">
-                      {Math.round((analysisResult.confidence + (analysisResult.analysis.tradingSignal?.confidence || 70) +
+                      {Math.round((analysisResult.analysis.overallConfidence + (analysisResult.analysis.tradingSignal?.confidence || 70) +
                         (analysisResult.analysis.predictions?.reduce((sum, p) => sum + p.confidence, 0) || 210) / 3) / 3)}%
                     </div>
                     <div className="text-2xl font-bold mb-6">
-                      {Math.round((analysisResult.confidence + (analysisResult.analysis.tradingSignal?.confidence || 70) +
+                      {Math.round((analysisResult.analysis.overallConfidence + (analysisResult.analysis.tradingSignal?.confidence || 70) +
                         (analysisResult.analysis.predictions?.reduce((sum, p) => sum + p.confidence, 0) || 210) / 3) / 3) >= 80
                         ? '🎯 EXCELLENT' :
-                        Math.round((analysisResult.confidence + (analysisResult.analysis.tradingSignal?.confidence || 70) +
+                        Math.round((analysisResult.analysis.overallConfidence + (analysisResult.analysis.tradingSignal?.confidence || 70) +
                         (analysisResult.analysis.predictions?.reduce((sum, p) => sum + p.confidence, 0) || 210) / 3) / 3) >= 70
                         ? '✅ GOOD' : '⚠️ NEEDS IMPROVEMENT'}
                     </div>
                     <div className="max-w-md mx-auto">
                       <Progress
-                        value={Math.round((analysisResult.confidence + (analysisResult.analysis.tradingSignal?.confidence || 70) +
+                        value={Math.round((analysisResult.analysis.overallConfidence + (analysisResult.analysis.tradingSignal?.confidence || 70) +
                           (analysisResult.analysis.predictions?.reduce((sum, p) => sum + p.confidence, 0) || 210) / 3) / 3)}
                         className="h-4"
                       />
@@ -1171,7 +1171,7 @@ Troubleshooting steps:
 TRADAI Quality Report
 ====================
 Overall Score: ${qualityScore}% (${scoreLabel})
-Processing Time: ${(analysisResult.processingTime / 1000).toFixed(1)}s
+Processing Time: ${((analysisResult.processingTime || 0) / 1000).toFixed(1)}s
 Overall Confidence: ${analysisResult.analysis.overallConfidence}%
 Signal Confidence: ${analysisResult.analysis.tradingSignal.confidence}%
 Predictions: ${analysisResult.analysis.predictions?.length || 0}/3
