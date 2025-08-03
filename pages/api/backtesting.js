@@ -161,16 +161,16 @@ async function handlePostRequest(req, res, service, action) {
 
         case 'record-result':
             // Record actual market result
-            const { predictionId, actualData } = req.body;
+            const { predictionId: resultPredictionId, actualData } = req.body;
             
-            if (!predictionId || !actualData) {
+            if (!resultPredictionId || !actualData) {
                 return res.status(400).json({
                     success: false,
                     error: 'Prediction ID and actual data are required'
                 });
             }
 
-            const success = service.recordActualResult(predictionId, actualData);
+            const success = service.recordActualResult(resultPredictionId, actualData);
             
             if (success) {
                 return res.status(200).json({
