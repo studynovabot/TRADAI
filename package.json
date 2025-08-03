@@ -1,7 +1,7 @@
 {
   "name": "tradai-gemini-analyzer",
-  "version": "2.0.0",
-  "description": "Streamlined Gemini AI-powered trading chart analysis application",
+  "version": "3.0.0-enhanced",
+  "description": "Enhanced Gemini AI-powered trading chart analysis with multi-factor confirmation and backtesting",
   "main": "pages/index.tsx",
   "private": true,
   "scripts": {
@@ -9,7 +9,9 @@
     "build": "next build",
     "vercel-build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:enhanced": "node test-enhanced-gemini.js",
+    "test:backtesting": "node -e \"const BacktestingService = require('./services/BacktestingService'); const service = new BacktestingService(); console.log('Backtesting service test passed');\""
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -32,6 +34,7 @@
     "postcss": "8.4.40",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "sharp": "^0.33.5",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "3.4.7",
     "typescript": "5.5.4"

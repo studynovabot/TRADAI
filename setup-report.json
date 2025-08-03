@@ -1,0 +1,20 @@
+{
+  "timestamp": "2025-08-03T16:57:44.782Z",
+  "results": {
+    "checkNodeVersion": {
+      "success": true
+    },
+    "installDependencies": {
+      "success": true
+    },
+    "validateEnvironment": {
+      "success": false,
+      "error": "Required environment variable GOOGLE_VISION_API_KEY is not set"
+    }
+  },
+  "summary": {
+    "totalSteps": 6,
+    "successCount": 2,
+    "successRate": "33.3%"
+  }
+}
