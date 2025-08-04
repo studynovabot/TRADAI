@@ -61,15 +61,15 @@ export default async function handler(req, res) {
   try {
     console.log('🚀 Processing ultimate trading chart analysis request...');
 
-    // Check if API key is available
-    const apiKey = process.env.GOOGLE_VISION_API_KEY;
-    console.log('API Key configured:', !!apiKey);
+    // Check if Gemini API key is available
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_VISION_API_KEY;
+    console.log('Gemini API Key configured:', !!apiKey);
 
     if (!apiKey) {
-      console.error('❌ GOOGLE_VISION_API_KEY not found in environment variables');
+      console.error('❌ GEMINI_API_KEY not found in environment variables');
       return res.status(500).json({
         success: false,
-        error: 'Ultimate Gemini API configuration error. Please ensure GOOGLE_VISION_API_KEY is set.',
+        error: 'Ultimate Gemini API configuration error. Please ensure GEMINI_API_KEY is set.',
         code: 'MISSING_API_KEY',
         service: 'Ultimate Gemini Vision'
       });

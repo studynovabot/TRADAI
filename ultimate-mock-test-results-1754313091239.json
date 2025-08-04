@@ -1,0 +1,72 @@
+{
+  "success": true,
+  "analysis": {
+    "asset": "USD/BRL",
+    "timeframe": "5m",
+    "signal": "BUY",
+    "signalConfidence": 93,
+    "overallConfidence": 68,
+    "marketCondition": "Trending (Up)",
+    "currentPrice": "5.12345",
+    "trend": "Uptrend",
+    "nextCandlePredictions": [
+      {
+        "candle": 1,
+        "direction": "UP",
+        "confidence": 87,
+        "reasoning": "Volume confirmation supports rally"
+      },
+      {
+        "candle": 2,
+        "direction": "UP",
+        "confidence": 67,
+        "reasoning": "Stochastic oversold bounce expected"
+      },
+      {
+        "candle": 3,
+        "direction": "UP",
+        "confidence": 82,
+        "reasoning": "Following bullish trend momentum"
+      }
+    ],
+    "technicalIndicators": {
+      "ema": "Above price, upward slope",
+      "sma": "Above price, rising trend",
+      "stochastic": "%K=25, %D=30, Oversold, Bullish crossover"
+    },
+    "supportLevels": [
+      "5.11200",
+      "5.10800"
+    ],
+    "resistanceLevels": [
+      "5.13500",
+      "5.14200"
+    ],
+    "processingTime": "1.2s"
+  },
+  "confidence": 68,
+  "processingTime": 1053,
+  "metadata": {
+    "model": "mock-gemini-1.5-flash",
+    "timestamp": "2025-08-04T13:11:30.610Z",
+    "imageSize": 29,
+    "originalImageSize": 29,
+    "analysisMethod": "Mock Ultimate Gemini Vision",
+    "version": "1.0.0-ultimate-mock"
+  },
+  "ultimateStats": {
+    "totalAnalyses": 1,
+    "buySignals": 1,
+    "sellSignals": 0,
+    "averageConfidence": 68,
+    "averageProcessingTime": 1009,
+    "patternDetections": 0,
+    "ocrExtractions": 0,
+    "keyRotations": 0,
+    "modelFallbacks": 0,
+    "buyPercentage": 100,
+    "sellPercentage": 0
+  },
+  "formattedReport": "TRADAI Analysis Report\n======================\nAsset: USD/BRL\nTimeframe: 5m\nSignal: BUY\nSignal Confidence: 93%\nOverall Confidence: 68%\nMarket Condition: Trending (Up)\n\nCurrent Price: 5.12345\nTrend: Uptrend\n\nNext 3 Candle Predictions:\nCandle 1: UP (87%) - Volume confirmation supports rally\nCandle 2: UP (67%) - Stochastic oversold bounce expected\nCandle 3: UP (82%) - Following bullish trend momentum\n\nTechnical Indicators:\nEMA: Above price, upward slope\nSMA: Above price, rising trend\nStochastic: %K=25, %D=30, Oversold, Bullish crossover\n\nSupport Levels: 5.11200, 5.10800\nResistance Levels: 5.13500, 5.14200\n\nGenerated: 04/08/2025, 18:41:30\nProcessing Time: 1.2s",
+  "testType": "mock"
+}

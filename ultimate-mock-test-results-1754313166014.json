@@ -1,0 +1,76 @@
+{
+  "success": true,
+  "analysis": {
+    "asset": "USD/BRL",
+    "timeframe": "5m",
+    "signal": "SELL",
+    "signalConfidence": 76,
+    "overallConfidence": 62,
+    "marketCondition": "Trending (Down)",
+    "currentPrice": "5.12345",
+    "trend": "Downtrend",
+    "nextCandlePredictions": [
+      {
+        "candle": 1,
+        "direction": "UP",
+        "confidence": 80,
+        "reasoning": "Volume confirmation supports rally"
+      },
+      {
+        "candle": 2,
+        "direction": "UP",
+        "confidence": 65,
+        "reasoning": "Volume confirmation supports rally"
+      },
+      {
+        "candle": 3,
+        "direction": "DOWN",
+        "confidence": 71,
+        "reasoning": "Profit-taking pressure anticipated"
+      }
+    ],
+    "technicalIndicators": {
+      "ema": "Below price, downward slope",
+      "sma": "Below price, falling trend",
+      "stochastic": "%K=85, %D=80, Overbought, Bearish crossover"
+    },
+    "supportLevels": [
+      "5.11200",
+      "5.10800"
+    ],
+    "resistanceLevels": [
+      "5.13500",
+      "5.14200"
+    ],
+    "patternAnalysis": "Bullish engulfing pattern detected at support level",
+    "volumeAnalysis": "Volume increasing on bullish candles, confirming upward momentum",
+    "riskAssessment": "Low risk entry above 5.11200 support, stop loss at 5.10500",
+    "confluenceFactors": "EMA support, oversold stochastic, bullish pattern, volume confirmation",
+    "processingTime": "1.2s"
+  },
+  "confidence": 62,
+  "processingTime": 1054,
+  "metadata": {
+    "model": "mock-gemini-1.5-flash",
+    "timestamp": "2025-08-04T13:12:45.824Z",
+    "imageSize": 29,
+    "originalImageSize": 29,
+    "analysisMethod": "Mock Ultimate Gemini Vision",
+    "version": "1.0.0-ultimate-mock"
+  },
+  "ultimateStats": {
+    "totalAnalyses": 1,
+    "buySignals": 0,
+    "sellSignals": 1,
+    "averageConfidence": 62,
+    "averageProcessingTime": 1026,
+    "patternDetections": 0,
+    "ocrExtractions": 0,
+    "keyRotations": 0,
+    "modelFallbacks": 0,
+    "buyPercentage": 0,
+    "sellPercentage": 100
+  },
+  "formattedReport": "TRADAI Analysis Report\n======================\nAsset: USD/BRL\nTimeframe: 5m\nSignal: SELL\nSignal Confidence: 76%\nOverall Confidence: 62%\nMarket Condition: Trending (Down)\n\nCurrent Price: 5.12345\nTrend: Downtrend\n\nNext 3 Candle Predictions:\nCandle 1: UP (80%) - Volume confirmation supports rally\nCandle 2: UP (65%) - Volume confirmation supports rally\nCandle 3: DOWN (71%) - Profit-taking pressure anticipated\n\nTechnical Indicators:\nEMA: Below price, downward slope\nSMA: Below price, falling trend\nStochastic: %K=85, %D=80, Overbought, Bearish crossover\n\nSupport Levels: 5.11200, 5.10800\nResistance Levels: 5.13500, 5.14200\n\nPattern Analysis: Bullish engulfing pattern detected at support level\nVolume Analysis: Volume increasing on bullish candles, confirming upward momentum\nRisk Assessment: Low risk entry above 5.11200 support, stop loss at 5.10500\nConfluence Factors: EMA support, oversold stochastic, bullish pattern, volume confirmation\n\nGenerated: 04/08/2025, 18:42:45\nProcessing Time: 1.2s",
+  "testType": "mock"
+}

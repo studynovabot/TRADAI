@@ -31,6 +31,12 @@
     },
     "pages/api/gemini-vision-signal.js": {
       "maxDuration": 300
+    },
+    "pages/api/enhanced-gemini-vision.js": {
+      "maxDuration": 300
+    },
+    "pages/api/ultimate-gemini-vision.js": {
+      "maxDuration": 300
     }
   },
   "regions": ["iad1"],
@@ -70,6 +76,14 @@
     {
       "src": "/api/gemini-vision-signal",
       "dest": "/api/gemini-vision-signal"
+    },
+    {
+      "src": "/api/enhanced-gemini-vision",
+      "dest": "/api/enhanced-gemini-vision"
+    },
+    {
+      "src": "/api/ultimate-gemini-vision",
+      "dest": "/api/ultimate-gemini-vision"
     }
   ]
 }
