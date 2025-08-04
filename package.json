@@ -11,6 +11,9 @@
     "start": "next start",
     "lint": "next lint",
     "test:enhanced": "node test-enhanced-gemini.js",
+    "test:ultimate": "node test-ultimate-gemini.js",
+    "test:ultimate-mock": "node test-ultimate-mock.js",
+    "test:ultimate-service": "node test-ultimate-service.js",
     "test:backtesting": "node -e \"const BacktestingService = require('./services/BacktestingService'); const service = new BacktestingService(); console.log('Backtesting service test passed');\""
   },
   "dependencies": {
