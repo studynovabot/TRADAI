@@ -37,7 +37,7 @@ interface AnalysisResult {
   analysis: {
     overallConfidence: number;
     tradingSignal: {
-      action: 'BUY' | 'SELL' | 'HOLD';
+      action: 'BUY' | 'SELL' | 'NO_TRADE';
       confidence: number;
     };
     marketCondition: string;
@@ -289,7 +289,7 @@ Troubleshooting steps:
     switch (signal) {
       case 'BUY': return <Icons.ArrowUp className="h-5 w-5 text-green-500" />;
       case 'SELL': return <Icons.ArrowDown className="h-5 w-5 text-red-500" />;
-      case 'HOLD': return <Icons.Minus className="h-5 w-5 text-yellow-500" />;
+      case 'NO_TRADE': return <Icons.Minus className="h-5 w-5 text-gray-500" />;
       default: return <Icons.Activity className="h-5 w-5" />;
     }
   };
@@ -298,14 +298,14 @@ Troubleshooting steps:
     switch (signal) {
       case 'BUY': return 'bg-green-100 text-green-800 border-green-200';
       case 'SELL': return 'bg-red-100 text-red-800 border-red-200';
-      case 'HOLD': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'NO_TRADE': return 'bg-gray-100 text-gray-800 border-gray-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   const getConfidenceColor = (confidence: number) => {
     if (confidence >= 80) return 'text-green-600';
-    if (confidence >= 70) return 'text-yellow-600';
+    if (confidence >= 60) return 'text-yellow-600';
     return 'text-red-600';
   };
 
@@ -315,9 +315,9 @@ Troubleshooting steps:
     let maxScore = 6;
 
     if (processingTime < 60000) score++;
-    if (analysis.overallConfidence >= 70) score++;
+    if (analysis.overallConfidence >= 60) score++;
     if (analysis.predictions && analysis.predictions.length === 3) score++;
-    if (analysis.tradingSignal.confidence >= 70) score++;
+    if (analysis.tradingSignal.confidence >= 60) score++;
     if (analysis.technicalIndicators) score++;
     if (analysis.supportLevels && analysis.resistanceLevels) score++;
 

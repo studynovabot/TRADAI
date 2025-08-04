@@ -424,9 +424,9 @@ RESPONSE FORMAT (JSON):
       }
     ],
     "tradingSignal": {
-      "action": "BUY/SELL/HOLD",
-      "confidence": 85,
-      "entryPoint": "specific price level for entry",
+      "action": "BUY/SELL/NO_TRADE",
+      "confidence": 60-95,
+      "entryPoint": "specific price level for entry or null if NO_TRADE",
       "reasoning": "comprehensive analysis summary explaining the signal",
       "riskLevel": "LOW/MEDIUM/HIGH"
     },
@@ -593,7 +593,7 @@ IMPORTANT: Analyze the ACTUAL chart content. Look at real price movements, actua
         } else if (lowerText.includes('sell') || lowerText.includes('short')) {
             return { action: 'SELL', direction: 'DOWN' };
         }
-        return { action: 'HOLD', direction: 'UP' };
+        return { action: 'NO_TRADE', direction: 'NONE' };
     }
 
     /**

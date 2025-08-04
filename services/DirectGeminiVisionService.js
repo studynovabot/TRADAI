@@ -395,110 +395,160 @@ class DirectGeminiVisionService {
 
         return `You are a world-class professional forex trader and technical analyst with 20+ years of institutional trading experience. You are analyzing a trading chart image directly using your vision capabilities.
 
-CRITICAL REQUIREMENTS:
-- Analyze the ACTUAL chart content visible in the image
-- NO placeholder data, NO synthetic responses, NO mock analysis
-- Provide REAL technical analysis based on what you can see
-- Generate authentic trading signals with specific confidence percentages
-- Focus on USD/BRL, USD/INR, USD/BDT, USD/TRY and other major forex pairs
-- Support OTC binary options trading signals
+🎯 **ENHANCED ANALYSIS REQUIREMENTS:**
 
-COMPREHENSIVE ANALYSIS REQUIRED:
+1. **ASSET & TIMEFRAME DETECTION:**
+   - Auto-detect the exact trading pair/asset from the chart (USD/BRL, USD/INR, etc.)
+   - Auto-detect the timeframe (1m, 3m, 5m, 15m, 1h, etc.) from chart indicators
+   - Identify current price from the chart
+   - Note any significant support/resistance level breaks
 
-1. **CHART IDENTIFICATION:**
-   - Auto-detect the trading pair/asset from the chart
-   - Auto-detect the timeframe (1m, 3m, 5m, 15m, 1h, etc.)
-   - Identify the trading platform if visible
-   - Read current price levels from the chart
+2. **ENHANCED CONTEXT ANALYSIS:**
+   - Identify recent price action significance (breakouts, bounces, rejections)
+   - Analyze market structure changes (higher highs/lows, lower highs/lows)
+   - Detect momentum shifts and trend exhaustion signals
+   - Note any significant volume spikes or divergences
 
-2. **MULTI-TIMEFRAME ANALYSIS:**
-   - Analyze trend direction for 1m, 3m, and 5m timeframes
-   - Provide trend strength (1-10 scale) and confidence (70-95%)
-   - Identify confluence between different timeframes
+3. **TECHNICAL INDICATORS VERIFICATION:**
+   - Moving Averages: Exact position relative to price, crossovers, slope direction
+   - Stochastic: Current K/D values, crossovers, overbought/oversold zones
+   - RSI: Current level, divergences, trend confirmation
+   - Volume: Relative strength, confirmation/contradiction with price action
+   - Any other visible indicators with specific readings
 
-3. **TECHNICAL INDICATORS ANALYSIS:**
-   - Moving Averages (EMA/SMA): Identify if price is above/below key levels
-   - Stochastic Oscillator: Current readings and overbought/oversold conditions
-   - RSI: Current level and interpretation if visible
-   - Volume: Analyze relative volume levels
-   - Any other visible indicators on the chart
+4. **RISK ASSESSMENT & INVALIDATION LEVELS:**
+   - Identify key invalidation levels for bullish/bearish scenarios
+   - Calculate risk/reward ratios for potential trades
+   - Note confluence of multiple technical factors
+   - Assess probability of false breakouts/breakdowns
 
-4. **CANDLESTICK PATTERN RECOGNITION:**
-   - Identify recent candlestick formations
-   - Reversal patterns (doji, hammer, engulfing, shooting star, etc.)
-   - Continuation patterns
-   - Current candle formation analysis
-
-5. **SUPPORT AND RESISTANCE LEVELS:**
-   - Identify key support levels with specific price points
-   - Identify key resistance levels with specific price points
-   - Determine current price position relative to these levels
+5. **CONSERVATIVE BOUNCE PROBABILITY:**
+   - Be more conservative about oversold bounces in strong trends
+   - Consider trend strength when evaluating reversal signals
+   - Prioritize trend continuation over counter-trend moves
+   - Require multiple confirmations for reversal signals
 
 6. **NEXT 3 CANDLE PREDICTIONS (CRITICAL):**
-   - Predict direction for NEXT 3 CANDLES with confidence percentages (70-95%)
+   - Only provide predictions if confidence ≥ 60%
+   - If confidence < 60%, recommend NO_TRADE
    - Provide specific technical reasoning for each prediction
-   - Consider all visible technical factors
+   - Consider all visible technical factors and confluences
 
-7. **TRADING SIGNAL GENERATION:**
-   - Clear UP/DOWN recommendation for binary options
-   - BUY/SELL/HOLD recommendation for forex
-   - Confidence percentage (70-95%)
-   - Entry price suggestion
-   - Risk assessment
+7. **TRADING SIGNAL LOGIC:**
+   - NO HOLD signals - only BUY/SELL/NO_TRADE
+   - BUY: Only if multiple bullish confluences and confidence ≥ 60%
+   - SELL: Only if multiple bearish confluences and confidence ≥ 60%
+   - NO_TRADE: If confidence < 60% or conflicting signals
 
 RESPONSE FORMAT (JSON):
 {
-  "detectedAsset": "auto-detected trading pair",
-  "detectedTimeframe": "auto-detected timeframe",
-  "currentPrice": "visible current price",
-  "multiTimeframeAnalysis": {
-    "1m": {"trend": "UP/DOWN/SIDEWAYS", "strength": 1-10, "confidence": 70-95},
-    "3m": {"trend": "UP/DOWN/SIDEWAYS", "strength": 1-10, "confidence": 70-95},
-    "5m": {"trend": "UP/DOWN/SIDEWAYS", "strength": 1-10, "confidence": 70-95}
+  "detectedAsset": "auto-detected trading pair (e.g., USD/BRL, USD/INR)",
+  "detectedTimeframe": "auto-detected timeframe (e.g., 5m, 1m, 3m)",
+  "currentPrice": "visible current price from chart",
+  "enhancedContext": {
+    "recentPriceAction": "description of significant recent moves",
+    "supportBreaks": ["list of broken support levels"],
+    "resistanceBreaks": ["list of broken resistance levels"],
+    "marketStructure": "higher highs/lower lows/ranging/consolidation",
+    "momentumShift": "detected/not detected",
+    "trendStrength": "strong/moderate/weak"
   },
   "technicalIndicators": {
-    "ema": {"signal": "BUY/SELL/NEUTRAL", "confidence": 70-95, "analysis": "detailed analysis"},
-    "sma": {"signal": "BUY/SELL/NEUTRAL", "confidence": 70-95, "analysis": "detailed analysis"},
-    "stochastic": {"value": 0-100, "signal": "BUY/SELL/NEUTRAL", "confidence": 70-95, "overbought": true/false, "oversold": true/false},
-    "rsi": {"value": 0-100, "signal": "BUY/SELL/NEUTRAL", "confidence": 70-95},
-    "volume": "HIGH/NORMAL/LOW",
-    "momentum": "BULLISH/BEARISH/NEUTRAL"
+    "ema": {
+      "signal": "BUY/SELL/NEUTRAL", 
+      "confidence": 60-95, 
+      "position": "above/below price",
+      "crossover": "bullish/bearish/none",
+      "analysis": "detailed analysis"
+    },
+    "stochastic": {
+      "kValue": 0-100,
+      "dValue": 0-100,
+      "signal": "BUY/SELL/NEUTRAL", 
+      "confidence": 60-95, 
+      "zone": "overbought/oversold/neutral",
+      "crossover": "bullish/bearish/none"
+    },
+    "rsi": {
+      "value": 0-100, 
+      "signal": "BUY/SELL/NEUTRAL", 
+      "confidence": 60-95,
+      "zone": "overbought/oversold/neutral",
+      "divergence": "bullish/bearish/none"
+    },
+    "volume": {
+      "level": "HIGH/NORMAL/LOW",
+      "trend": "increasing/decreasing/stable",
+      "confirmation": "confirms/contradicts price action"
+    }
   },
-  "candlestickPatterns": [
-    {"pattern": "pattern name", "type": "BULLISH/BEARISH/NEUTRAL", "confidence": 70-95, "significance": "HIGH/MEDIUM/LOW"}
-  ],
+  "riskAssessment": {
+    "invalidationLevels": {
+      "bullish": "price level that invalidates bullish scenario",
+      "bearish": "price level that invalidates bearish scenario"
+    },
+    "riskRewardRatio": "calculated ratio for potential trades",
+    "confluenceCount": "number of technical factors aligning",
+    "falseBreakoutProbability": "LOW/MEDIUM/HIGH"
+  },
   "supportResistance": {
-    "support": ["level1", "level2", "level3"],
-    "resistance": ["level1", "level2", "level3"],
-    "currentLevel": "SUPPORT/RESISTANCE/BETWEEN",
-    "confidence": 70-95
+    "keySupport": ["level1", "level2", "level3"],
+    "keyResistance": ["level1", "level2", "level3"],
+    "currentPosition": "near support/near resistance/between levels",
+    "proximityToLevel": "very close/close/moderate/far",
+    "levelStrength": "STRONG/MODERATE/WEAK"
   },
-  "predictions": [
-    {"candle": 1, "direction": "UP/DOWN", "confidence": 70-95, "reasoning": "specific technical reasons"},
-    {"candle": 2, "direction": "UP/DOWN", "confidence": 70-95, "reasoning": "specific technical reasons"},
-    {"candle": 3, "direction": "UP/DOWN", "confidence": 70-95, "reasoning": "specific technical reasons"}
+  "nextCandlePredictions": [
+    {
+      "candle": 1,
+      "direction": "UP/DOWN",
+      "confidence": 60-95,
+      "reasoning": "specific technical confluence reasoning",
+      "keyFactors": ["factor1", "factor2", "factor3"]
+    },
+    {
+      "candle": 2,
+      "direction": "UP/DOWN", 
+      "confidence": 60-95,
+      "reasoning": "specific technical confluence reasoning",
+      "keyFactors": ["factor1", "factor2", "factor3"]
+    },
+    {
+      "candle": 3,
+      "direction": "UP/DOWN",
+      "confidence": 60-95,
+      "reasoning": "specific technical confluence reasoning", 
+      "keyFactors": ["factor1", "factor2", "factor3"]
+    }
   ],
   "tradingSignal": {
-    "action": "BUY/SELL/HOLD",
-    "direction": "UP/DOWN",
-    "confidence": 70-95,
-    "entryPoint": "specific price level",
-    "reasoning": "comprehensive analysis summary",
+    "action": "BUY/SELL/NO_TRADE",
+    "direction": "UP/DOWN/NONE",
+    "confidence": 60-95,
+    "entryPoint": "specific price level or null if NO_TRADE",
+    "stopLoss": "specific price level or null",
+    "takeProfit": "specific price level or null",
+    "riskReward": "calculated ratio",
+    "reasoning": "comprehensive multi-factor analysis summary",
     "riskLevel": "LOW/MEDIUM/HIGH",
-    "timeframe": "recommended timeframe for signal"
+    "timeframe": "recommended timeframe"
   },
-  "confluenceAnalysis": {
-    "bullishFactors": ["factor1", "factor2"],
-    "bearishFactors": ["factor1", "factor2"],
-    "overallBias": "BULLISH/BEARISH/NEUTRAL",
-    "confluenceScore": 70-95
-  },
-  "overallConfidence": 70-95,
-  "marketCondition": "TRENDING/RANGING/VOLATILE",
-  "timeframeBias": "BULLISH/BEARISH/NEUTRAL"
+  "overallConfidence": 60-95,
+  "recommendedAction": "BUY/SELL/NO_TRADE",
+  "marketCondition": "TRENDING/RANGING/VOLATILE"
 }
 
-IMPORTANT: This analysis will be used for real money trading decisions. Provide authentic, accurate analysis based on the actual chart content you can see in the image.`;
+CRITICAL INSTRUCTIONS:
+- Base analysis ONLY on what you can actually see in the chart
+- Require minimum 2-3 confluences before issuing BUY/SELL signals
+- If confidence drops below 60%, recommend NO_TRADE
+- Be conservative about oversold bounces in strong downtrends
+- Be conservative about overbought reversals in strong uptrends
+- Align main signal with candle predictions (if predicting 2+ DOWN candles, signal should be SELL)
+- Provide specific price levels and technical reasoning
+- This analysis will be used for real money trading decisions
+
+Analyze the chart image now and provide the complete JSON response.`;
     }
 
     /**
@@ -553,51 +603,90 @@ IMPORTANT: This analysis will be used for real money trading decisions. Provide 
             detectedAsset: analysis.detectedAsset || 'Unknown',
             detectedTimeframe: analysis.detectedTimeframe || '5m',
             currentPrice: analysis.currentPrice || 'Market Price',
-            multiTimeframeAnalysis: analysis.multiTimeframeAnalysis || {
-                "1m": { trend: "SIDEWAYS", strength: 5, confidence: 70 },
-                "3m": { trend: "SIDEWAYS", strength: 5, confidence: 70 },
-                "5m": { trend: "SIDEWAYS", strength: 5, confidence: 70 }
+            
+            // Enhanced context fields
+            enhancedContext: analysis.enhancedContext || {
+                recentPriceAction: "No significant recent moves detected",
+                supportBreaks: [],
+                resistanceBreaks: [],
+                marketStructure: "ranging",
+                momentumShift: "not detected",
+                trendStrength: "moderate"
             },
+            
             technicalIndicators: analysis.technicalIndicators || {
-                ema: { signal: "NEUTRAL", confidence: 70, analysis: "EMA analysis" },
-                sma: { signal: "NEUTRAL", confidence: 70, analysis: "SMA analysis" },
-                stochastic: { value: 50, signal: "NEUTRAL", confidence: 70, overbought: false, oversold: false },
-                rsi: { value: 50, signal: "NEUTRAL", confidence: 70 },
-                volume: "NORMAL",
-                momentum: "NEUTRAL"
+                ema: { 
+                    signal: "NEUTRAL", 
+                    confidence: 70, 
+                    position: "neutral",
+                    crossover: "none",
+                    analysis: "EMA analysis" 
+                },
+                stochastic: { 
+                    kValue: 50,
+                    dValue: 50,
+                    signal: "NEUTRAL", 
+                    confidence: 70, 
+                    zone: "neutral",
+                    crossover: "none"
+                },
+                rsi: { 
+                    value: 50, 
+                    signal: "NEUTRAL", 
+                    confidence: 70,
+                    zone: "neutral",
+                    divergence: "none"
+                },
+                volume: {
+                    level: "NORMAL",
+                    trend: "stable",
+                    confirmation: "neutral"
+                }
             },
-            candlestickPatterns: analysis.candlestickPatterns || [],
+            
+            // Risk assessment fields
+            riskAssessment: analysis.riskAssessment || {
+                invalidationLevels: {
+                    bullish: "No specific level identified",
+                    bearish: "No specific level identified"
+                },
+                riskRewardRatio: "1:1",
+                confluenceCount: 1,
+                falseBreakoutProbability: "MEDIUM"
+            },
+            
             supportResistance: analysis.supportResistance || {
-                support: [],
-                resistance: [],
-                currentLevel: "BETWEEN",
-                confidence: 70
+                keySupport: [],
+                keyResistance: [],
+                currentPosition: "between levels",
+                proximityToLevel: "moderate",
+                levelStrength: "MODERATE"
             },
-            predictions: analysis.predictions || this.generateDefaultPredictions(),
-            tradingSignal: analysis.tradingSignal || {
-                action: "HOLD",
-                direction: "UP",
-                confidence: 70,
-                entryPoint: "Market Price",
-                reasoning: "Insufficient data for high-confidence signal",
-                riskLevel: "MEDIUM",
+            
+            nextCandlePredictions: analysis.nextCandlePredictions || this.generateEnhancedDefaultPredictions(),
+            
+            tradingSignal: this.validateTradingSignal(analysis.tradingSignal || {
+                action: "NO_TRADE",
+                direction: "NONE",
+                confidence: 60,
+                entryPoint: null,
+                stopLoss: null,
+                takeProfit: null,
+                riskReward: "N/A",
+                reasoning: "Insufficient confluence for high-confidence signal",
+                riskLevel: "HIGH",
                 timeframe: "5m"
-            },
-            confluenceAnalysis: analysis.confluenceAnalysis || {
-                bullishFactors: [],
-                bearishFactors: [],
-                overallBias: "NEUTRAL",
-                confluenceScore: 70
-            },
+            }),
+            
             overallConfidence: this.validateConfidence(analysis.overallConfidence || 70),
+            recommendedAction: analysis.recommendedAction || "NO_TRADE",
             marketCondition: analysis.marketCondition || "RANGING",
-            timeframeBias: analysis.timeframeBias || "NEUTRAL",
 
             // Legacy fields for compatibility
-            trend: analysis.multiTimeframeAnalysis?.["5m"]?.trend || "SIDEWAYS",
-            supportLevels: analysis.supportResistance?.support || [],
-            resistanceLevels: analysis.supportResistance?.resistance || [],
-            chartPatterns: "Chart patterns analyzed",
+            trend: analysis.enhancedContext?.marketStructure || "ranging",
+            supportLevels: analysis.supportResistance?.keySupport || [],
+            resistanceLevels: analysis.supportResistance?.keyResistance || [],
+            predictions: analysis.nextCandlePredictions || this.generateEnhancedDefaultPredictions(),
 
             // Add metadata
             metadata: {
@@ -611,6 +700,66 @@ IMPORTANT: This analysis will be used for real money trading decisions. Provide 
         enhanced.overallConfidence = Math.max(70, Math.min(95, enhanced.overallConfidence));
 
         return enhanced;
+    }
+
+    /**
+     * Validate trading signal and remove HOLD logic
+     */
+    validateTradingSignal(signal) {
+        // Convert HOLD to NO_TRADE
+        if (signal.action === 'HOLD') {
+            signal.action = 'NO_TRADE';
+            signal.direction = 'NONE';
+        }
+
+        // Ensure confidence is at least 60% for BUY/SELL signals
+        if ((signal.action === 'BUY' || signal.action === 'SELL') && signal.confidence < 60) {
+            signal.action = 'NO_TRADE';
+            signal.direction = 'NONE';
+            signal.reasoning = 'Confidence below 60% threshold - NO_TRADE recommended';
+        }
+
+        return {
+            action: signal.action || 'NO_TRADE',
+            direction: signal.direction || 'NONE',
+            confidence: this.validateConfidence(signal.confidence || 60),
+            entryPoint: signal.entryPoint || null,
+            stopLoss: signal.stopLoss || null,
+            takeProfit: signal.takeProfit || null,
+            riskReward: signal.riskReward || 'N/A',
+            reasoning: signal.reasoning || 'No specific reasoning provided',
+            riskLevel: signal.riskLevel || 'MEDIUM',
+            timeframe: signal.timeframe || '5m'
+        };
+    }
+
+    /**
+     * Generate enhanced default predictions
+     */
+    generateEnhancedDefaultPredictions() {
+        return [
+            { 
+                candle: 1, 
+                direction: "UP", 
+                confidence: 65, 
+                reasoning: "Default prediction - insufficient data for specific analysis",
+                keyFactors: ["market structure", "trend continuation"]
+            },
+            { 
+                candle: 2, 
+                direction: "UP", 
+                confidence: 60, 
+                reasoning: "Default prediction - following first candle direction",
+                keyFactors: ["momentum", "trend alignment"]
+            },
+            { 
+                candle: 3, 
+                direction: "DOWN", 
+                confidence: 60, 
+                reasoning: "Default prediction - potential reversal or consolidation",
+                keyFactors: ["profit taking", "resistance levels"]
+            }
+        ];
     }
 
     /**
@@ -699,7 +848,8 @@ IMPORTANT: This analysis will be used for real money trading decisions. Provide 
         } else if (lowerText.includes('sell') || lowerText.includes('short') || lowerText.includes('bearish')) {
             return { action: 'SELL', direction: 'DOWN' };
         }
-        return { action: 'HOLD', direction: 'UP' };
+        // Default to NO_TRADE instead of HOLD
+        return { action: 'NO_TRADE', direction: 'NONE' };
     }
 
     /**
