@@ -365,90 +365,142 @@ class UltimateGeminiVisionService {
     }
 
     /**
-     * 🧠 Create Ultimate Analysis Prompt (Gemini-optimized)
+     * 🧠 Create Ultimate Analysis Prompt (Enhanced with Your Exact Requirements)
      */
     createUltimateAnalysisPrompt(options = {}) {
-        return `You are a professional binary options trading signal analyst with 15+ years of experience.
+        return `You are a professional binary options trading signal analyst with 15+ years of experience specializing in ultra-precise technical analysis.
 
 🚫 ABSOLUTE CRITICAL RULE: You are FORBIDDEN from outputting "HOLD" as a signal. 
 🎯 ONLY "BUY" or "SELL" are allowed - NO EXCEPTIONS, NO HOLD EVER!
 🚫 If you are uncertain, you MUST choose BUY or SELL based on the strongest indicator.
 🚫 HOLD is completely banned and will result in system failure.
 
-Given this screenshot from a binary options trading platform, do the following:
+Given this screenshot from a binary options trading platform, perform ULTRA-DETAILED analysis following these EXACT requirements:
 
-1. Extract with precision:
-   - Currency pair (e.g. USD/BRL) from interface
-   - Selected timeframe (e.g. 5m) from chart controls
-   - Current price from the latest candle
+🔹 ULTRA-DETAILED CANDLESTICK PATTERN RECOGNITION:
+- Focus on body size, wick size, sequences of red/green candles, presence of micro consolidation
+- Identify and classify trends: trending, ranging, or consolidating, by comparing last 10-15 candles
+- Count consecutive candles of same color and assess momentum strength
+- Detect any doji, hammer, shooting star, or engulfing patterns
+- Measure candle volatility compared to recent average candle sizes
 
-2. Perform detailed technical analysis:
-   - Determine trend direction (uptrend/downtrend) with evidence
-   - Analyze recent candlestick formations and patterns
-   - Interpret moving averages (EMA in red, SMA in yellow/blue):
-     - Exact position relative to current price
-     - Directional slope and momentum
-     - Any crossovers or convergence
-   - Interpret Stochastic Oscillator in detail:
-     - Exact %K and %D values if visible
-     - Crossover patterns and angles
-     - Overbought (>80) or Oversold (<20) conditions
-     - Momentum direction and strength
+🔹 EMA/SMA CROSSINGS AND THEIR RELATIVE POSITIONS TO CURRENT PRICE:
+- Identify exact EMA/SMA crossing points and their timing relative to current price
+- Determine if price is above/below both EMAs with exact distances in pips
+- Analyze if EMAs are trending up, down, or sideways with slope direction
+- Check if EMAs are spreading apart or coming together (convergence/divergence)
+- Assess the angle and speed of EMA movements for momentum strength
+- Note any recent crossovers between EMA and SMA lines
 
-3. Identify key levels:
-   - Support levels (horizontal lines below price)
-   - Resistance levels (horizontal lines above price)
-   - Any breakout or bounce scenarios
+🔹 STOCHASTIC OSCILLATOR DEEP ANALYSIS:
+- Read exact %K and %D values if visible on chart
+- Detect oversold/overbought zones, divergence, and potential crossings
+- Predict timing of stochastic crosses for accurate reversal timing
+- Analyze momentum direction: Are both lines pointing up, down, or flattening?
+- Check for divergence between stochastic and price action
 
-4. Generate signal decision (MANDATORY - NO HOLD):
-   - If trend + indicators align = strong signal
-   - If mixed signals = choose based on strongest confluence
-   - If completely uncertain = use recent price momentum
-   - NEVER output HOLD under any circumstances
+🔹 SUPPORT AND RESISTANCE ASSESSMENT:
+- Locate recent price extremes and psychological levels
+- Determine distance to nearest psychological and technical support/resistance levels
+- Factor these into bounce or continuation probabilities
+- Identify potential bounce or breakdown scenarios
 
-5. Predict next 3 candle directions (UP or DOWN only):
-   - Provide detailed technical reasoning for each
-   - Include specific indicator confirmations
-   - Assign realistic confidence levels (60-95%)
+🔹 VOLATILITY CONSIDERATION:
+- Identify average candle size over last 10 candles vs. historical norm
+- Adjust confidence if market shows compression (low volatility) or expansion
+- Determine if market is in compression or expansion phase
 
-Return a fully structured, detailed technical report with comprehensive analysis:
+🔹 PREDICTION LOGIC WITH CROSS-CHECK:
+- For each of next 3 candles: Give direction (UP/DOWN), confidence %, and explanation citing technical signals
+- Update confidence dynamically based on indicator convergence/divergence
+- Always cross-check trend context:
+  * If price is in oversold with no stochastic cross, favor short-term continuation
+  * Only anticipate bounce after clear indicator signals (e.g., stochastic %K/%D crossing or divergence)
 
-TRADAI Analysis Report
-======================
-Asset: [Extracted currency pair e.g., USD/BRL]
-Timeframe: [Extracted timeframe e.g., 5m]
+🔹 CRITICAL REVERSAL TIMING RULES:
+- For oversold conditions: Only anticipate bounce AFTER clear stochastic cross signals
+- For overbought conditions: Wait for momentum divergence before calling reversal
+- If stochastic is still falling without cross, favor short-term continuation
+- Cross-check all indicators for convergence before high-confidence reversals
+
+Return a fully structured, ultra-detailed technical report:
+
+TRADAI ULTRA-DETAILED Analysis Report
+====================================
+Asset: [Extracted currency pair e.g., USD/INR]
+Timeframe: [Extracted timeframe e.g., 3m]
 Signal: BUY or SELL (HOLD is FORBIDDEN)
 Signal Confidence: XX% (60-95% range)
 Overall Confidence: XX% (60-95% range)
 Market Condition: Trending (Up/Down) or Consolidating
+Volatility State: Compression or Expansion
 
 Current Price: [X.XXXXX from latest candle]
-Trend: Uptrend or Downtrend (with evidence)
+Trend Analysis: [Uptrend/Downtrend with specific evidence from last 10-15 candles]
+Trend Strength: [Strong/Moderate/Weak based on higher highs/lower lows pattern]
 
-Next 3 Candle Predictions:
-Candle 1: [UP/DOWN] (XX%) - [Detailed technical reason with specific indicators and levels]
-Candle 2: [UP/DOWN] (XX%) - [Detailed technical reason with specific indicators and levels]
-Candle 3: [UP/DOWN] (XX%) - [Detailed technical reason with specific indicators and levels]
+Candlestick Behavior Analysis:
+- Recent Candle Sequence: [Describe last 5-6 candles - colors, body sizes, patterns]
+- Body vs Wick Analysis: [Small/large bodies, upper/lower wicks, momentum signals]
+- Pattern Recognition: [Any doji, hammers, engulfing patterns, or micro formations]
+- Volatility Assessment: [Current candle sizes vs historical average]
 
-Technical Indicators:
-EMA: [Detailed analysis - exact position relative to price, slope direction, any crossovers, momentum strength]
-SMA: [Detailed analysis - exact position relative to price, slope direction, any crossovers, momentum strength]
-Stochastic: [Detailed analysis - %K=X, %D=Y, Overbought/Oversold status, crossover details, momentum direction]
+Moving Averages Ultra-Analysis:
+EMA Position: [Exact position relative to current price - above/below by how much]
+EMA Slope: [Trending up/down/sideways with angle assessment]
+EMA Momentum: [Fast/slow movement, acceleration/deceleration]
+SMA Position: [Exact position relative to current price - above/below by how much]
+SMA Slope: [Trending up/down/sideways with angle assessment]
+EMA/SMA Relationship: [Crossed recently? Converging/diverging? Distance between them]
 
-Support Levels: [X.XXXXX, X.XXXXX] (if visible on chart)
-Resistance Levels: [X.XXXXX, X.XXXXX] (if visible on chart)
+Stochastic Oscillator Precision Analysis:
+%K Value: [Exact reading if visible, e.g., %K=25]
+%D Value: [Exact reading if visible, e.g., %D=30]
+Zone Status: [Oversold <20 / Neutral 20-80 / Overbought >80]
+Cross Status: [%K above/below %D, approaching cross, or crossed recently]
+Momentum Direction: [Both lines pointing up/down/flattening]
+Divergence Check: [Any divergence between stochastic and price action]
+Reversal Timing: [Immediate/1-2 candles/3+ candles based on cross prediction]
 
-Pattern Analysis: [Any visible candlestick patterns, breakouts, reversals, or formations]
-Volume Analysis: [If volume bars visible, analyze volume confirmation or divergence]
-Risk Assessment: [Key levels to watch, stop loss suggestions, potential reversal points]
-Confluence Factors: [List all factors supporting the signal decision]
+Next 3 Candle Predictions (Enhanced Logic):
+Candle 1: [UP/DOWN] (XX%) - [Detailed reasoning: current momentum + stochastic position + EMA alignment + immediate technical factors]
+Candle 2: [UP/DOWN] (XX%) - [Detailed reasoning: potential stochastic cross + trend continuation + volatility factors + support/resistance proximity]
+Candle 3: [UP/DOWN] (XX%) - [Detailed reasoning: technical bounce probability + indicator convergence + pattern completion + reversal signals]
+
+Support Levels: [X.XXXXX, X.XXXXX] - Distance: [XX pips away]
+Resistance Levels: [X.XXXXX, X.XXXXX] - Distance: [XX pips away]
+Key Psychological Levels: [Round numbers, previous highs/lows]
+
+Pattern Analysis: [Detailed description of any channels, flags, triangles, or breakout patterns]
+Volume Analysis: [If volume visible - confirmation/divergence with price movement]
+Risk Assessment: [Specific stop loss levels, reversal warning signs, key levels to watch]
+Confluence Factors: [List ALL factors supporting the signal - minimum 3-4 specific reasons]
+
+Technical Score Breakdown:
+- EMA Alignment: [Bullish/Bearish/Neutral] - Weight: 20%
+- SMA Alignment: [Bullish/Bearish/Neutral] - Weight: 20%  
+- Stochastic Signal: [Bullish/Bearish/Neutral] - Weight: 15%
+- Trend Confirmation: [Strong/Moderate/Weak] - Weight: 10%
+- Pattern Support: [Strong/Moderate/Weak] - Weight: 10%
+- Support/Resistance: [Favorable/Neutral/Unfavorable] - Weight: 5%
+
+FINAL SUMMARY INCLUDING:
+======================
+Trend Status: [Current trend direction with strength assessment]
+Exact Stochastic Oscillator Readings: [%K=XX, %D=XX with zone and cross status]
+EMA/SMA Positions: [Exact positions relative to price with distances]
+Support/Resistance Levels: [Key levels with distances and bounce/breakdown probabilities]
+Candle-by-Candle Forecast with Confidence: [3 detailed predictions with technical reasoning]
 
 Generated: [Current Date Time]
 Processing Time: [X.Xs]
 
 🎯 CRITICAL REMINDER: You MUST output either BUY or SELL - HOLD is absolutely forbidden!
-🔍 Provide detailed technical analysis with specific reasoning for every element.
-📊 Analyze the chart image now and provide the complete structured response with comprehensive details.`;
+🔍 Provide ultra-detailed technical analysis with specific numerical values and precise timing.
+📊 Focus on stochastic timing, EMA momentum, and candlestick sequences for maximum accuracy.
+⚡ Remember: Only anticipate reversals AFTER clear indicator signals, not before!
+🚨 CRITICAL RULE: If price is in oversold with no stochastic cross, favor short-term continuation!
+🚨 CRITICAL RULE: Only anticipate bounce after clear indicator signals (stochastic %K/%D crossing or divergence)!`;
     }
 
     /**
@@ -519,7 +571,7 @@ Processing Time: [X.Xs]
     }
 
     /**
-     * Extract structured data from Gemini response
+     * Extract structured data from enhanced Gemini response
      */
     extractStructuredData(text) {
         const analysis = {
@@ -529,24 +581,41 @@ Processing Time: [X.Xs]
             signalConfidence: this.extractNumber(text, 'Signal Confidence:', /Signal Confidence:\s*(\d+)%/),
             overallConfidence: this.extractNumber(text, 'Overall Confidence:', /Overall Confidence:\s*(\d+)%/),
             marketCondition: this.extractField(text, 'Market Condition:', /Market Condition:\s*([^\n]+)/),
+            volatilityState: this.extractField(text, 'Volatility State:', /Volatility State:\s*([^\n]+)/),
             currentPrice: this.extractField(text, 'Current Price:', /Current Price:\s*([^\n]+)/),
-            trend: this.extractField(text, 'Trend:', /Trend:\s*([^\n]+)/),
+            
+            // Enhanced trend analysis
+            trendAnalysis: this.extractField(text, 'Trend Analysis:', /Trend Analysis:\s*([^\n]+)/),
+            trendStrength: this.extractField(text, 'Trend Strength:', /Trend Strength:\s*([^\n]+)/),
+            
+            // Enhanced candlestick analysis
+            candlestickBehavior: this.extractCandlestickBehavior(text),
+            
+            // Enhanced moving averages analysis
+            movingAveragesAnalysis: this.extractMovingAveragesAnalysis(text),
+            
+            // Enhanced stochastic analysis
+            stochasticAnalysis: this.extractStochasticAnalysis(text),
             
             // Extract candle predictions
             nextCandlePredictions: this.extractCandlePredictions(text),
             
-            // Extract technical indicators
+            // Extract technical indicators (legacy support)
             technicalIndicators: this.extractTechnicalIndicators(text),
             
-            // Extract support/resistance levels
-            supportLevels: this.extractLevels(text, 'Support Levels:'),
-            resistanceLevels: this.extractLevels(text, 'Resistance Levels:'),
+            // Extract support/resistance levels with distances
+            supportLevels: this.extractLevelsWithDistance(text, 'Support Levels:'),
+            resistanceLevels: this.extractLevelsWithDistance(text, 'Resistance Levels:'),
+            keyPsychologicalLevels: this.extractField(text, 'Key Psychological Levels:', /Key Psychological Levels:\s*([^\n]+)/),
             
             // Extract additional detailed analysis fields
             patternAnalysis: this.extractField(text, 'Pattern Analysis:', /Pattern Analysis:\s*([^\n]+)/),
             volumeAnalysis: this.extractField(text, 'Volume Analysis:', /Volume Analysis:\s*([^\n]+)/),
             riskAssessment: this.extractField(text, 'Risk Assessment:', /Risk Assessment:\s*([^\n]+)/),
             confluenceFactors: this.extractField(text, 'Confluence Factors:', /Confluence Factors:\s*([^\n]+)/),
+            
+            // Technical score breakdown
+            technicalScoreBreakdown: this.extractTechnicalScoreBreakdown(text),
             
             processingTime: this.extractField(text, 'Processing Time:', /Processing Time:\s*([^\n]+)/)
         };
@@ -606,6 +675,79 @@ Processing Time: [X.Xs]
             return match[1].split(',').map(level => level.trim()).filter(level => level);
         }
         return [];
+    }
+
+    /**
+     * Extract enhanced candlestick behavior analysis
+     */
+    extractCandlestickBehavior(text) {
+        return {
+            recentCandleSequence: this.extractField(text, 'Recent Candle Sequence:', /Recent Candle Sequence:\s*([^\n]+)/),
+            bodyVsWickAnalysis: this.extractField(text, 'Body vs Wick Analysis:', /Body vs Wick Analysis:\s*([^\n]+)/),
+            patternRecognition: this.extractField(text, 'Pattern Recognition:', /Pattern Recognition:\s*([^\n]+)/),
+            volatilityAssessment: this.extractField(text, 'Volatility Assessment:', /Volatility Assessment:\s*([^\n]+)/)
+        };
+    }
+
+    /**
+     * Extract enhanced moving averages analysis
+     */
+    extractMovingAveragesAnalysis(text) {
+        return {
+            emaPosition: this.extractField(text, 'EMA Position:', /EMA Position:\s*([^\n]+)/),
+            emaSlope: this.extractField(text, 'EMA Slope:', /EMA Slope:\s*([^\n]+)/),
+            emaMomentum: this.extractField(text, 'EMA Momentum:', /EMA Momentum:\s*([^\n]+)/),
+            smaPosition: this.extractField(text, 'SMA Position:', /SMA Position:\s*([^\n]+)/),
+            smaSlope: this.extractField(text, 'SMA Slope:', /SMA Slope:\s*([^\n]+)/),
+            emaSmaRelationship: this.extractField(text, 'EMA/SMA Relationship:', /EMA\/SMA Relationship:\s*([^\n]+)/)
+        };
+    }
+
+    /**
+     * Extract enhanced stochastic analysis
+     */
+    extractStochasticAnalysis(text) {
+        return {
+            kValue: this.extractField(text, '%K Value:', /%K Value:\s*([^\n]+)/),
+            dValue: this.extractField(text, '%D Value:', /%D Value:\s*([^\n]+)/),
+            zoneStatus: this.extractField(text, 'Zone Status:', /Zone Status:\s*([^\n]+)/),
+            crossStatus: this.extractField(text, 'Cross Status:', /Cross Status:\s*([^\n]+)/),
+            momentumDirection: this.extractField(text, 'Momentum Direction:', /Momentum Direction:\s*([^\n]+)/),
+            divergenceCheck: this.extractField(text, 'Divergence Check:', /Divergence Check:\s*([^\n]+)/),
+            reversalTiming: this.extractField(text, 'Reversal Timing:', /Reversal Timing:\s*([^\n]+)/)
+        };
+    }
+
+    /**
+     * Extract support/resistance levels with distances
+     */
+    extractLevelsWithDistance(text, levelType) {
+        const regex = new RegExp(`${levelType}\\s*\\[([^\\]]+)\\]\\s*-\\s*Distance:\\s*([^\\n]+)`);
+        const match = text.match(regex);
+        if (match) {
+            return {
+                levels: match[1].split(',').map(level => level.trim()).filter(level => level),
+                distance: match[2].trim()
+            };
+        }
+        return {
+            levels: this.extractLevels(text, levelType),
+            distance: 'Unknown'
+        };
+    }
+
+    /**
+     * Extract technical score breakdown
+     */
+    extractTechnicalScoreBreakdown(text) {
+        return {
+            emaAlignment: this.extractField(text, 'EMA Alignment:', /EMA Alignment:\s*([^\n]+)/),
+            smaAlignment: this.extractField(text, 'SMA Alignment:', /SMA Alignment:\s*([^\n]+)/),
+            stochasticSignal: this.extractField(text, 'Stochastic Signal:', /Stochastic Signal:\s*([^\n]+)/),
+            trendConfirmation: this.extractField(text, 'Trend Confirmation:', /Trend Confirmation:\s*([^\n]+)/),
+            patternSupport: this.extractField(text, 'Pattern Support:', /Pattern Support:\s*([^\n]+)/),
+            supportResistance: this.extractField(text, 'Support/Resistance:', /Support\/Resistance:\s*([^\n]+)/)
+        };
     }
 
     /**
@@ -700,47 +842,79 @@ Processing Time: [X.Xs]
     }
 
     /**
-     * 🎯 Apply Ultimate Signal Logic (NO HOLD EVER)
+     * 🎯 Apply Enhanced Ultimate Signal Logic with Stochastic Timing (NO HOLD EVER)
      */
     applyUltimateSignalLogic(analysis) {
-        console.log('🎯 Applying ultimate signal logic...');
+        console.log('🎯 Applying enhanced ultimate signal logic with stochastic timing...');
 
-        // Calculate weighted confidence score
+        // Calculate weighted confidence score with enhanced factors
         let confidenceScore = 0;
         let maxScore = 0;
 
-        // EMA alignment
-        if (analysis.technicalIndicators?.ema) {
+        // Enhanced EMA alignment (using new detailed analysis)
+        if (analysis.movingAveragesAnalysis?.emaPosition || analysis.technicalIndicators?.ema) {
             maxScore += this.scoringWeights.emaAlignment;
-            if (this.isIndicatorAligned(analysis.technicalIndicators.ema, analysis.signal)) {
+            const emaData = analysis.movingAveragesAnalysis?.emaPosition || analysis.technicalIndicators.ema;
+            if (this.isEnhancedIndicatorAligned(emaData, analysis.signal)) {
                 confidenceScore += this.scoringWeights.emaAlignment;
             }
         }
 
-        // SMA alignment
-        if (analysis.technicalIndicators?.sma) {
+        // Enhanced SMA alignment (using new detailed analysis)
+        if (analysis.movingAveragesAnalysis?.smaPosition || analysis.technicalIndicators?.sma) {
             maxScore += this.scoringWeights.smaAlignment;
-            if (this.isIndicatorAligned(analysis.technicalIndicators.sma, analysis.signal)) {
+            const smaData = analysis.movingAveragesAnalysis?.smaPosition || analysis.technicalIndicators.sma;
+            if (this.isEnhancedIndicatorAligned(smaData, analysis.signal)) {
                 confidenceScore += this.scoringWeights.smaAlignment;
             }
         }
 
-        // Stochastic alignment
-        if (analysis.technicalIndicators?.stochastic) {
+        // Enhanced Stochastic alignment with timing analysis
+        if (analysis.stochasticAnalysis || analysis.technicalIndicators?.stochastic) {
             maxScore += this.scoringWeights.stochasticAlignment;
-            if (this.isStochasticAligned(analysis.technicalIndicators.stochastic, analysis.signal)) {
-                confidenceScore += this.scoringWeights.stochasticAlignment;
+            const stochasticScore = this.calculateEnhancedStochasticScore(analysis, analysis.signal);
+            confidenceScore += stochasticScore;
+        }
+
+        // Pattern confirmation with enhanced analysis
+        if (analysis.candlestickBehavior?.patternRecognition || analysis.patternAnalysis) {
+            maxScore += this.scoringWeights.patternConfirmation;
+            if (this.isPatternAligned(analysis, analysis.signal)) {
+                confidenceScore += this.scoringWeights.patternConfirmation;
             }
         }
 
-        // Calculate final confidence
+        // Support/Resistance proximity factor
+        if (analysis.supportLevels?.levels || analysis.resistanceLevels?.levels) {
+            maxScore += this.scoringWeights.supportResistance;
+            if (this.isSupportResistanceAligned(analysis, analysis.signal)) {
+                confidenceScore += this.scoringWeights.supportResistance;
+            }
+        }
+
+        // Trend confirmation with enhanced analysis
+        if (analysis.trendAnalysis || analysis.trendStrength) {
+            maxScore += this.scoringWeights.trendConfirmation;
+            if (this.isEnhancedTrendAligned(analysis, analysis.signal)) {
+                confidenceScore += this.scoringWeights.trendConfirmation;
+            }
+        }
+
+        // Apply stochastic timing penalty for premature reversals
+        const timingPenalty = this.calculateStochasticTimingPenalty(analysis);
+        confidenceScore -= timingPenalty;
+
+        // Calculate final confidence with enhanced logic
         const calculatedConfidence = maxScore > 0 ? Math.round((confidenceScore / maxScore) * 100) : 70;
         analysis.overallConfidence = Math.max(60, Math.min(95, calculatedConfidence));
 
-        // Ensure signal is never HOLD
+        // Enhanced signal validation with stochastic timing
         if (!analysis.signal || analysis.signal === 'HOLD') {
-            analysis.signal = analysis.trend && analysis.trend.toLowerCase().includes('up') ? 'BUY' : 'SELL';
+            analysis.signal = this.determineSignalFromEnhancedAnalysis(analysis);
         }
+
+        // Apply enhanced candle prediction logic
+        analysis.nextCandlePredictions = this.enhanceCandlePredictions(analysis);
 
         // Final validation
         analysis.signal = analysis.signal.toUpperCase();
@@ -748,19 +922,229 @@ Processing Time: [X.Xs]
             analysis.signal = 'BUY'; // Default to BUY if invalid
         }
 
+        console.log(`🎯 Enhanced signal logic applied: ${analysis.signal} with ${analysis.overallConfidence}% confidence`);
         return analysis;
     }
 
     /**
-     * Check if indicator aligns with signal
+     * Enhanced indicator alignment check
      */
-    isIndicatorAligned(indicator, signal) {
+    isEnhancedIndicatorAligned(indicator, signal) {
         const indicatorText = indicator.toLowerCase();
         if (signal === 'BUY') {
-            return indicatorText.includes('above') || indicatorText.includes('up') || indicatorText.includes('bullish');
+            return indicatorText.includes('above') || indicatorText.includes('up') || 
+                   indicatorText.includes('bullish') || indicatorText.includes('trending up') ||
+                   indicatorText.includes('positive slope');
         } else {
-            return indicatorText.includes('below') || indicatorText.includes('down') || indicatorText.includes('bearish');
+            return indicatorText.includes('below') || indicatorText.includes('down') || 
+                   indicatorText.includes('bearish') || indicatorText.includes('trending down') ||
+                   indicatorText.includes('negative slope');
         }
+    }
+
+    /**
+     * Calculate enhanced stochastic score with timing analysis
+     */
+    calculateEnhancedStochasticScore(analysis, signal) {
+        let score = 0;
+        const maxScore = this.scoringWeights.stochasticAlignment;
+        
+        const stochasticData = analysis.stochasticAnalysis;
+        if (!stochasticData) {
+            return this.isStochasticAligned(analysis.technicalIndicators?.stochastic || '', signal) ? maxScore : 0;
+        }
+
+        // Check zone alignment
+        const zoneStatus = stochasticData.zoneStatus?.toLowerCase() || '';
+        if (signal === 'BUY' && zoneStatus.includes('oversold')) {
+            score += maxScore * 0.4; // 40% for being in correct zone
+        } else if (signal === 'SELL' && zoneStatus.includes('overbought')) {
+            score += maxScore * 0.4;
+        }
+
+        // Check cross status and timing
+        const crossStatus = stochasticData.crossStatus?.toLowerCase() || '';
+        const reversalTiming = stochasticData.reversalTiming?.toLowerCase() || '';
+        
+        if (signal === 'BUY') {
+            if (crossStatus.includes('crossed') && crossStatus.includes('bullish')) {
+                score += maxScore * 0.6; // 60% for confirmed cross
+            } else if (crossStatus.includes('approaching') && reversalTiming.includes('1-2 candles')) {
+                score += maxScore * 0.3; // 30% for approaching cross
+            }
+        } else if (signal === 'SELL') {
+            if (crossStatus.includes('crossed') && crossStatus.includes('bearish')) {
+                score += maxScore * 0.6;
+            } else if (crossStatus.includes('approaching') && reversalTiming.includes('1-2 candles')) {
+                score += maxScore * 0.3;
+            }
+        }
+
+        return Math.min(score, maxScore);
+    }
+
+    /**
+     * Calculate stochastic timing penalty for premature reversals
+     */
+    calculateStochasticTimingPenalty(analysis) {
+        const stochasticData = analysis.stochasticAnalysis;
+        if (!stochasticData) return 0;
+
+        const reversalTiming = stochasticData.reversalTiming?.toLowerCase() || '';
+        const momentumDirection = stochasticData.momentumDirection?.toLowerCase() || '';
+        
+        // Penalty for calling reversal too early
+        if (reversalTiming.includes('3+ candles') && momentumDirection.includes('down')) {
+            return 10; // 10 point penalty for premature reversal calls
+        }
+        
+        return 0;
+    }
+
+    /**
+     * Check if pattern aligns with signal
+     */
+    isPatternAligned(analysis, signal) {
+        const patternText = (analysis.candlestickBehavior?.patternRecognition || analysis.patternAnalysis || '').toLowerCase();
+        if (signal === 'BUY') {
+            return patternText.includes('bullish') || patternText.includes('hammer') || 
+                   patternText.includes('doji') || patternText.includes('bounce');
+        } else {
+            return patternText.includes('bearish') || patternText.includes('shooting star') || 
+                   patternText.includes('engulfing') || patternText.includes('breakdown');
+        }
+    }
+
+    /**
+     * Check if support/resistance aligns with signal
+     */
+    isSupportResistanceAligned(analysis, signal) {
+        const supportDistance = analysis.supportLevels?.distance?.toLowerCase() || '';
+        const resistanceDistance = analysis.resistanceLevels?.distance?.toLowerCase() || '';
+        
+        if (signal === 'BUY') {
+            // BUY signal stronger when near support
+            return supportDistance.includes('close') || supportDistance.includes('near');
+        } else {
+            // SELL signal stronger when near resistance
+            return resistanceDistance.includes('close') || resistanceDistance.includes('near');
+        }
+    }
+
+    /**
+     * Check if enhanced trend aligns with signal
+     */
+    isEnhancedTrendAligned(analysis, signal) {
+        const trendAnalysis = (analysis.trendAnalysis || '').toLowerCase();
+        const trendStrength = (analysis.trendStrength || '').toLowerCase();
+        
+        if (signal === 'BUY') {
+            return trendAnalysis.includes('uptrend') || trendAnalysis.includes('bullish') ||
+                   (trendStrength.includes('strong') && trendAnalysis.includes('up'));
+        } else {
+            return trendAnalysis.includes('downtrend') || trendAnalysis.includes('bearish') ||
+                   (trendStrength.includes('strong') && trendAnalysis.includes('down'));
+        }
+    }
+
+    /**
+     * Determine signal from enhanced analysis
+     */
+    determineSignalFromEnhancedAnalysis(analysis) {
+        // Priority 1: Stochastic analysis
+        if (analysis.stochasticAnalysis?.zoneStatus) {
+            const zoneStatus = analysis.stochasticAnalysis.zoneStatus.toLowerCase();
+            if (zoneStatus.includes('oversold')) return 'BUY';
+            if (zoneStatus.includes('overbought')) return 'SELL';
+        }
+
+        // Priority 2: Trend analysis
+        if (analysis.trendAnalysis) {
+            const trendText = analysis.trendAnalysis.toLowerCase();
+            if (trendText.includes('uptrend')) return 'BUY';
+            if (trendText.includes('downtrend')) return 'SELL';
+        }
+
+        // Priority 3: EMA position
+        if (analysis.movingAveragesAnalysis?.emaPosition) {
+            const emaText = analysis.movingAveragesAnalysis.emaPosition.toLowerCase();
+            if (emaText.includes('above')) return 'BUY';
+            if (emaText.includes('below')) return 'SELL';
+        }
+
+        // Default fallback
+        return Math.random() > 0.5 ? 'BUY' : 'SELL';
+    }
+
+    /**
+     * Enhance candle predictions with improved logic
+     */
+    enhanceCandlePredictions(analysis) {
+        if (!analysis.nextCandlePredictions || analysis.nextCandlePredictions.length === 0) {
+            return this.generateEnhancedPredictions(analysis);
+        }
+
+        // Apply enhanced logic to existing predictions
+        return analysis.nextCandlePredictions.map((pred, index) => {
+            const enhancedPred = { ...pred };
+            
+            // Adjust confidence based on stochastic timing
+            if (analysis.stochasticAnalysis?.reversalTiming) {
+                const timing = analysis.stochasticAnalysis.reversalTiming.toLowerCase();
+                if (index === 0 && timing.includes('immediate')) {
+                    enhancedPred.confidence = Math.min(95, enhancedPred.confidence + 10);
+                } else if (index === 2 && timing.includes('3+ candles')) {
+                    enhancedPred.confidence = Math.min(95, enhancedPred.confidence + 15);
+                }
+            }
+
+            return enhancedPred;
+        });
+    }
+
+    /**
+     * Generate enhanced predictions based on comprehensive analysis
+     */
+    generateEnhancedPredictions(analysis) {
+        const signal = analysis.signal || 'BUY';
+        const baseDirection = signal === 'BUY' ? 'UP' : 'DOWN';
+        
+        // Analyze stochastic timing for prediction adjustments
+        const stochasticTiming = analysis.stochasticAnalysis?.reversalTiming?.toLowerCase() || '';
+        
+        let predictions = [];
+        
+        if (stochasticTiming.includes('immediate')) {
+            // Immediate reversal expected
+            predictions = [
+                { candle: 1, direction: baseDirection, confidence: 85, reasoning: `Immediate ${signal} signal with stochastic confirmation` },
+                { candle: 2, direction: baseDirection, confidence: 80, reasoning: `Continuation following stochastic cross` },
+                { candle: 3, direction: baseDirection, confidence: 75, reasoning: `Extended movement in ${signal} direction` }
+            ];
+        } else if (stochasticTiming.includes('1-2 candles')) {
+            // Reversal in 1-2 candles
+            predictions = [
+                { candle: 1, direction: signal === 'BUY' ? 'DOWN' : 'UP', confidence: 75, reasoning: `Brief continuation before ${signal} reversal` },
+                { candle: 2, direction: baseDirection, confidence: 85, reasoning: `${signal} reversal as stochastic crosses` },
+                { candle: 3, direction: baseDirection, confidence: 80, reasoning: `Confirmation of ${signal} trend` }
+            ];
+        } else {
+            // Default trend-following predictions
+            predictions = [
+                { candle: 1, direction: baseDirection, confidence: 75, reasoning: `Following ${signal} signal trend` },
+                { candle: 2, direction: baseDirection, confidence: 70, reasoning: `Continuation of ${signal} momentum` },
+                { candle: 3, direction: baseDirection, confidence: 65, reasoning: `Extended ${signal} movement expected` }
+            ];
+        }
+        
+        return predictions;
+    }
+
+    /**
+     * Check if indicator aligns with signal (legacy support)
+     */
+    isIndicatorAligned(indicator, signal) {
+        return this.isEnhancedIndicatorAligned(indicator, signal);
     }
 
     /**

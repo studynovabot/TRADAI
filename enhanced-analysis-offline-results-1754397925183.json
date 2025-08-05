@@ -1,0 +1,183 @@
+{
+  "promptLength": 7685,
+  "requirementsCoverage": "25/25",
+  "extractedData": {
+    "asset": "USD/INR",
+    "timeframe": "3m",
+    "signal": "SELL",
+    "signalConfidence": 80,
+    "overallConfidence": 75,
+    "marketCondition": "Trending Down",
+    "volatilityState": "Compression",
+    "currentPrice": "90.8520",
+    "trendAnalysis": "Downtrend with lower highs and lower lows over last 10 candles, consistent selling pressure",
+    "trendStrength": "Moderate based on 6 consecutive red candles with small bodies",
+    "candlestickBehavior": {
+      "recentCandleSequence": "6 consecutive red candles with small bodies and lower closes, showing weak momentum but clear selling pressure",
+      "bodyVsWickAnalysis": "Small bodies with lower wicks, indicating selling pressure but no strong impulsive moves",
+      "patternRecognition": "Bearish flag formation with potential breakdown, resembles slow drift down pattern",
+      "volatilityAssessment": "Low volatility with candles 50% smaller than historical average, market in compression"
+    },
+    "movingAveragesAnalysis": {
+      "emaPosition": "Price below EMA by 15 pips, yellow line crossed below red line earlier",
+      "emaSlope": "Trending down at moderate angle with current price sitting below both EMAs",
+      "emaMomentum": "Moderate downward movement, EMAs diverging from price",
+      "smaPosition": "Price below SMA by 25 pips, confirming bearish sentiment",
+      "smaSlope": "Trending down steadily with consistent bearish angle",
+      "emaSmaRelationship": "EMA crossed below SMA 6-9 candles ago, currently diverging"
+    },
+    "stochasticAnalysis": {
+      "kValue": "18",
+      "dValue": "22",
+      "zoneStatus": "Oversold <20, in deep oversold territory",
+      "crossStatus": "%K below %D, both lines pointing down without signs of divergence or crossing",
+      "momentumDirection": "Both lines still pointing down without flattening",
+      "divergenceCheck": "No divergence detected between stochastic and price action",
+      "reversalTiming": "1-2 candles based on potential cross prediction, but no clear signals yet"
+    },
+    "nextCandlePredictions": [
+      {
+        "candle": 1,
+        "direction": "DOWN",
+        "confidence": 80,
+        "reasoning": "Continuation of selling likely as momentum is bearish and no stochastic cross or divergence yet, stochastic still falling"
+      },
+      {
+        "candle": 2,
+        "direction": "DOWN",
+        "confidence": 70,
+        "reasoning": "Selling may persist or slow down as oversold stochastic will begin flattening but won't reverse yet"
+      },
+      {
+        "candle": 3,
+        "direction": "UP",
+        "confidence": 75,
+        "reasoning": "Technical bounce probable due to stochastic likely crossing or diverging upwards plus psychological support near 90.8300 could trigger short-covering"
+      }
+    ],
+    "technicalIndicators": {
+      "ema": "Unknown",
+      "sma": "Unknown",
+      "stochastic": "Unknown"
+    },
+    "supportLevels": {
+      "levels": [
+        "90.8500",
+        "90.8300"
+      ],
+      "distance": "22 pips away"
+    },
+    "resistanceLevels": {
+      "levels": [
+        "90.8700",
+        "90.8800"
+      ],
+      "distance": "18 pips away"
+    },
+    "keyPsychologicalLevels": "90.8500 psychological support, 90.8300-90.8000 area",
+    "patternAnalysis": "Bearish channel or bearish flag breakdown, but no strong impulsive move yet, slow drift down pattern",
+    "volumeAnalysis": "Market not very volatile with small candle formations",
+    "riskAssessment": "Break below 90.8500 opens 90.8300-90.8000 area, resistance at 90.8700-90.8800",
+    "confluenceFactors": "Bearish EMA alignment, oversold stochastic without cross, consistent red candles, psychological support test",
+    "technicalScoreBreakdown": {
+      "emaAlignment": "Bearish - Weight: 20%",
+      "smaAlignment": "Bearish - Weight: 20%",
+      "stochasticSignal": "Neutral (oversold but no cross) - Weight: 15%",
+      "trendConfirmation": "Moderate - Weight: 10%",
+      "patternSupport": "Moderate - Weight: 10%",
+      "supportResistance": "Favorable for continuation - Weight: 5%"
+    },
+    "processingTime": "2.5s"
+  },
+  "enhancedAnalysis": {
+    "asset": "USD/INR",
+    "timeframe": "3m",
+    "signal": "SELL",
+    "signalConfidence": 80,
+    "overallConfidence": 75,
+    "marketCondition": "Trending Down",
+    "volatilityState": "Compression",
+    "currentPrice": "90.8520",
+    "trendAnalysis": "Downtrend with lower highs and lower lows over last 10 candles, consistent selling pressure",
+    "trendStrength": "Moderate based on 6 consecutive red candles with small bodies",
+    "candlestickBehavior": {
+      "recentCandleSequence": "6 consecutive red candles with small bodies and lower closes, showing weak momentum but clear selling pressure",
+      "bodyVsWickAnalysis": "Small bodies with lower wicks, indicating selling pressure but no strong impulsive moves",
+      "patternRecognition": "Bearish flag formation with potential breakdown, resembles slow drift down pattern",
+      "volatilityAssessment": "Low volatility with candles 50% smaller than historical average, market in compression"
+    },
+    "movingAveragesAnalysis": {
+      "emaPosition": "Price below EMA by 15 pips, yellow line crossed below red line earlier",
+      "emaSlope": "Trending down at moderate angle with current price sitting below both EMAs",
+      "emaMomentum": "Moderate downward movement, EMAs diverging from price",
+      "smaPosition": "Price below SMA by 25 pips, confirming bearish sentiment",
+      "smaSlope": "Trending down steadily with consistent bearish angle",
+      "emaSmaRelationship": "EMA crossed below SMA 6-9 candles ago, currently diverging"
+    },
+    "stochasticAnalysis": {
+      "kValue": "18",
+      "dValue": "22",
+      "zoneStatus": "Oversold <20, in deep oversold territory",
+      "crossStatus": "%K below %D, both lines pointing down without signs of divergence or crossing",
+      "momentumDirection": "Both lines still pointing down without flattening",
+      "divergenceCheck": "No divergence detected between stochastic and price action",
+      "reversalTiming": "1-2 candles based on potential cross prediction, but no clear signals yet"
+    },
+    "nextCandlePredictions": [
+      {
+        "candle": 1,
+        "direction": "DOWN",
+        "confidence": 80,
+        "reasoning": "Continuation of selling likely as momentum is bearish and no stochastic cross or divergence yet, stochastic still falling"
+      },
+      {
+        "candle": 2,
+        "direction": "DOWN",
+        "confidence": 70,
+        "reasoning": "Selling may persist or slow down as oversold stochastic will begin flattening but won't reverse yet"
+      },
+      {
+        "candle": 3,
+        "direction": "UP",
+        "confidence": 75,
+        "reasoning": "Technical bounce probable due to stochastic likely crossing or diverging upwards plus psychological support near 90.8300 could trigger short-covering"
+      }
+    ],
+    "technicalIndicators": {
+      "ema": "Unknown",
+      "sma": "Unknown",
+      "stochastic": "Unknown"
+    },
+    "supportLevels": {
+      "levels": [
+        "90.8500",
+        "90.8300"
+      ],
+      "distance": "22 pips away"
+    },
+    "resistanceLevels": {
+      "levels": [
+        "90.8700",
+        "90.8800"
+      ],
+      "distance": "18 pips away"
+    },
+    "keyPsychologicalLevels": "90.8500 psychological support, 90.8300-90.8000 area",
+    "patternAnalysis": "Bearish channel or bearish flag breakdown, but no strong impulsive move yet, slow drift down pattern",
+    "volumeAnalysis": "Market not very volatile with small candle formations",
+    "riskAssessment": "Break below 90.8500 opens 90.8300-90.8000 area, resistance at 90.8700-90.8800",
+    "confluenceFactors": "Bearish EMA alignment, oversold stochastic without cross, consistent red candles, psychological support test",
+    "technicalScoreBreakdown": {
+      "emaAlignment": "Bearish - Weight: 20%",
+      "smaAlignment": "Bearish - Weight: 20%",
+      "stochasticSignal": "Neutral (oversold but no cross) - Weight: 15%",
+      "trendConfirmation": "Moderate - Weight: 10%",
+      "patternSupport": "Moderate - Weight: 10%",
+      "supportResistance": "Favorable for continuation - Weight: 5%"
+    },
+    "processingTime": "2.5s"
+  },
+  "scenarioCorrect": true,
+  "stochasticTimingCorrect": true,
+  "timestamp": "2025-08-05T12:45:25.184Z"
+}
