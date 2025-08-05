@@ -14,7 +14,6 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
 const sharp = require('sharp');
 const path = require('path');
-const Tesseract = require('tesseract.js');
 
 class InstitutionalGeminiVisionService {
     constructor(config = {}) {
@@ -29,7 +28,6 @@ class InstitutionalGeminiVisionService {
             
             // Institutional-grade configuration options
             imagePreprocessing: config.imagePreprocessing !== false,
-            ocrEnabled: config.ocrEnabled !== false,
             advancedPatternDetection: config.advancedPatternDetection !== false,
             multiTimeframeAnalysis: config.multiTimeframeAnalysis !== false,
             volumeAnalysis: config.volumeAnalysis !== false,
@@ -53,7 +51,6 @@ class InstitutionalGeminiVisionService {
             sellSignals: 0,
             averageConfidence: 0,
             averageProcessingTime: 0,
-            ocrSuccessRate: 0,
             patternDetections: 0,
             confluenceScores: [],
             indicatorAccuracy: {
@@ -97,31 +94,6 @@ class InstitutionalGeminiVisionService {
             uncertaintyPenalty: -10
         };
 
-        // OCR worker for text extraction
-        this.ocrWorker = null;
-    }
-
-    /**
-     * Initialize OCR worker
-     */
-    async initializeOCR() {
-        if (!this.config.ocrEnabled) {
-            console.log('📝 OCR disabled in configuration');
-            return;
-        }
-
-        try {
-            console.log('🔍 Initializing OCR worker for chart metadata extraction...');
-            this.ocrWorker = await Tesseract.createWorker('eng');
-            await this.ocrWorker.setParameters({
-                tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/:-. ',
-                tessedit_pageseg_mode: Tesseract.PSM.SPARSE_TEXT
-            });
-            console.log('✅ OCR worker initialized successfully');
-        } catch (error) {
-            console.warn('⚠️ OCR initialization failed:', error.message);
-            this.config.ocrEnabled = false;
-        }
     }
 
     /**
@@ -220,7 +192,6 @@ class InstitutionalGeminiVisionService {
             }
 
             this.initializeCurrentClient();
-            await this.initializeOCR();
             await this.testConnection();
 
             this.isInitialized = true;
@@ -231,7 +202,6 @@ class InstitutionalGeminiVisionService {
                 message: 'Institutional Gemini Vision Service ready',
                 features: {
                     imagePreprocessing: this.config.imagePreprocessing,
-                    ocrEnabled: this.config.ocrEnabled,
                     advancedPatternDetection: this.config.advancedPatternDetection,
                     multiTimeframeAnalysis: this.config.multiTimeframeAnalysis,
                     volumeAnalysis: this.config.volumeAnalysis,
@@ -335,136 +305,7 @@ class InstitutionalGeminiVisionService {
         };
     }
 
-    /**
-     * 🔍 OCR Chart Metadata Extraction
-     */
-    async extractChartMetadata(imageBuffer) {
-        if (!this.config.ocrEnabled || !this.ocrWorker) {
-            console.log('📝 OCR disabled or not initialized');
-            return {
-                currencyPair: 'Auto-detect',
-                timeframe: 'Auto-detect',
-                platform: 'Trading Platform'
-            };
-        }
 
-        try {
-            console.log('🔍 Extracting chart metadata using OCR...');
-            
-            // Create a focused crop for UI elements
-            const uiCrop = await this.createUIFocusedCrop(imageBuffer);
-            
-            const { data: { text } } = await this.ocrWorker.recognize(uiCrop);
-            console.log('📝 OCR extracted text:', text);
-
-            const metadata = this.parseOCRText(text);
-            
-            this.institutionalStats.ocrSuccessRate = 
-                (this.institutionalStats.ocrSuccessRate * this.institutionalStats.totalAnalyses + 
-                 (metadata.currencyPair !== 'Auto-detect' ? 1 : 0)) / 
-                (this.institutionalStats.totalAnalyses + 1);
-
-            console.log('✅ Chart metadata extracted:', metadata);
-            return metadata;
-        } catch (error) {
-            console.warn('⚠️ OCR metadata extraction failed:', error.message);
-            return {
-                currencyPair: 'Auto-detect',
-                timeframe: 'Auto-detect',
-                platform: 'Trading Platform'
-            };
-        }
-    }
-
-    /**
-     * Create UI-focused crop for OCR
-     */
-    async createUIFocusedCrop(imageBuffer) {
-        try {
-            const image = sharp(imageBuffer);
-            const metadata = await image.metadata();
-            
-            // Extract top portion for timeframe/currency pair
-            const topCrop = await image
-                .extract({
-                    left: 0,
-                    top: 0,
-                    width: metadata.width,
-                    height: Math.floor(metadata.height * 0.15)
-                })
-                .png()
-                .toBuffer();
-
-            return topCrop;
-        } catch (error) {
-            console.warn('⚠️ UI crop failed, using original image');
-            return imageBuffer;
-        }
-    }
-
-    /**
-     * Parse OCR text to extract trading metadata
-     */
-    parseOCRText(text) {
-        const metadata = {
-            currencyPair: 'Auto-detect',
-            timeframe: 'Auto-detect',
-            platform: 'Trading Platform'
-        };
-
-        // Currency pair patterns
-        const currencyPatterns = [
-            /([A-Z]{3}\/[A-Z]{3})/g,
-            /([A-Z]{3}[A-Z]{3})/g,
-            /(USD|EUR|GBP|JPY|AUD|CAD|CHF|NZD|INR|BDT|SGD|HKD|CNY|KRW|THB|MYR|IDR|PHP|VND|TWD|ZAR|RUB|BRL|MXN|TRY|PLN|CZK|HUF|NOK|SEK|DKK|ILS|AED|SAR|QAR|KWD|BHD|OMR|JOD|LBP|EGP|MAD|TND|DZD|LYD|SDG|ETB|KES|UGX|TZS|RWF|BIF|MGA|MUR|SCR|SZL|LSL|BWP|NAD|ZMW|MWK|MZN|AOA|XAF|XOF|XPF|CVE|STP|GNF|SLL|LRD|GMD|GHS|NGN|XAG|XAU|XPD|XPT|BTC|ETH|LTC|XRP|ADA|DOT|LINK|UNI|AAVE|COMP|MKR|SNX|YFI|SUSHI|CRV|BAL|REN|KNC|ZRX|OMG|LRC|ANT|REP|GNT|BAT|ZIL|ICX|VET|TRX|EOS|XLM|ADA|IOTA|NEO|QTUM|ONT|ZEC|DASH|XMR|ETC|BCH|BSV|LTC|DOGE|SHIB|MATIC|AVAX|SOL|LUNA|UST|BUSD|USDC|USDT|DAI|TUSD|PAX|GUSD|HUSD|SUSD|DUSD|FRAX|LUSD|OUSD|USDP|USDN|USDK|EURS|EURT|XAUT|PAXG|DGX|CACHE|WBTC|RENBTC|HBTC|BTCB|TBTC|BBTC|OBTC|imBTC|pBTC|sBTC|tBTC|vBTC|wBTC|yBTC|zBTC|WETH|stETH|rETH|sETH|aETH|cETH|yETH|BETH|ETH2|SETH2|RETH2|STETH|ANKRETH|SWETH|CBETH|LSETH|FRXETH|SFRXETH|OETH|RETH|WSTETH|STETH|ROCKET|RPL|LDO|FXS|CVX|CRV|BAL|AURA|PENDLE|GNS|GMX|DYDX|PERP|MCDEX|HEGIC|OPYN|RIBBON|DOPEX|JONES|UMAMI|VELA|GAINS|KWENTA|LYRA|PREMIA|AEVO|DERI|MCDX|PERP|DYDX|GMX|GNS|GAINS|VELA|UMAMI|JONES|DOPEX|RIBBON|OPYN|HEGIC|MCDEX|KWENTA|LYRA|PREMIA|AEVO|DERI)/gi
-        ];
-
-        // Timeframe patterns
-        const timeframePatterns = [
-            /(\d+[smhd])/gi,
-            /(\d+\s*(?:sec|min|hour|day|week|month))/gi,
-            /(1m|3m|5m|15m|30m|1h|2h|4h|6h|8h|12h|1d|3d|1w|1M)/gi
-        ];
-
-        // Platform patterns
-        const platformPatterns = [
-            /(MetaTrader|MT4|MT5|TradingView|IQ\s*Option|Olymp\s*Trade|Binomo|Pocket\s*Option|Expert\s*Option|Quotex|Deriv|Binary\.com|Spectre|RaceOption|Nadex|IG|Plus500|eToro|XM|FXCM|OANDA|Interactive\s*Brokers|TD\s*Ameritrade|E\*TRADE|Charles\s*Schwab|Fidelity|Robinhood|Webull|Alpaca|Zerodha|Upstox|Angel\s*Broking|5paisa|IIFL|Motilal\s*Oswal|Sharekhan|HDFC\s*Securities|ICICI\s*Direct|Kotak\s*Securities|Axis\s*Direct|SBI\s*Securities|Paytm\s*Money|Groww|Kite|Coin|CoinDCX|WazirX|Bitbns|ZebPay|CoinSwitch|Unocoin|BuyUcoin|Giottus|Bitex|Delta\s*Exchange|Vauld|Mudrex|CoinTracker|Koinly|Blockfolio|Delta|CoinStats|Crypto\.com|Binance|Coinbase|Kraken|Bitfinex|Huobi|OKEx|KuCoin|Gate\.io|Bybit|FTX|Bitget|MEXC|Phemex|Deribit|BitMEX|Perpetual\s*Protocol|dYdX|Synthetix|Uniswap|SushiSwap|PancakeSwap|Curve|Balancer|Aave|Compound|MakerDAO|Yearn|Convex|Frax|Liquity|Reflexer|Fei|Olympus|Klima|Wonderland|Time|Spell|Abracadabra|Popsicle|Beefy|Harvest|Pickle|Alpha|Cream|Iron\s*Bank|Rari|Fuse|Euler|Notional|Element|Pendle|APWine|Sense|Tempus|Ribbon|Opyn|Hegic|Dopex|Jones|Umami|Vela|Gains|Kwenta|Lyra|Premia|Aevo|Deri)/gi
-        ];
-
-        // Extract currency pair
-        for (const pattern of currencyPatterns) {
-            const matches = text.match(pattern);
-            if (matches && matches.length > 0) {
-                let pair = matches[0].toUpperCase();
-                // Format as XXX/YYY if not already
-                if (pair.length === 6 && !pair.includes('/')) {
-                    pair = pair.substring(0, 3) + '/' + pair.substring(3);
-                }
-                metadata.currencyPair = pair;
-                break;
-            }
-        }
-
-        // Extract timeframe
-        for (const pattern of timeframePatterns) {
-            const matches = text.match(pattern);
-            if (matches && matches.length > 0) {
-                metadata.timeframe = matches[0].toLowerCase();
-                break;
-            }
-        }
-
-        // Extract platform
-        for (const pattern of platformPatterns) {
-            const matches = text.match(pattern);
-            if (matches && matches.length > 0) {
-                metadata.platform = matches[0];
-                break;
-            }
-        }
-
-        return metadata;
-    }
 
     /**
      * Detect MIME type from image buffer
@@ -495,8 +336,12 @@ class InstitutionalGeminiVisionService {
 
             console.log('🏛️ Starting Institutional Gemini Vision Analysis...');
 
-            // 1️⃣ Extract Chart Metadata using OCR
-            const chartMetadata = await this.extractChartMetadata(imageBuffer);
+            // 1️⃣ Use Gemini for chart metadata extraction (no OCR needed)
+            const chartMetadata = {
+                currencyPair: 'Auto-detect',
+                timeframe: 'Auto-detect',
+                platform: 'Trading Platform'
+            };
 
             // 2️⃣ Institutional Image Preprocessing
             const processedImageBuffer = await this.preprocessImage(imageBuffer, options);
@@ -1325,10 +1170,8 @@ Generated: ${new Date().toISOString()}
      * Cleanup resources
      */
     async cleanup() {
-        if (this.ocrWorker) {
-            await this.ocrWorker.terminate();
-            console.log('🧹 OCR worker terminated');
-        }
+        // No cleanup needed for pure Gemini implementation
+        console.log('🧹 Institutional service cleanup completed');
     }
 }
 

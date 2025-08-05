@@ -7,25 +7,8 @@
  */
 
 const ProductionGeminiVisionService = require('../../services/ProductionGeminiVisionService');
-const multer = require('multer');
-const { promisify } = require('util');
-
-// Configure multer for memory storage
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB limit
-    },
-    fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed'), false);
-        }
-    }
-});
-
-const uploadSingle = promisify(upload.single('image'));
+const formidable = require('formidable');
+const fs = require('fs');
 
 // Initialize the production service
 let productionService = null;
@@ -77,38 +60,51 @@ export default async function handler(req, res) {
         // Initialize service
         const service = await initializeService();
 
-        // Handle file upload
-        await uploadSingle(req, res);
+        // Handle file upload with formidable
+        const form = formidable({
+            maxFileSize: 10 * 1024 * 1024, // 10MB limit
+            keepExtensions: true,
+            multiples: false
+        });
 
-        if (!req.file) {
+        const [fields, files] = await form.parse(req);
+
+        // Get the uploaded image file
+        const imageFile = files.image?.[0];
+        if (!imageFile) {
             return res.status(400).json({
                 success: false,
                 error: 'No image file provided. Please upload an image.'
             });
         }
 
-        console.log(`📷 Image received: ${req.file.originalname} (${req.file.size} bytes)`);
+        console.log(`📷 Image received: ${imageFile.originalFilename} (${imageFile.size} bytes)`);
+
+        // Read image buffer
+        const imageBuffer = fs.readFileSync(imageFile.filepath);
 
         // Validate image
-        if (!req.file.buffer || req.file.size === 0) {
+        if (!imageBuffer || imageBuffer.length === 0) {
             return res.status(400).json({
                 success: false,
                 error: 'Invalid or empty image file'
             });
         }
 
+        // Clean up temporary file
+        fs.unlinkSync(imageFile.filepath);
+
         // Extract options from request
         const options = {
-            debugMode: req.body?.debugMode === 'true' || false,
-            imagePreprocessing: req.body?.imagePreprocessing !== 'false',
-            // Add any other options from request body
-            ...req.body
+            debugMode: fields.debugMode?.[0] === 'true' || false,
+            imagePreprocessing: fields.imagePreprocessing?.[0] !== 'false',
+            // Add any other options from fields
         };
 
         console.log('🔍 Starting production chart analysis...');
 
         // Perform analysis
-        const result = await service.analyzeChartImage(req.file.buffer, options);
+        const result = await service.analyzeChartImage(imageBuffer, options);
 
         const totalTime = Date.now() - startTime;
 
@@ -128,9 +124,9 @@ export default async function handler(req, res) {
                     endpoint: 'production-gemini-vision',
                     requestId: `prod-${Date.now()}`,
                     imageInfo: {
-                        originalName: req.file.originalname,
-                        size: req.file.size,
-                        mimeType: req.file.mimetype
+                        originalName: imageFile.originalFilename,
+                        size: imageFile.size,
+                        mimeType: imageFile.mimetype
                     }
                 },
                 serviceStats: stats

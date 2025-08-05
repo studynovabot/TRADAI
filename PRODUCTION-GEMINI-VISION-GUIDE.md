@@ -71,7 +71,7 @@ GOOGLE_VISION_API_KEY=your_gemini_api_key_here
 The system uses these key dependencies:
 - `@google/generative-ai` - Gemini API client
 - `sharp` - Image preprocessing
-- `multer` - File upload handling
+- `formidable` - File upload handling
 
 ---
 
