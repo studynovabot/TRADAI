@@ -1,0 +1,25 @@
+{
+  "setupResults": {
+    "dependencies": {
+      "checked": true,
+      "installed": [
+        "axios",
+        "form-data"
+      ]
+    },
+    "environment": {
+      "checked": true,
+      "valid": false
+    },
+    "files": {
+      "checked": true,
+      "created": []
+    },
+    "tests": {
+      "run": true,
+      "passed": true
+    }
+  },
+  "timestamp": "2025-08-07T11:51:36.774Z",
+  "systemReady": false
+}
