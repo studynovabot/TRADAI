@@ -63,7 +63,7 @@ export default async function handler(req, res) {
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
         // Create comprehensive analysis prompt
         const prompt = `You are an expert trading analyst. Analyze this ${asset} ${timeframe} chart image and provide a comprehensive trading signal analysis.
@@ -161,7 +161,7 @@ Remember: NO HOLD signals allowed - always choose BUY or SELL based on the stron
             confidence: analysis.overallConfidence,
             processingTime: processingTime,
             metadata: {
-                model: 'gemini-1.5-flash',
+                model: 'gemini-2.5-flash',
                 timestamp: new Date().toISOString(),
                 imageSize: imageBuffer.length,
                 analysisMethod: 'Working Gemini Vision with NO HOLD Guarantee',

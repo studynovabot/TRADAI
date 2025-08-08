@@ -172,7 +172,7 @@ Remember: NO HOLD signals allowed - always choose BUY or SELL based on the stron
             confidence: analysis.overallConfidence,
             processingTime: processingTime,
             metadata: {
-                model: 'gemini-1.5-flash',
+                model: 'gemini-2.5-flash',
                 timestamp: new Date().toISOString(),
                 imageSize: imageBuffer.length,
                 analysisMethod: 'Final Gemini Vision with NO HOLD Guarantee',
@@ -203,7 +203,7 @@ function makeHttpsRequest(apiKey, requestBody) {
         const options = {
             hostname: 'generativelanguage.googleapis.com',
             port: 443,
-            path: `/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            path: `/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

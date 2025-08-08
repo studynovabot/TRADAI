@@ -19,7 +19,7 @@ class InstitutionalGeminiVisionService {
     constructor(config = {}) {
         this.config = {
             apiKeys: config.apiKeys || null,
-            models: config.models || ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro'],
+            models: config.models || ['gemini-2.5-flash', 'gemini-2.5-flash-latest', 'gemini-1.5-pro'],
             temperature: config.temperature || 0.05, // Lower for more precise analysis
             maxTokens: config.maxTokens || 12000, // Increased for detailed analysis
             timeout: config.timeout || 120000, // Increased timeout for complex analysis

@@ -15,7 +15,7 @@ class ProductionGeminiVisionService {
     constructor(config = {}) {
         this.config = {
             apiKeys: config.apiKeys || null,
-            models: config.models || ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro'],
+            models: config.models || ['gemini-2.5-flash', 'gemini-2.5-flash-latest', 'gemini-1.5-pro'],
             temperature: config.temperature || 0.1,
             maxTokens: config.maxTokens || 8000,
             timeout: config.timeout || 90000,

@@ -10,7 +10,7 @@ class GeminiAnalysisService {
     constructor(config = {}) {
         this.config = {
             apiKeys: config.apiKeys || this.loadApiKeysFromEnv(),
-            models: config.models || ['gemini-1.5-flash', 'gemini-1.5-flash-latest'],
+            models: config.models || ['gemini-2.5-flash', 'gemini-2.5-flash-latest'],
             temperature: config.temperature || 0.1,
             maxTokens: config.maxTokens || 4000,
             timeout: config.timeout || 60000,

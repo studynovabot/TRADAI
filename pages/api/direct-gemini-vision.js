@@ -131,7 +131,7 @@ Remember: NO HOLD signals allowed - always choose BUY or SELL based on the stron
         console.log('🤖 Sending direct HTTP request to Gemini API...');
 
         // Make direct HTTP request to Gemini API
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
         
         const response = await fetch(geminiUrl, {
             method: 'POST',
@@ -186,7 +186,7 @@ Remember: NO HOLD signals allowed - always choose BUY or SELL based on the stron
             confidence: analysis.overallConfidence,
             processingTime: processingTime,
             metadata: {
-                model: 'gemini-1.5-flash',
+                model: 'gemini-2.5-flash',
                 timestamp: new Date().toISOString(),
                 imageSize: imageBuffer.length,
                 analysisMethod: 'Direct Gemini Vision with NO HOLD Guarantee',
