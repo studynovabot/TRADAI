@@ -20,7 +20,14 @@
     "test:system": "node test-deterministic-system.js",
     "test:system-full": "node test-deterministic-system.js --benchmark",
     "test:system-unit-only": "node test-deterministic-system.js --skip-api",
-    "test:system-api-only": "node test-deterministic-system.js --skip-unit"
+    "test:system-api-only": "node test-deterministic-system.js --skip-unit",
+    "setup:firebase": "node setup-firebase.js",
+    "test:prediction-system": "node test-prediction-system.js",
+    "test:features": "node -e \"const FeatureExtractionService = require('./services/FeatureExtractionService'); const service = new FeatureExtractionService(); console.log('Feature extraction service loaded successfully');\"",
+    "test:chart": "node test-chart-analysis.js",
+    "test:deployed": "node test-deployed-app.js",
+    "deploy": "node deploy-to-vercel.js",
+    "deploy:quick": "vercel --prod"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -33,11 +40,15 @@
     "axios": "^1.11.0",
     "class-variance-authority": "0.7.0",
     "clsx": "2.1.1",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.0",
+    "firebase": "^12.1.0",
+    "firebase-admin": "^13.4.0",
     "form-data": "^4.0.4",
     "formidable": "^3.5.4",
     "framer-motion": "11.3.19",
     "lucide-react": "^0.534.0",
+    "multer": "^2.0.2",
     "next": "14.2.5",
     "node-fetch": "^2.7.0",
     "postcss": "8.4.40",
@@ -46,7 +57,9 @@
     "sharp": "^0.33.5",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "3.4.7",
-    "typescript": "5.5.4"
+    "typescript": "5.5.4",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "eslint": "8.57.0",

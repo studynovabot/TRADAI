@@ -1,0 +1,82 @@
+// Firestore Security Rules for TRADAI Prediction System
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Predictions collection - users can only access their own predictions
+    match /predictions/{predictionId} {
+      // Allow users to create predictions for themselves
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && isValidPrediction(request.resource.data);
+      
+      // Allow users to read their own predictions
+      // Allow admins to read any prediction
+      allow read: if request.auth != null 
+        && (resource.data.userId == request.auth.uid 
+            || hasAdminRole(request.auth));
+      
+      // Allow users to update feedback on their own predictions
+      // Allow admins to update any prediction
+      allow update: if request.auth != null 
+        && (resource.data.userId == request.auth.uid 
+            || hasAdminRole(request.auth))
+        && isValidUpdate(resource.data, request.resource.data);
+      
+      // Only admins can delete predictions
+      allow delete: if request.auth != null 
+        && hasAdminRole(request.auth);
+    }
+    
+    // Training queue collection - admin only
+    match /training_queue/{queueId} {
+      allow read, write: if request.auth != null 
+        && hasAdminRole(request.auth);
+    }
+    
+    // User stats collection (if we add it later)
+    match /user_stats/{userId} {
+      allow read, write: if request.auth != null 
+        && (userId == request.auth.uid || hasAdminRole(request.auth));
+    }
+    
+    // Model versions collection - read for all authenticated users, write for admins
+    match /model_versions/{versionId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && hasAdminRole(request.auth);
+    }
+    
+    // Functions to validate data and check permissions
+    function hasAdminRole(auth) {
+      return auth.token.admin == true || auth.token.role == 'admin';
+    }
+    
+    function isValidPrediction(data) {
+      return data.keys().hasAll(['userId', 'timestamp', 'predictions', 'features', 'feedback', 'status'])
+        && data.userId is string
+        && data.timestamp is timestamp
+        && data.predictions is map
+        && data.features is map
+        && data.feedback is map
+        && data.status in ['pending_verification', 'partial_feedback', 'labeled']
+        && data.feedback.keys().hasAll(['1', '2', '3']);
+    }
+    
+    function isValidUpdate(oldData, newData) {
+      // Only allow updates to feedback, status, and timestamp fields
+      return newData.diff(oldData).affectedKeys().hasOnly(['feedback', 'status', 'updatedAt', 'feedbackTimestamp', 'feedbackComment'])
+        && newData.userId == oldData.userId  // User ID cannot change
+        && newData.predictionId == oldData.predictionId  // Prediction ID cannot change
+        && isValidFeedback(newData.feedback);
+    }
+    
+    function isValidFeedback(feedback) {
+      return feedback is map
+        && feedback.keys().hasAll(['1', '2', '3'])
+        && feedback.keys().hasOnly(['1', '2', '3'])
+        && (feedback['1'] == null || feedback['1'] is bool)
+        && (feedback['2'] == null || feedback['2'] is bool)
+        && (feedback['3'] == null || feedback['3'] is bool);
+    }
+  }
+}

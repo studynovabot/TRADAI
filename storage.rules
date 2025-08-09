@@ -1,0 +1,44 @@
+// Firebase Storage Security Rules for TRADAI Prediction System
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Prediction images - users can upload, admins can read/delete
+    match /images/predictions/{predictionId}.{extension} {
+      // Allow authenticated users to upload images
+      allow create: if request.auth != null
+        && isValidImageUpload(request.resource)
+        && extension in ['jpg', 'jpeg', 'png', 'webp'];
+      
+      // Allow users to read their own images (via server-side verification)
+      // Allow admins to read any image
+      allow read: if request.auth != null;
+      
+      // Only admins can delete images
+      allow delete: if request.auth != null 
+        && hasAdminRole(request.auth);
+    }
+    
+    // Model artifacts - admin only
+    match /models/{modelPath=**} {
+      allow read, write: if request.auth != null 
+        && hasAdminRole(request.auth);
+    }
+    
+    // Training data exports - admin only
+    match /training_data/{dataPath=**} {
+      allow read, write: if request.auth != null 
+        && hasAdminRole(request.auth);
+    }
+    
+    // Validation functions
+    function hasAdminRole(auth) {
+      return auth.token.admin == true || auth.token.role == 'admin';
+    }
+    
+    function isValidImageUpload(resource) {
+      return resource.size < 10 * 1024 * 1024  // Max 10MB
+        && resource.contentType.matches('image/.*');
+    }
+  }
+}

@@ -37,6 +37,18 @@
     },
     "pages/api/ultimate-gemini-vision.js": {
       "maxDuration": 300
+    },
+    "pages/api/predict.js": {
+      "maxDuration": 300
+    },
+    "pages/api/feedback.js": {
+      "maxDuration": 60
+    },
+    "pages/api/predictions.js": {
+      "maxDuration": 60
+    },
+    "pages/api/retrain-request.js": {
+      "maxDuration": 300
     }
   },
   "regions": ["iad1"],
@@ -84,6 +96,30 @@
     {
       "src": "/api/ultimate-gemini-vision",
       "dest": "/api/ultimate-gemini-vision"
+    },
+    {
+      "src": "/api/predict",
+      "dest": "/api/predict"
+    },
+    {
+      "src": "/api/feedback",
+      "dest": "/api/feedback"
+    },
+    {
+      "src": "/api/predictions",
+      "dest": "/api/predictions"
+    },
+    {
+      "src": "/api/retrain-request",
+      "dest": "/api/retrain-request"
+    },
+    {
+      "src": "/predictions",
+      "dest": "/predictions"
+    },
+    {
+      "src": "/demo",
+      "dest": "/demo"
     }
   ]
 }
