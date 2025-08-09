@@ -1,0 +1,85 @@
+{
+  "unitTests": {
+    "passed": 10,
+    "failed": 0,
+    "total": 10,
+    "details": [
+      {
+        "name": "Service Initialization",
+        "status": "PASSED",
+        "duration": 1316,
+        "error": null
+      },
+      {
+        "name": "Prompt Generation",
+        "status": "PASSED",
+        "duration": 1370,
+        "error": null
+      },
+      {
+        "name": "Timestamp Calculation",
+        "status": "PASSED",
+        "duration": 4,
+        "error": null
+      },
+      {
+        "name": "Timeframe Conversion",
+        "status": "PASSED",
+        "duration": 1,
+        "error": null
+      },
+      {
+        "name": "Response Schema Validation",
+        "status": "PASSED",
+        "duration": 7,
+        "error": null
+      },
+      {
+        "name": "Sanity Checks and Overrides",
+        "status": "PASSED",
+        "duration": 1,
+        "error": null
+      },
+      {
+        "name": "Performance Metrics Tracking",
+        "status": "PASSED",
+        "duration": 2,
+        "error": null
+      },
+      {
+        "name": "Image Preprocessing",
+        "status": "PASSED",
+        "duration": 40,
+        "error": null
+      },
+      {
+        "name": "Prompt Module Integration",
+        "status": "PASSED",
+        "duration": 1,
+        "error": null
+      },
+      {
+        "name": "Error Handling and Recovery",
+        "status": "PASSED",
+        "duration": 5,
+        "error": null
+      }
+    ]
+  },
+  "integrationTests": null,
+  "apiTests": null,
+  "overallSuccess": true,
+  "totalTests": 10,
+  "totalPassed": 10,
+  "totalFailed": 0,
+  "startTime": 1754708222537,
+  "endTime": 1754708225349,
+  "duration": 2812,
+  "timestamp": "2025-08-09T02:57:05.357Z",
+  "environment": {
+    "nodeVersion": "v22.15.0",
+    "platform": "win32",
+    "arch": "x64",
+    "cwd": "E:\\Ranveer\\TRADAI"
+  }
+}

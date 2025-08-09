@@ -14,7 +14,13 @@
     "test:ultimate": "node test-ultimate-gemini.js",
     "test:ultimate-mock": "node test-ultimate-mock.js",
     "test:ultimate-service": "node test-ultimate-service.js",
-    "test:backtesting": "node -e \"const BacktestingService = require('./services/BacktestingService'); const service = new BacktestingService(); console.log('Backtesting service test passed');\""
+    "test:backtesting": "node -e \"const BacktestingService = require('./services/BacktestingService'); const service = new BacktestingService(); console.log('Backtesting service test passed');\"",
+    "test:deterministic": "node test/deterministic-analysis-tests.js",
+    "test:api": "node test/api-integration-tests.js",
+    "test:system": "node test-deterministic-system.js",
+    "test:system-full": "node test-deterministic-system.js --benchmark",
+    "test:system-unit-only": "node test-deterministic-system.js --skip-api",
+    "test:system-api-only": "node test-deterministic-system.js --skip-unit"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

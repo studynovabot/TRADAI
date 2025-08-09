@@ -1,0 +1,73 @@
+{
+  "passed": 8,
+  "failed": 2,
+  "total": 10,
+  "details": [
+    {
+      "name": "Service Initialization",
+      "status": "PASSED",
+      "duration": 1782,
+      "error": null
+    },
+    {
+      "name": "Prompt Generation",
+      "status": "FAILED",
+      "duration": 0,
+      "error": "User prompt missing closed candle rule"
+    },
+    {
+      "name": "Timestamp Calculation",
+      "status": "PASSED",
+      "duration": 2,
+      "error": null
+    },
+    {
+      "name": "Timeframe Conversion",
+      "status": "PASSED",
+      "duration": 0,
+      "error": null
+    },
+    {
+      "name": "Response Schema Validation",
+      "status": "PASSED",
+      "duration": 4,
+      "error": null
+    },
+    {
+      "name": "Sanity Checks and Overrides",
+      "status": "PASSED",
+      "duration": 0,
+      "error": null
+    },
+    {
+      "name": "Performance Metrics Tracking",
+      "status": "FAILED",
+      "duration": 0,
+      "error": "High confidence distribution incorrect"
+    },
+    {
+      "name": "Image Preprocessing",
+      "status": "PASSED",
+      "duration": 82,
+      "error": null
+    },
+    {
+      "name": "Prompt Module Integration",
+      "status": "PASSED",
+      "duration": 1,
+      "error": null
+    },
+    {
+      "name": "Error Handling and Recovery",
+      "status": "PASSED",
+      "duration": 5,
+      "error": null
+    }
+  ],
+  "timestamp": "2025-08-09T02:54:27.917Z",
+  "environment": {
+    "nodeVersion": "v22.15.0",
+    "platform": "win32",
+    "arch": "x64"
+  }
+}
