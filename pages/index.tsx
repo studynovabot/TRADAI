@@ -77,6 +77,8 @@ export default function Home() {
 
   const API_BASE_URL = 'https://tradai-4c8p4mlkz-ranveer-singh-rajputs-projects.vercel.app';
 
+
+
   // Health check function
   const checkApiHealth = async () => {
     setIsCheckingHealth(true);
@@ -1318,6 +1320,9 @@ Processing Time: ${analysisResult.processingTime ? `${(analysisResult.processing
                   <div className="text-sm font-medium text-gray-700 mb-2">API Endpoint</div>
                   <div className="text-xs text-gray-600 font-mono break-all">
                     {API_BASE_URL}/api/gemini-vision-signal
+                  </div>
+                  <div className="text-xs text-blue-600 mt-1">
+                    🔮 Now powered by Multi-Scenario Analysis
                   </div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-4">

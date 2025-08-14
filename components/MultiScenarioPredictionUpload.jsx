@@ -19,7 +19,7 @@ const MultiScenarioPredictionUpload = ({ onPredictionCreated }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState(null);
-  const [analysisMode, setAnalysisMode] = useState('multi-scenario'); // 'multi-scenario' or 'legacy'
+  const [analysisMode, setAnalysisMode] = useState('multi-scenario'); // Always use multi-scenario
   const fileInputRef = useRef(null);
 
   const handleImageSelect = (event) => {
@@ -78,6 +78,9 @@ const MultiScenarioPredictionUpload = ({ onPredictionCreated }) => {
       const apiEndpoint = analysisMode === 'multi-scenario' 
         ? '/api/multi-scenario-predict' 
         : '/api/predict';
+      
+      console.log(`🎯 Analysis Mode: ${analysisMode}`);
+      console.log(`🌐 API Endpoint: ${apiEndpoint}`);
 
       // Submit to API
       setUploadProgress(60);
@@ -148,37 +151,18 @@ const MultiScenarioPredictionUpload = ({ onPredictionCreated }) => {
 
   return (
     <div className="space-y-6">
-      {/* Analysis Mode Selector */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            🎯 Analysis Mode
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <Button
-              variant={analysisMode === 'multi-scenario' ? 'default' : 'outline'}
-              onClick={() => setAnalysisMode('multi-scenario')}
-              className="flex-1"
-            >
-              🔮 Multi-Scenario Analysis
-              <Badge variant="secondary" className="ml-2">New</Badge>
-            </Button>
-            <Button
-              variant={analysisMode === 'legacy' ? 'default' : 'outline'}
-              onClick={() => setAnalysisMode('legacy')}
-              className="flex-1"
-            >
-              📊 Classic Analysis
-            </Button>
+      {/* Multi-Scenario Info Banner */}
+      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="text-2xl">🔮</div>
+            <div>
+              <h3 className="font-semibold text-blue-900">Multi-Scenario Analysis Active</h3>
+              <p className="text-sm text-blue-700">
+                Generate multiple possible scenarios for the next 3 candles with probability rankings and AI reasoning
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-gray-600 mt-2">
-            {analysisMode === 'multi-scenario' 
-              ? 'Generate multiple possible scenarios for the next 3 candles with probability rankings'
-              : 'Traditional single-path prediction for the next 3 candles'
-            }
-          </p>
         </CardContent>
       </Card>
 
@@ -186,12 +170,10 @@ const MultiScenarioPredictionUpload = ({ onPredictionCreated }) => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            📊 Chart Analysis Upload
-            {analysisMode === 'multi-scenario' && (
-              <Badge variant="outline" className="text-xs">
-                Multi-Scenario Mode
-              </Badge>
-            )}
+            🔮 Multi-Scenario Chart Analysis
+            <Badge variant="default" className="text-xs">
+              Multiple Scenarios
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -242,10 +224,7 @@ const MultiScenarioPredictionUpload = ({ onPredictionCreated }) => {
                 <div className="space-y-2">
                   <Progress value={uploadProgress} className="w-full" />
                   <p className="text-sm text-center text-gray-600">
-                    {analysisMode === 'multi-scenario' 
-                      ? `Generating scenarios... ${uploadProgress}%`
-                      : `Analyzing chart... ${uploadProgress}%`
-                    }
+                    Generating multiple scenarios... {uploadProgress}%
                   </p>
                 </div>
               )}
@@ -253,10 +232,7 @@ const MultiScenarioPredictionUpload = ({ onPredictionCreated }) => {
               {!isUploading && !prediction && (
                 <div className="text-center">
                   <Button onClick={handleUpload} size="lg">
-                    {analysisMode === 'multi-scenario' 
-                      ? '🔮 Generate Scenarios'
-                      : '🔍 Analyze Chart'
-                    }
+                    🔮 Generate Multiple Scenarios
                   </Button>
                 </div>
               )}
@@ -276,14 +252,9 @@ const MultiScenarioPredictionUpload = ({ onPredictionCreated }) => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              <span>
-                {prediction.analysisType === 'multi-scenario' 
-                  ? '🎯 Multi-Scenario Predictions'
-                  : '🎯 AI Prediction Results'
-                }
-              </span>
+              <span>🎯 Multi-Scenario Predictions</span>
               <Badge variant="outline">
-                {prediction.modelVersion}
+                {prediction.modelVersion || 'Multi-Scenario v1.0'}
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -304,44 +275,29 @@ const MultiScenarioPredictionUpload = ({ onPredictionCreated }) => {
               </div>
             </div>
 
-            {/* Multi-Scenario Display */}
-            {prediction.analysisType === 'multi-scenario' && prediction.scenarios ? (
+            {/* Multi-Scenario Display - Always show scenarios */}
+            {prediction.scenarios && prediction.scenarios.length > 0 ? (
               <ScenarioCards 
                 scenarios={prediction.scenarios}
                 mostLikelyPath={prediction.mostLikelyPath}
               />
             ) : (
-              /* Legacy 3-Candle Predictions */
-              <div>
-                <h3 className="text-lg font-semibold mb-4">Next 3 Candles Prediction</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {Object.entries(prediction.predictions).map(([candleNum, candlePred]) => (
-                    <Card key={candleNum} className="border-2">
-                      <CardContent className="p-4">
-                        <div className="text-center space-y-2">
-                          <div className="text-lg font-bold">
-                            Candle {candleNum}
-                          </div>
-                          <div className="text-3xl">
-                            {getDirectionIcon(candlePred.direction)}
-                          </div>
-                          <div className="text-xl font-semibold">
-                            {candlePred.direction}
-                          </div>
-                          <div className="flex items-center justify-center">
-                            <div 
-                              className={`px-3 py-1 rounded-full text-white text-sm ${getConfidenceColor(candlePred.probability)}`}
-                            >
-                              {candlePred.probability}%
-                            </div>
-                          </div>
-                          <p className="text-xs text-gray-600 mt-2">
-                            {candlePred.explanation}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+              /* Fallback if no scenarios - show error */
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-red-800 mb-2">⚠️ No Scenarios Generated</h3>
+                <p className="text-red-700">
+                  The multi-scenario analysis failed to generate scenarios. This might be due to:
+                </p>
+                <ul className="list-disc list-inside text-red-700 mt-2">
+                  <li>API endpoint not being called correctly</li>
+                  <li>Response parsing issues</li>
+                  <li>AI service configuration problems</li>
+                </ul>
+                <div className="mt-3 p-3 bg-red-100 rounded">
+                  <p className="text-sm text-red-800">
+                    <strong>Debug Info:</strong> analysisType = {prediction.analysisType || 'undefined'}, 
+                    scenarios = {prediction.scenarios ? prediction.scenarios.length : 'undefined'}
+                  </p>
                 </div>
               </div>
             )}
@@ -350,8 +306,9 @@ const MultiScenarioPredictionUpload = ({ onPredictionCreated }) => {
             <div className="text-center text-sm text-gray-500">
               <p>
                 Processed in {(prediction.processingTimeMs / 1000).toFixed(1)}s • 
-                Prediction ID: {prediction.predictionId} •
-                {prediction.analysisType === 'multi-scenario' && prediction.scenarios && (
+                Prediction ID: {prediction.predictionId} • 
+                Analysis Type: {prediction.analysisType || 'undefined'} •
+                {prediction.scenarios && (
                   <span> {prediction.scenarios.length} scenarios generated</span>
                 )}
               </p>

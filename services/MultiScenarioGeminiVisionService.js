@@ -276,6 +276,7 @@ class MultiScenarioGeminiVisionService {
 
             return {
                 success: true,
+                analysisType: 'multi-scenario',
                 signal: finalAnalysis.signal,
                 signalConfidence: finalAnalysis.signalConfidence,
                 overallConfidence: finalAnalysis.overallConfidence,

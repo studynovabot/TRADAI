@@ -33,6 +33,7 @@ export default async function handler(req, res) {
     }
 
     console.log(`🔍 Processing multi-scenario prediction request for user: ${user.uid}`);
+    console.log(`🎯 MULTI-SCENARIO API ENDPOINT CALLED - This should generate multiple scenarios!`);
 
     // Initialize services
     const predictionService = new PredictionService();
