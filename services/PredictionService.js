@@ -17,6 +17,85 @@ class PredictionService {
   }
 
   /**
+   * Create a new multi-scenario prediction from chart analysis
+   * @param {string} userId - User ID
+   * @param {string} imageBase64 - Base64 encoded chart image
+   * @param {Object} analysisResult - AI analysis result with scenarios
+   * @param {Object} marketData - Market data for feature extraction
+   * @param {Object} meta - Additional metadata
+   * @returns {Promise<Object>} Multi-scenario prediction document
+   */
+  async createMultiScenarioPrediction(userId, imageBase64, analysisResult, marketData, meta = {}) {
+    try {
+      const predictionId = uuidv4();
+      const timestamp = Date.now();
+
+      // Save image to Firebase Storage
+      const imagePath = await this.saveImageToStorage(predictionId, imageBase64);
+
+      // Extract features for ML training
+      const features = this.featureExtractor.extractFeatures(
+        marketData, 
+        marketData.recentCandles || []
+      );
+
+      // Create multi-scenario prediction document
+      const predictionDoc = {
+        userId,
+        predictionId,
+        imagePath,
+        timestamp,
+        
+        // Market context
+        asset: meta.asset || 'Unknown',
+        timeframe: meta.timeframe || 'Unknown',
+        currentPrice: marketData.currentPrice || 0,
+        
+        // Analysis results
+        trend: analysisResult.trend || 'unknown',
+        marketCondition: analysisResult.marketCondition || 'unknown',
+        signal: analysisResult.signal || 'HOLD',
+        signalConfidence: analysisResult.signalConfidence || 0,
+        overallConfidence: analysisResult.overallConfidence || 0,
+        
+        // Multi-scenario specific data
+        scenarios: this.formatScenarios(analysisResult.scenarios || []),
+        mostLikelyPath: analysisResult.mostLikelyPath || 'Unknown',
+        confluenceFactors: analysisResult.confluenceFactors || 'Unknown',
+        
+        // Legacy 3-candle predictions (for backward compatibility)
+        predictions: this.formatPredictions(analysisResult.predictions || {}),
+        
+        // ML features
+        features,
+        
+        // Feedback (initially null for each scenario)
+        feedback: this.initializeScenarioFeedback(analysisResult.scenarios || []),
+        
+        // Metadata
+        modelVersion: this.currentModelVersion,
+        processingTimeMs: analysisResult.processingTimeMs || 0,
+        status: 'pending_verification',
+        analysisType: 'multi-scenario',
+        
+        // Timestamps
+        createdAt: new Date(timestamp),
+        updatedAt: new Date(timestamp)
+      };
+
+      // Save to Firestore
+      await this.db.collection('predictions').doc(predictionId).set(predictionDoc);
+
+      console.log(`✅ Multi-scenario prediction ${predictionId} created successfully`);
+      return { predictionId, ...predictionDoc };
+
+    } catch (error) {
+      console.error('Failed to create multi-scenario prediction:', error);
+      throw new Error(`Multi-scenario prediction creation failed: ${error.message}`);
+    }
+  }
+
+  /**
    * Create a new prediction from chart analysis
    * @param {string} userId - User ID
    * @param {string} imageBase64 - Base64 encoded chart image
@@ -90,6 +169,73 @@ class PredictionService {
     } catch (error) {
       console.error('Failed to create prediction:', error);
       throw new Error(`Prediction creation failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Submit feedback for a multi-scenario prediction
+   * @param {string} userId - User ID
+   * @param {string} predictionId - Prediction ID
+   * @param {Object} feedbackData - Feedback data with actual path and scenario match
+   * @returns {Promise<Object>} Updated prediction
+   */
+  async submitMultiScenarioFeedback(userId, predictionId, feedbackData) {
+    try {
+      const predictionRef = this.db.collection('predictions').doc(predictionId);
+      const predictionDoc = await predictionRef.get();
+
+      if (!predictionDoc.exists) {
+        throw new Error('Prediction not found');
+      }
+
+      const prediction = predictionDoc.data();
+
+      // Verify ownership
+      if (prediction.userId !== userId) {
+        throw new Error('Unauthorized: You can only provide feedback on your own predictions');
+      }
+
+      const { actualPath, matchingScenario, wasCorrect, comment } = feedbackData;
+
+      // Validate actual path
+      if (!Array.isArray(actualPath) || actualPath.length !== 3) {
+        throw new Error('Invalid actual path: must be array of 3 directions');
+      }
+
+      // Calculate accuracy metrics
+      const accuracy = this.calculateScenarioAccuracy(prediction.scenarios, actualPath, matchingScenario);
+
+      // Update prediction with multi-scenario feedback
+      const updateData = {
+        feedback: {
+          actualPath,
+          matchingScenario,
+          wasCorrect,
+          accuracy,
+          comment: comment || null,
+          submittedAt: new Date()
+        },
+        status: 'labeled',
+        feedbackTimestamp: new Date(),
+        updatedAt: new Date()
+      };
+
+      await predictionRef.update(updateData);
+
+      // Queue for training if feedback is complete
+      await this.queueForTraining(predictionId);
+
+      console.log(`✅ Multi-scenario feedback submitted for prediction ${predictionId}`);
+      return { 
+        predictionId, 
+        feedback: updateData.feedback, 
+        status: 'labeled',
+        accuracy 
+      };
+
+    } catch (error) {
+      console.error('Failed to submit multi-scenario feedback:', error);
+      throw new Error(`Multi-scenario feedback submission failed: ${error.message}`);
     }
   }
 
@@ -329,6 +475,59 @@ class PredictionService {
   }
 
   /**
+   * Format scenarios to ensure consistent structure
+   */
+  formatScenarios(scenarios) {
+    if (!Array.isArray(scenarios) || scenarios.length === 0) {
+      return [
+        {
+          rank: 1,
+          probability: 70,
+          path: ['DOWN', 'UP', 'DOWN'],
+          reasoning: 'Default scenario based on technical analysis'
+        },
+        {
+          rank: 2,
+          probability: 60,
+          path: ['UP', 'DOWN', 'UP'],
+          reasoning: 'Alternative scenario based on market conditions'
+        }
+      ];
+    }
+
+    return scenarios.map((scenario, index) => ({
+      rank: scenario.rank || (index + 1),
+      probability: Math.min(85, Math.max(40, scenario.probability || 60)),
+      path: Array.isArray(scenario.path) ? scenario.path : ['UP', 'DOWN', 'UP'],
+      reasoning: scenario.reasoning || 'Technical analysis based scenario'
+    }));
+  }
+
+  /**
+   * Initialize feedback structure for scenarios
+   */
+  initializeScenarioFeedback(scenarios) {
+    const feedback = {
+      // Legacy candle-by-candle feedback
+      "1": null,
+      "2": null,
+      "3": null,
+      // Scenario-based feedback
+      scenarios: {}
+    };
+
+    scenarios.forEach((scenario, index) => {
+      feedback.scenarios[scenario.rank || (index + 1)] = {
+        actualPath: null, // Will be filled when user provides feedback
+        isCorrect: null,  // Will be calculated based on actualPath vs predicted path
+        comment: null
+      };
+    });
+
+    return feedback;
+  }
+
+  /**
    * Format predictions to ensure consistent structure
    */
   formatPredictions(predictions) {
@@ -370,6 +569,43 @@ class PredictionService {
     }
     
     return validated;
+  }
+
+  /**
+   * Calculate accuracy metrics for multi-scenario predictions
+   */
+  calculateScenarioAccuracy(scenarios, actualPath, matchingScenario) {
+    if (!scenarios || !Array.isArray(scenarios) || !actualPath) {
+      return {
+        exactMatch: false,
+        partialMatches: 0,
+        topScenarioRank: null,
+        confidence: 0
+      };
+    }
+
+    // Find exact match
+    const exactMatch = scenarios.find(scenario => 
+      scenario.path && scenario.path.every((dir, idx) => dir === actualPath[idx])
+    );
+
+    // Calculate partial matches (how many candles were correct in top scenario)
+    const topScenario = scenarios[0];
+    let partialMatches = 0;
+    if (topScenario && topScenario.path) {
+      partialMatches = topScenario.path.reduce((count, dir, idx) => {
+        return count + (dir === actualPath[idx] ? 1 : 0);
+      }, 0);
+    }
+
+    return {
+      exactMatch: !!exactMatch,
+      matchingScenarioRank: exactMatch ? exactMatch.rank : null,
+      matchingScenarioProbability: exactMatch ? exactMatch.probability : 0,
+      partialMatches,
+      topScenarioAccuracy: partialMatches / 3, // 0-1 scale
+      totalScenarios: scenarios.length
+    };
   }
 
   /**

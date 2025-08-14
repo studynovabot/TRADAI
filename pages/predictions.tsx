@@ -7,7 +7,9 @@ import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import AuthForm from '../components/AuthForm';
 import PredictionUpload from '../components/PredictionUpload';
+import MultiScenarioPredictionUpload from '../components/MultiScenarioPredictionUpload';
 import FeedbackForm from '../components/FeedbackForm';
+import MultiScenarioFeedbackForm from '../components/MultiScenarioFeedbackForm';
 import PredictionHistory from '../components/PredictionHistory';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
@@ -18,6 +20,7 @@ const PredictionsPage = () => {
   const [activeTab, setActiveTab] = useState('upload');
   const [currentPrediction, setCurrentPrediction] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [predictionMode, setPredictionMode] = useState('multi-scenario'); // 'multi-scenario' or 'legacy'
 
   const handlePredictionCreated = (prediction) => {
     setCurrentPrediction(prediction);
@@ -132,11 +135,12 @@ const PredictionsPage = () => {
                   Upload Chart for AI Analysis
                 </h2>
                 <p className="text-gray-600">
-                  Upload a trading chart screenshot to get AI-powered predictions for the next 3 candles.
+                  Upload a trading chart screenshot to get AI-powered predictions. Choose between 
+                  multi-scenario analysis (multiple possible paths) or classic single-path predictions.
                   After receiving predictions, you can provide feedback to help improve the model.
                 </p>
               </div>
-              <PredictionUpload onPredictionCreated={handlePredictionCreated} />
+              <MultiScenarioPredictionUpload onPredictionCreated={handlePredictionCreated} />
             </div>
           )}
 
@@ -153,10 +157,17 @@ const PredictionsPage = () => {
                       Your feedback is valuable for training better models.
                     </p>
                   </div>
-                  <FeedbackForm 
-                    prediction={currentPrediction} 
-                    onFeedbackSubmitted={handleFeedbackSubmitted}
-                  />
+                  {currentPrediction?.analysisType === 'multi-scenario' ? (
+                    <MultiScenarioFeedbackForm 
+                      prediction={currentPrediction} 
+                      onFeedbackSubmitted={handleFeedbackSubmitted}
+                    />
+                  ) : (
+                    <FeedbackForm 
+                      prediction={currentPrediction} 
+                      onFeedbackSubmitted={handleFeedbackSubmitted}
+                    />
+                  )}
                 </div>
               ) : (
                 <Card>
@@ -209,8 +220,8 @@ const PredictionsPage = () => {
                 <div className="text-3xl mb-3">🎯</div>
                 <h3 className="font-semibold mb-2">2. Get Predictions</h3>
                 <p className="text-sm text-gray-600">
-                  Receive AI predictions for the next 3 candles with confidence scores 
-                  and detailed explanations.
+                  Receive multiple possible scenarios for the next 3 candles, ranked by 
+                  probability with AI reasoning for each path.
                 </p>
               </div>
               <div className="text-center">
