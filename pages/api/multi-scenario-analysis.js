@@ -239,6 +239,7 @@ export default async function handler(req, res) {
       // Multi-Scenario Data
       scenarios: analysisResult.scenarios,
       mostLikelyPath: analysisResult.mostLikelyPath,
+      mostLikelyPathArray: analysisResult.mostLikelyPathArray,
       confluenceFactors: analysisResult.confluenceFactors,
       
       // Technical Analysis

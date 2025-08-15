@@ -636,6 +636,9 @@ Processing Time: [X.Xs]
             analysis.mostLikelyPath = `${analysis.scenarios[0].path.join(' → ')} (${analysis.scenarios[0].probability}%)`;
         }
 
+        // Add parsed path array for frontend compatibility
+        analysis.mostLikelyPathArray = analysis.scenarios[0]?.path || [];
+
         return analysis;
     }
 

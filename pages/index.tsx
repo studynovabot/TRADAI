@@ -235,6 +235,29 @@ export default function Home() {
     }
   };
 
+  // Parse mostLikelyPath - handle both string and array formats
+  const parseMostLikelyPath = (analysisResult: any) => {
+    // Prefer the array format if available
+    if (analysisResult.mostLikelyPathArray && Array.isArray(analysisResult.mostLikelyPathArray)) {
+      return analysisResult.mostLikelyPathArray;
+    }
+    
+    const mostLikelyPath = analysisResult.mostLikelyPath;
+    if (Array.isArray(mostLikelyPath)) {
+      return mostLikelyPath;
+    }
+    if (typeof mostLikelyPath === 'string') {
+      // Extract path from string like "DOWN → UP → DOWN (72%)"
+      const pathMatch = mostLikelyPath.match(/^([A-Z]+(?:\s*→\s*[A-Z]+)*)/);
+      if (pathMatch) {
+        return pathMatch[1].split(/\s*→\s*/);
+      }
+      // Fallback: split by arrow or return as single item
+      return mostLikelyPath.includes('→') ? mostLikelyPath.split('→').map(s => s.trim()) : [mostLikelyPath];
+    }
+    return [];
+  };
+
   const getSignalColor = (signal: string) => {
     switch (signal) {
       case 'BUY': return 'bg-green-100 text-green-800 border-green-200';
@@ -564,17 +587,23 @@ export default function Home() {
                           🎯 MOST LIKELY PATH
                         </div>
                         <div className="flex items-center space-x-2">
-                          {analysisResult.mostLikelyPath.map((step, index) => (
+                          {parseMostLikelyPath(analysisResult).map((step, index) => (
                             <div key={index} className="flex items-center">
                               <Badge className="bg-green-600 text-white font-bold">
                                 {step}
                               </Badge>
-                              {index < analysisResult.mostLikelyPath!.length - 1 && (
+                              {index < parseMostLikelyPath(analysisResult).length - 1 && (
                                 <Icons.ArrowRight className="h-4 w-4 mx-2 text-green-600" />
                               )}
                             </div>
                           ))}
                         </div>
+                        {/* Show original string if it contains probability */}
+                        {typeof analysisResult.mostLikelyPath === 'string' && analysisResult.mostLikelyPath.includes('%') && (
+                          <div className="mt-2 text-sm text-green-700 font-medium">
+                            {analysisResult.mostLikelyPath}
+                          </div>
+                        )}
                       </div>
                     )}
                   </CardContent>
