@@ -28,21 +28,23 @@ export const config = {
 };
 
 export default async function handler(req, res) {
+  // Set CORS headers immediately for all requests
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+
+  // Handle preflight OPTIONS request
+  if (req.method === 'OPTIONS') {
+    console.log('Handling CORS preflight OPTIONS request');
+    return res.status(200).end();
+  }
+
   try {
     console.log('=== 🚀 MULTI-SCENARIO ANALYSIS API CALLED ===');
     console.log('🔮 Pure Multi-Scenario Analysis - No Legacy Conversion!');
     console.log('Method:', req.method);
-
-    // Set CORS headers for all requests
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    // Handle preflight OPTIONS request
-    if (req.method === 'OPTIONS') {
-      console.log('Handling OPTIONS request');
-      return res.status(200).end();
-    }
+    console.log('Origin:', req.headers.origin);
 
     if (req.method !== 'POST') {
       console.log('Invalid method:', req.method);

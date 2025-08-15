@@ -49,6 +49,15 @@
     },
     "pages/api/retrain-request.js": {
       "maxDuration": 300
+    },
+    "pages/api/multi-scenario-analysis.js": {
+      "maxDuration": 300
+    },
+    "pages/api/multi-scenario-feedback.js": {
+      "maxDuration": 60
+    },
+    "pages/api/multi-scenario-predict.js": {
+      "maxDuration": 300
     }
   },
   "regions": ["iad1"],
@@ -120,6 +129,18 @@
     {
       "src": "/demo",
       "dest": "/demo"
+    },
+    {
+      "src": "/api/multi-scenario-analysis",
+      "dest": "/api/multi-scenario-analysis"
+    },
+    {
+      "src": "/api/multi-scenario-feedback",
+      "dest": "/api/multi-scenario-feedback"
+    },
+    {
+      "src": "/api/multi-scenario-predict",
+      "dest": "/api/multi-scenario-predict"
     }
   ]
 }
