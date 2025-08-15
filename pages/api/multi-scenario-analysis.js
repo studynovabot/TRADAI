@@ -13,7 +13,7 @@
  * - Full Gemini AI integration for comprehensive chart analysis
  */
 
-const formidable = require('formidable');
+const { formidable } = require('formidable');
 const fs = require('fs');
 const path = require('path');
 
@@ -97,8 +97,14 @@ export default async function handler(req, res) {
 
     // Parse the uploaded file using formidable
     console.log('📁 Parsing uploaded file...');
+    
+    // Runtime type check for formidable
+    if (typeof formidable !== 'function') {
+      throw new Error(`Expected formidable to be a function but got ${typeof formidable}`);
+    }
+    
     const form = formidable({
-      uploadDir: '/tmp',
+      uploadDir: process.env.NODE_ENV === 'production' ? '/tmp' : require('os').tmpdir(),
       keepExtensions: true,
       maxFileSize: 10 * 1024 * 1024, // 10MB limit
       filter: function ({ name, originalFilename, mimetype }) {
@@ -164,6 +170,11 @@ export default async function handler(req, res) {
     }
 
     console.log('🤖 Initializing Multi-Scenario Gemini Vision Service...');
+
+    // Runtime type check for MultiScenarioGeminiVisionService
+    if (typeof MultiScenarioGeminiVisionService !== 'function') {
+      throw new Error(`Expected MultiScenarioGeminiVisionService to be a function but got ${typeof MultiScenarioGeminiVisionService}`);
+    }
 
     // Initialize Multi-Scenario Gemini Vision Service with optimal settings
     const geminiVisionService = new MultiScenarioGeminiVisionService({

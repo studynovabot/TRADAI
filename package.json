@@ -26,6 +26,10 @@
     "test:features": "node -e \"const FeatureExtractionService = require('./services/FeatureExtractionService'); const service = new FeatureExtractionService(); console.log('Feature extraction service loaded successfully');\"",
     "test:chart": "node test-chart-analysis.js",
     "test:deployed": "node test-deployed-app.js",
+    "test:multi-scenario": "node test-multi-scenario.js",
+    "test:production": "node test-production-api.js",
+    "test:production-only": "node test-production-api.js --production-only",
+    "test:local-only": "node test-production-api.js --local-only",
     "deploy": "node deploy-to-vercel.js",
     "deploy:quick": "vercel --prod"
   },
